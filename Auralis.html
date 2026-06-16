@@ -1779,7 +1779,8 @@
       width: 64px;
     }
 
-    .prompt-generation-chip[data-generation-control="imageAspectRatio"] {
+    .prompt-generation-chip[data-generation-control="imageAspectRatio"],
+    .prompt-generation-chip[data-generation-control="videoAspectRatio"] {
       width: 48px;
     }
 
@@ -3094,7 +3095,7 @@
               <button class="small-btn" id="restoreLatestBackupBtn" type="button">恢复最新备份</button>
             </div>
           </div>
-          <label>画幅
+          <label>默认图片比例
             <select id="aspectSelect">
               <option value="9:16">9:16</option>
               <option value="1:1">1:1</option>
@@ -3300,7 +3301,7 @@
       target: 'selector',
       kind: 'image|video',
       model: 'model id or alias optional',
-      mediaSettings: 'optional object: imageAspectRatio 1:1|16:9|9:16, imageResolution 1080|2k|4k, videoResolution 720p|1080p, duration seconds',
+      mediaSettings: 'optional object: imageAspectRatio 1:1|16:9|9:16, videoAspectRatio 1:1|16:9|9:16, imageResolution 1080|2k|4k, videoResolution 720p|1080p, duration seconds',
       concurrency: 'parallel|serial optional'
     },
     generateMediaVariants: {
@@ -4569,7 +4570,7 @@
       roleScope: roleDefinition?.scope || '',
       roleCapabilities: arrayFrom(roleDefinition?.capabilities),
       status: String((node && node.status) || ''),
-      hasAsset: !!(node && (node.assetUrl || node.displayUrl)),
+      hasAsset: !!(node && (node.assetUrl || node.displayUrl || node.meta?.localAssetId || node.meta?.remoteAssetUrl)),
       assetState: String((node && node.assetState) || ''),
       mime: String((node && node.mime) || ''),
       model: String((node && (node.model || node.generation?.model || meta.model)) || ''),
@@ -4836,11 +4837,13 @@
       fail(`${label} must be an object when provided.`);
       return;
     }
-    const aspect = mediaSettings.imageAspectRatio || mediaSettings.image_aspect_ratio || mediaSettings.aspectRatio || mediaSettings.aspect_ratio;
+    const imageAspect = mediaSettings.imageAspectRatio || mediaSettings.image_aspect_ratio || (kind === 'image' ? mediaSettings.aspectRatio || mediaSettings.aspect_ratio : undefined);
+    const videoAspect = mediaSettings.videoAspectRatio || mediaSettings.video_aspect_ratio || (kind === 'video' ? mediaSettings.aspectRatio || mediaSettings.aspect_ratio || mediaSettings.imageAspectRatio || mediaSettings.image_aspect_ratio : undefined);
     const imageResolution = mediaSettings.imageResolution || mediaSettings.image_resolution || (kind === 'image' ? mediaSettings.resolution : '');
     const videoResolution = mediaSettings.videoResolution || mediaSettings.video_resolution || (kind === 'video' ? mediaSettings.resolution : '');
     const duration = mediaSettings.segmentDurationSeconds ?? mediaSettings.segment_duration_seconds ?? mediaSettings.duration;
-    if (aspect !== undefined && !new Set(['1:1', '16:9', '9:16']).has(String(aspect))) fail(`${label}.imageAspectRatio must be 1:1, 16:9, or 9:16.`);
+    if (imageAspect !== undefined && !new Set(['1:1', '16:9', '9:16']).has(String(imageAspect))) fail(`${label}.imageAspectRatio must be 1:1, 16:9, or 9:16.`);
+    if (videoAspect !== undefined && !new Set(['1:1', '16:9', '9:16']).has(String(videoAspect))) fail(`${label}.videoAspectRatio must be 1:1, 16:9, or 9:16.`);
     if (imageResolution !== undefined && imageResolution !== '' && !new Set(['1080', '2k', '4k']).has(String(imageResolution))) fail(`${label}.imageResolution must be 1080, 2k, or 4k.`);
     if (videoResolution !== undefined && videoResolution !== '' && !new Set(['720p', '1080p']).has(String(videoResolution))) fail(`${label}.videoResolution must be 720p or 1080p.`);
     if (duration !== undefined && !positiveIntegerInRange(duration, 4, 15)) fail(`${label}.duration must be 4-15 seconds.`);
@@ -4865,6 +4868,7 @@
       segmentCount: numberOrNull(fields.segmentCount || fields.segment_count),
       segmentDurationSeconds: numberOrNull(fields.segmentDurationSeconds || fields.segment_duration_seconds),
       imageAspectRatio: String(fields.imageAspectRatio || fields.image_aspect_ratio || ''),
+      videoAspectRatio: String(fields.videoAspectRatio || fields.video_aspect_ratio || ''),
       videoResolution: String(fields.videoResolution || fields.video_resolution || '')
     };
   }
@@ -4964,10 +4968,12 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.01';
+    const AURALIS_VERSION = 'Auralis v1.02';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 Auralis 启动器：可检查更新、查看版本说明、选择浏览器并打开本地版本。'
+      '进行大幅性能优化，避免画布内容较多时，部分设备删除节点等操作导致浏览器页面容易崩溃的问题。',
+      '按 BI 的建议修正公司网关调用 Seedance 的方式，解决此前图生视频时时长参数无效的问题。',
+      '修复生成视频后比例偶尔出错的问题。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -5018,6 +5024,7 @@
     const PLANNER_SEGMENT_COUNT_MAX = 30;
     const PLANNER_VIDEO_RESOLUTIONS = ['720p', '1080p'];
     const PLANNER_IMAGE_ASPECT_RATIOS = ['1:1', '16:9', '9:16'];
+    const PLANNER_VIDEO_ASPECT_RATIOS = PLANNER_IMAGE_ASPECT_RATIOS;
     const PLANNER_IMAGE_RESOLUTIONS = ['1080', '2k', '4k'];
     const IMAGE_MODEL_COMPACT_LABELS = Object.freeze({
       'rg-gpt-image-2': 'RG/GI2',
@@ -5485,9 +5492,9 @@
           '输出要直接服务后续生图和生视频，避免泛泛营销词。',
           () => `用户偏好：${state.settings.preferences || '无'}`,
           () => `当前画幅：${state.settings.aspectRatio}`,
-          ({ refs }) => `文本输入：${(refs || []).filter(n => !n.assetUrl).map(n => n.content).join('\n\n') || '无'}`,
+          ({ refs }) => `文本输入：${(refs || []).filter(n => !nodeHasAsset(n)).map(n => n.content).join('\n\n') || '无'}`,
           ({ mviStatus }) => `MVI checklist：\n${JSON.stringify(mviStatus || {}, null, 2)}`,
-          ({ refs }) => (refs || []).some(n => n.assetUrl) ? '已附带画布素材。请只概括素材关键可用信息，不要假设看过未提供的素材。' : ''
+          ({ refs }) => (refs || []).some(nodeHasAsset) ? '已附带画布素材。请只概括素材关键可用信息，不要假设看过未提供的素材。' : ''
         ]
       },
       'actions.createShotScripts': {
@@ -5521,7 +5528,8 @@
           '如果目标有 sequence.index，保持顺序和片段职责，不要把多个片段写成同一个画面或同一个动作。',
           '如果用户要求优化或修改，只改用户点名的方向；不要无故改变核心玩法、画风锁或片段顺序。',
           '如果画布上下文里有 Polaris.styleLock，图片 prompt 必须应用其中的画风、构图约束。\n如果画布上下文里有 Polaris.videoLock，视频 prompt 必须应用其中的镜头、视角、跟随和衔接约束。',
-          () => `aspect_ratio=${starFlowMediaSettings().imageAspectRatio}`,
+          () => `image_aspect_ratio=${starFlowMediaSettings().imageAspectRatio}`,
+          () => `video_aspect_ratio=${starFlowMediaSettings().videoAspectRatio}`,
           () => `duration=${videoDurationForMediaSettings(starFlowMediaSettings())}`,
           () => `image_model=${currentProject().runtime.imageModel}`,
           () => `video_model=${currentProject().runtime.videoModel}`,
@@ -5634,7 +5642,7 @@
           'Generate one short video from the prompt.',
           ({ mediaSettings }) => {
             const settings = mediaSettings || starFlowMediaSettings();
-            return `Aspect ratio: ${settings.imageAspectRatio}. Duration: ${videoDurationForMediaSettings(settings)}s. Video resolution: ${settings.videoResolution}.`;
+            return `Aspect ratio: ${settings.videoAspectRatio}. Duration: ${videoDurationForMediaSettings(settings)}s. Video resolution: ${settings.videoResolution}.`;
           },
           'Return the video as a URL or markdown/data URI if supported.',
           ({ styleLock }) => styleLock ? `Visual lock:\n${styleLock}` : '',
@@ -5738,6 +5746,7 @@
         tickTimer: null,
         running: false
       },
+      pendingAssetWrites: new Set(),
       editorNodeId: ''
     };
 
@@ -5907,15 +5916,84 @@
 
     function canvasSnapshotChanged(before, after) {
       if (!before || !after) return false;
-      return JSON.stringify({
-        nodes: before.nodes,
-        links: before.links,
-        actionSequences: before.actionSequences
-      }) !== JSON.stringify({
-        nodes: after.nodes,
-        links: after.links,
-        actionSequences: after.actionSequences
+      return canvasSnapshotChangeSignature(before) !== canvasSnapshotChangeSignature(after);
+    }
+
+    function canvasSnapshotChangeSignature(snapshot) {
+      return [
+        arrayFrom(snapshot.nodes).map(canvasNodeChangeSignature).join('\n'),
+        arrayFrom(snapshot.links).map(canvasLinkChangeSignature).join('\n'),
+        lightweightValueFingerprint(snapshot.actionSequences || [])
+      ].join('\n---\n');
+    }
+
+    function canvasNodeChangeSignature(node = {}) {
+      return [
+        'node',
+        node.id,
+        node.version,
+        node.updatedAt,
+        node.x,
+        node.y,
+        node.w,
+        node.status,
+        node.title,
+        node.type,
+        node.family,
+        node.role,
+        node.mime,
+        node.model,
+        node.assetState,
+        lightweightValueFingerprint(node.content || ''),
+        lightweightValueFingerprint(node.summary || ''),
+        lightweightValueFingerprint(node.assetUrl || ''),
+        lightweightValueFingerprint(node.displayUrl || ''),
+        lightweightValueFingerprint(node.mediaAnalysis || null),
+        lightweightValueFingerprint(node.userLabels || []),
+        lightweightValueFingerprint(node.entityAliases || []),
+        lightweightValueFingerprint(node.sequence || null),
+        lightweightValueFingerprint(node.generation || null),
+        lightweightValueFingerprint(node.meta || null)
+      ].join('\x1f');
+    }
+
+    function canvasLinkChangeSignature(link = {}) {
+      return lightweightValueFingerprint({
+        id: link.id || '',
+        fromNodeId: link.fromNodeId || link.from_astra_id || '',
+        toNodeId: link.toNodeId || link.to_astra_id || '',
+        inputRole: link.inputRole || link.input_role || '',
+        relation: link.relation || '',
+        visualStyle: link.visualStyle || '',
+        kind: link.kind || ''
       });
+    }
+
+    function lightweightValueFingerprint(value, depth = 0) {
+      if (value === null || value === undefined) return '';
+      if (typeof value === 'string') return fingerprintString(value);
+      if (typeof value === 'number' || typeof value === 'boolean') return String(value);
+      if (depth > 6) return '[depth]';
+      if (Array.isArray(value)) return `[${value.length}:${value.map(item => lightweightValueFingerprint(item, depth + 1)).join(',')}]`;
+      if (typeof value === 'object') {
+        return `{${Object.keys(value).sort().map(key => `${key}:${lightweightValueFingerprint(value[key], depth + 1)}`).join(',')}}`;
+      }
+      return String(value);
+    }
+
+    function fingerprintString(value) {
+      const text = String(value || '');
+      const length = text.length;
+      if (!length) return '';
+      const step = Math.max(1, Math.floor(length / 2048));
+      let hash = 2166136261;
+      for (let index = 0; index < length; index += step) {
+        hash ^= text.charCodeAt(index);
+        hash = Math.imul(hash, 16777619) >>> 0;
+      }
+      hash ^= text.charCodeAt(length - 1);
+      hash = Math.imul(hash, 16777619) >>> 0;
+      return `${length}:${hash.toString(36)}`;
     }
 
     function pushCanvasUndoEntry(label, before, after) {
@@ -6115,7 +6193,7 @@
     }
 
     function assetRequestUrl(node) {
-      return normalizeMediaUrl(node?.assetUrl || node?.meta?.remoteAssetUrl || node?.displayUrl || '');
+      return assetDisplayUrl(node);
     }
 
     function toRoman(value) {
@@ -6238,7 +6316,10 @@
       const assetUrl = normalizeMediaUrl(node.assetUrl || '');
       const displayUrl = normalizeMediaUrl(node.displayUrl || '');
       const remoteAssetUrl = normalizeMediaUrl(node.meta?.remoteAssetUrl || '');
-      if (assetUrl !== node.assetUrl) {
+      if (assetUrl && !/^data:/i.test(assetUrl)) {
+        node.assetUrl = '';
+        if (assetUrl !== remoteAssetUrl) node.meta = { ...(node.meta || {}), remoteAssetUrl: assetUrl, mediaUrlNormalizedAt: new Date().toISOString() };
+      } else if (assetUrl !== node.assetUrl) {
         node.assetUrl = assetUrl;
         node.meta = { ...(node.meta || {}), mediaUrlNormalizedAt: new Date().toISOString() };
       }
@@ -6277,6 +6358,7 @@
               segmentCount: Number(parsed.segment_count || parsed.segmentCount || existingFields?.segmentCount || 0) || 0,
               segmentDurationSeconds: Number(parsed.segment_duration_seconds || parsed.segmentDurationSeconds || existingFields?.segmentDurationSeconds || 0) || 0,
               videoResolution: parsed.video_resolution || parsed.videoResolution || existingFields?.videoResolution,
+              videoAspectRatio: parsed.video_aspect_ratio || parsed.videoAspectRatio || existingFields?.videoAspectRatio,
               imageAspectRatio: parsed.image_aspect_ratio || parsed.imageAspectRatio || parsed.aspect_ratio || existingFields?.imageAspectRatio,
               imageResolution: parsed.image_resolution || parsed.imageResolution || parsed.resolution || existingFields?.imageResolution
             };
@@ -6314,7 +6396,7 @@
       }
       for (const node of project.nodes || []) {
         if (!['running', 'queued', 'analyzing'].includes(node.status)) continue;
-        if (node.status === 'analyzing' && node.assetUrl) {
+        if (node.status === 'analyzing' && nodeHasAsset(node)) {
           node.status = 'completed';
           node.mediaAnalysis = {
             ...(node.mediaAnalysis || {}),
@@ -6357,9 +6439,9 @@
 
     function inferAstraRole(node) {
       if (node.family && node.role) return [node.family, node.role];
-      if (node.assetUrl && node.mime?.startsWith('image/') && node.type === 'input') return ['Sol', 'refImage'];
-      if (node.assetUrl && node.mime?.startsWith('video/') && node.type === 'input') return ['Luna', 'refVideo'];
-      if (node.assetUrl && node.mime?.startsWith('audio/') && node.type === 'input') return ['Meteor', 'spokenAudio'];
+      if (nodeHasAsset(node) && node.mime?.startsWith('image/') && node.type === 'input') return ['Sol', 'refImage'];
+      if (nodeHasAsset(node) && node.mime?.startsWith('video/') && node.type === 'input') return ['Luna', 'refVideo'];
+      if (nodeHasAsset(node) && node.mime?.startsWith('audio/') && node.type === 'input') return ['Meteor', 'spokenAudio'];
       return ASTRA_ROLE_BY_TYPE[node.type] || ['Comet', 'segmentPlan'];
     }
 
@@ -6371,14 +6453,14 @@
     }
 
     function assetFromNode(node) {
-      if (!node.assetUrl && !node.displayUrl && !node.mime) return null;
+      if (!nodeHasAsset(node) && !node.mime) return null;
       return {
         id: node.meta?.localAssetId || `asset_${node.id}`,
         kind: assetKindForNode(node),
         source: node.meta?.remoteAssetUrl ? 'generated' : 'local_upload',
         local_asset_id: node.meta?.localAssetId || '',
-        remote_url: node.meta?.remoteAssetUrl || node.assetUrl || '',
-        display_url: node.displayUrl || node.assetUrl || '',
+        remote_url: node.meta?.remoteAssetUrl || '',
+        display_url: node.meta?.remoteAssetUrl || '',
         mime: node.mime || '',
         size_bytes: node.meta?.size || node.meta?.localAssetSize || 0,
         width: 0,
@@ -6397,7 +6479,7 @@
     }
 
     function summarizeNode(node) {
-      if (node.assetUrl) return [node.title, node.mime, node.meta?.fileName].filter(Boolean).join(' · ');
+      if (nodeHasAsset(node)) return [node.title, node.mime, node.meta?.fileName].filter(Boolean).join(' · ');
       return truncateText(node.content || '', 220);
     }
 
@@ -6454,6 +6536,105 @@
       });
     }
 
+    function queueAssetWrite(assetId, record) {
+      if (!assetId || !record?.blob) return null;
+      const write = dbSetAsset(assetId, record)
+        .catch(error => {
+          console.warn('Auralis asset write failed.', error);
+          throw error;
+        })
+        .finally(() => state.pendingAssetWrites.delete(write));
+      state.pendingAssetWrites.add(write);
+      return write;
+    }
+
+    async function flushPendingAssetWrites() {
+      while (state.pendingAssetWrites.size) {
+        await Promise.allSettled([...state.pendingAssetWrites]);
+      }
+    }
+
+    function prepareNodeAssetFields(fields = {}, nodeId = uid('node'), existingNode = null) {
+      const next = { ...fields };
+      const existingMeta = existingNode?.meta && typeof existingNode.meta === 'object' ? existingNode.meta : {};
+      const incomingMeta = next.meta && typeof next.meta === 'object' ? next.meta : {};
+      const meta = { ...existingMeta, ...incomingMeta };
+      const rawSource = next.assetUrl ?? next.displayUrl ?? '';
+      const source = normalizeMediaUrl(rawSource || '');
+      const hasAssetPatch = Object.prototype.hasOwnProperty.call(next, 'assetUrl')
+        || Object.prototype.hasOwnProperty.call(next, 'displayUrl')
+        || !!incomingMeta.localAssetId
+        || !!incomingMeta.remoteAssetUrl;
+
+      if (/^data:/i.test(source)) {
+        const blob = dataUriToBlob(source);
+        const declaredMime = next.mime || existingNode?.mime || 'application/octet-stream';
+        const sourceMime = concreteMime(source.slice(5, source.indexOf(';')) || '', declaredMime);
+        const mime = concreteMime(blob.type, sourceMime);
+        const assetId = incomingMeta.localAssetId || uid('asset');
+        const storedBlob = blob.type === mime ? blob : blob.slice(0, blob.size, mime);
+        const displayUrl = URL.createObjectURL(storedBlob);
+        queueAssetWrite(assetId, {
+          blob: storedBlob,
+          mime,
+          size: storedBlob.size,
+          remoteUrl: '',
+          savedAt: new Date().toISOString()
+        });
+        next.assetUrl = '';
+        next.displayUrl = displayUrl;
+        next.mime = mime;
+        next.meta = {
+          ...meta,
+          localAssetId: assetId,
+          localAssetStatus: 'cached',
+          localAssetSize: storedBlob.size,
+          mediaUrlNormalizedAt: new Date().toISOString()
+        };
+        delete next.meta.remoteAssetUrl;
+        next.asset = null;
+        return next;
+      }
+
+      if (source && !/^blob:/i.test(source)) {
+        next.assetUrl = '';
+        next.displayUrl = next.displayUrl || source;
+        next.meta = {
+          ...meta,
+          remoteAssetUrl: source,
+          localAssetStatus: meta.localAssetId ? (meta.localAssetStatus || 'cached') : 'remote-only',
+          mediaUrlNormalizedAt: new Date().toISOString()
+        };
+        next.asset = null;
+        return next;
+      }
+
+      if (source && /^blob:/i.test(source)) {
+        next.assetUrl = '';
+        next.displayUrl = source;
+        next.meta = meta;
+        next.asset = null;
+        return next;
+      }
+
+      if (hasAssetPatch && !incomingMeta.localAssetId && !incomingMeta.remoteAssetUrl && !source) {
+        next.assetUrl = '';
+        next.displayUrl = '';
+        next.meta = {
+          ...meta,
+          localAssetId: '',
+          localAssetStatus: '',
+          localAssetSize: 0,
+          remoteAssetUrl: ''
+        };
+        next.asset = null;
+        return next;
+      }
+
+      if (Object.keys(incomingMeta).length) next.meta = meta;
+      return next;
+    }
+
     async function loadState() {
       const saved = await dbGet('app-state');
       if (saved) {
@@ -6489,6 +6670,7 @@
       state.settings.telemetryUsageWebhookUrl = state.settings.telemetryUsageWebhookUrl || TELEMETRY_USAGE_WEBHOOK_URL;
       state.settings.telemetryFeedbackWebhookUrl = state.settings.telemetryFeedbackWebhookUrl || TELEMETRY_FEEDBACK_WEBHOOK_URL;
       state.settings.launcherConfigVersion = state.settings.launcherConfigVersion || '';
+      state.settings.aspectRatio = PLANNER_IMAGE_ASPECT_RATIOS.includes(String(state.settings.aspectRatio || '')) ? state.settings.aspectRatio : '9:16';
       state.settings.imageModel = canonicalModelValue(state.settings.imageModel || IMAGE_MODELS[0]);
       state.settings.videoModel = canonicalModelValue(state.settings.videoModel || VIDEO_MODELS[0]);
       const launcherConfigApplied = applyLauncherConfigFromLocation();
@@ -6592,7 +6774,7 @@
         title: item.title || ASTRA_ROLE_LABELS[role] || 'Astra',
         content: item.content || '',
         summary: item.summary || truncateText(item.content || item.instruction || '', 220),
-        assetUrl: item.assetUrl || '',
+        assetUrl: '',
         mime: item.mime || '',
         asset: item.asset || null,
         mediaAnalysis: item.mediaAnalysis || null,
@@ -6615,7 +6797,12 @@
             if (node.meta?.localAssetId) {
               const record = await dbGetAsset(node.meta.localAssetId);
               if (record?.blob) {
-                node.displayUrl = URL.createObjectURL(record.blob);
+                const localMime = concreteMime(record.blob.type, record.mime || node.mime || 'application/octet-stream');
+                const displayBlob = record.blob.type === localMime ? record.blob : record.blob.slice(0, record.blob.size, localMime);
+                node.displayUrl = URL.createObjectURL(displayBlob);
+                node.assetUrl = '';
+                node.mime = localMime;
+                node.asset = assetFromNode(node);
                 continue;
               }
             }
@@ -6630,19 +6817,32 @@
     async function hydrateDataUrlAsset(node) {
       const source = normalizeMediaUrl(node?.assetUrl || node?.displayUrl || '');
       if (!/^data:/i.test(source)) return false;
-      const mime = source.slice(5, source.indexOf(';')) || node.mime || 'application/octet-stream';
+      const sourceMime = concreteMime(source.slice(5, source.indexOf(';')) || '', node.mime || 'application/octet-stream');
       const blob = dataUriToBlob(source);
-      await ensureDisplayableMediaBlob(blob, concreteMime(blob.type, mime));
-      const displayUrl = URL.createObjectURL(blob);
-      node.assetUrl = source;
+      const mime = concreteMime(blob.type, sourceMime);
+      await ensureDisplayableMediaBlob(blob, mime);
+      const assetId = node.meta?.localAssetId || uid('asset');
+      const displayBlob = blob.type === mime ? blob : blob.slice(0, blob.size, mime);
+      const displayUrl = URL.createObjectURL(displayBlob);
+      await dbSetAsset(assetId, {
+        blob: displayBlob,
+        mime,
+        size: displayBlob.size,
+        remoteUrl: '',
+        savedAt: new Date().toISOString()
+      });
+      node.assetUrl = '';
       node.displayUrl = displayUrl;
       node.mime = concreteMime(blob.type, mime);
       node.meta = {
         ...(node.meta || {}),
-        localAssetStatus: node.meta?.localAssetStatus || 'rehydrated',
-        localAssetSize: blob.size,
+        localAssetId: assetId,
+        localAssetStatus: 'cached',
+        localAssetSize: displayBlob.size,
         mediaUrlNormalizedAt: new Date().toISOString()
       };
+      delete node.meta.remoteAssetUrl;
+      node.asset = assetFromNode(node);
       return true;
     }
 
@@ -6656,6 +6856,7 @@
     async function saveState(options = {}) {
       const project = currentProject();
       if (project && !options.layoutOnly) project.updatedAt = new Date().toISOString();
+      await flushPendingAssetWrites();
       await dbSet('app-state', {
         settings: state.settings,
         projects: serializableProjects(),
@@ -6675,8 +6876,24 @@
     function serializableProjects() {
       return state.projects.map(project => ({
         ...project,
-        nodes: (project.nodes || []).map(({ displayUrl, ...node }) => node)
+        nodes: (project.nodes || []).map(serializableNode)
       }));
+    }
+
+    function serializableNode(node = {}) {
+      const { displayUrl, ...rest } = node;
+      const clone = structuredCloneSafe(rest);
+      const assetUrl = normalizeMediaUrl(clone.assetUrl || '');
+      clone.assetUrl = /^data:/i.test(assetUrl) ? '' : '';
+      if (clone.asset && typeof clone.asset === 'object') {
+        clone.asset = {
+          ...clone.asset,
+          remote_url: normalizeMediaUrl(clone.meta?.remoteAssetUrl || clone.asset.remote_url || ''),
+          display_url: normalizeMediaUrl(clone.meta?.remoteAssetUrl || ''),
+          local_asset_id: clone.meta?.localAssetId || clone.asset.local_asset_id || ''
+        };
+      }
+      return clone;
     }
 
     function supportsDirectoryBackups() {
@@ -7787,6 +8004,23 @@
       return true;
     }
 
+    function removeRenderedNodes(nodeIds, project = currentProject()) {
+      if (!isProjectActive(project) || !project?.nodes?.length) return false;
+      const canvas = $('canvas');
+      if (!canvas || canvas.querySelector('.empty-canvas')) return false;
+      const ids = uniqueIds(nodeIds);
+      if (!ids.length) return false;
+      for (const id of ids) {
+        const existing = canvas.querySelector(`.card[data-node-id="${cssEscape(id)}"]`);
+        if (!existing) return false;
+        const inlineEditor = existing.querySelector('[data-inline-editor]');
+        if (inlineEditor) inlineEditor.onblur = null;
+        existing.remove();
+      }
+      renderPatchedProjectChrome(project, ids);
+      return true;
+    }
+
     function renderPatchedProjectChrome(project, changedNodeIds = []) {
       syncCanvasSize(project);
       updateCanvasEdges();
@@ -7827,6 +8061,7 @@
       const canvas = $('canvas');
       const existing = canvas?.querySelector(`.card[data-node-id="${cssEscape(node.id)}"]`);
       if (!existing) return false;
+      if (patchRenderedMediaNodeChrome(existing, node)) return true;
       const next = elementFromHtml(renderNode(node));
       if (!next) return false;
       preserveRenderedMediaElements(existing, next);
@@ -7839,6 +8074,35 @@
         throw error;
       }
       attachNodeEvent(next);
+      return true;
+    }
+
+    function patchRenderedMediaNodeChrome(existing, node) {
+      const mediaBodyKey = mediaBodyRenderKey(node);
+      if (!mediaBodyKey || existing.dataset.mediaBodyKey !== mediaBodyKey) return false;
+      const body = existing.querySelector('[data-card-body]');
+      if (!body?.querySelector('img, video, audio')) return false;
+      if (existing.querySelector('[data-inline-editor]')) return false;
+
+      existing.style.left = `${node.x}px`;
+      existing.style.top = `${node.y}px`;
+      existing.style.width = `${nodeWidth(node)}px`;
+      existing.dataset.family = node.family || '';
+      existing.dataset.role = node.role || '';
+      existing.dataset.mediaBodyKey = mediaBodyKey;
+      applyRenderedNodeClasses(existing, node);
+      body.classList.toggle('editable', isInlineEditableNode(node));
+
+      const header = existing.querySelector('.card-head');
+      if (header) header.outerHTML = renderNodeHeader(node);
+
+      const footer = [...existing.children].find(child => child.classList?.contains('card-foot'));
+      const footerHtml = renderCardFoot(node);
+      if (footer && footerHtml) footer.outerHTML = footerHtml;
+      else if (footer) footer.remove();
+      else if (footerHtml) existing.insertAdjacentHTML('beforeend', footerHtml);
+
+      attachNodeEvent(existing);
       return true;
     }
 
@@ -8072,9 +8336,61 @@
     function estimatedNodeHeight(node) {
       const text = node.content || node.summary || '';
       const textHeight = Math.min(420, Math.max(170, 120 + Math.ceil(text.length / 48) * 18));
-      if (isMediaAstraNode(node)) return Math.max(110, Math.round((node.assetUrl ? 300 : textHeight) * MEDIA_ASTRA_SCALE));
-      if (node.assetUrl) return 300;
+      if (isMediaAstraNode(node)) return Math.max(110, Math.round((nodeHasAsset(node) ? 300 : textHeight) * MEDIA_ASTRA_SCALE));
+      if (nodeHasAsset(node)) return 300;
       return textHeight;
+    }
+
+    function mediaBodyRenderKey(node) {
+      const assetUrl = assetDisplayUrl(node);
+      if (!assetUrl) return '';
+      const meta = node.meta || {};
+      return lightweightValueFingerprint({
+        assetUrl,
+        mime: node.mime || '',
+        title: node.title || '',
+        segmentStart: meta.segmentStart ?? '',
+        segmentEnd: meta.segmentEnd ?? '',
+        cutTime: meta.cutTime ?? '',
+        referenceMode: meta.referenceMode || '',
+        prompt: meta.prompt || '',
+        promptNodeId: meta.promptNodeId || '',
+        assetId: meta.assetId || '',
+        segmentId: meta.segmentId || '',
+        sourceImageId: meta.sourceImageId || '',
+        sourceImageNodeId: meta.sourceImageNodeId || '',
+        mediaSummary: node.mediaAnalysis?.summary || ''
+      });
+    }
+
+    function applyRenderedNodeClasses(el, node) {
+      el.classList.toggle('selected', state.selectedNodeIds.includes(node.id));
+      el.classList.toggle('running', ['queued', 'running', 'analyzing'].includes(node.status) && !nodeHasAsset(node));
+      el.classList.toggle('failed', node.status === 'failed');
+      el.classList.toggle('candidate', node.assetState === 'candidate');
+      el.classList.toggle('link-source', state.pendingLink?.fromNodeId === node.id);
+      el.classList.toggle('link-target', !!state.pendingLink && state.pendingLink.fromNodeId !== node.id);
+      el.classList.toggle('link-hover', state.pendingLink?.targetNodeId === node.id);
+    }
+
+    function renderNodeHeader(node) {
+      const roleLabel = ASTRA_ROLE_LABELS[node.role] || node.role || '';
+      const title = displayNodeTitle(node, roleLabel);
+      const headerTags = renderHeaderTags(node);
+      return `<div class="card-head" data-drag-handle>
+          <div class="card-head-inner">
+            <div class="card-head-copy">
+              <div class="card-type-row">
+                <div class="card-type-wrap">
+                  <div class="card-type">${escapeHtml(roleLabel || TYPE_LABELS[node.type] || 'Astra')}</div>
+                  ${headerTags}
+                </div>
+              </div>
+              ${title ? `<div class="card-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>` : ''}
+            </div>
+            <button class="small-btn card-menu-btn" data-action="menu" title="Astra actions" aria-label="Astra actions">...</button>
+          </div>
+        </div>`;
     }
 
     function renderSelectionBox() {
@@ -8090,7 +8406,7 @@
     function renderNode(node) {
       normalizeNode(node);
       const selected = state.selectedNodeIds.includes(node.id) ? 'selected' : '';
-      const running = ['queued', 'running', 'analyzing'].includes(node.status) && !node.assetUrl ? 'running' : '';
+      const running = ['queued', 'running', 'analyzing'].includes(node.status) && !nodeHasAsset(node) ? 'running' : '';
       const failed = node.status === 'failed' ? 'failed' : '';
       const candidate = node.assetState === 'candidate' ? 'candidate' : '';
       const linkSource = state.pendingLink?.fromNodeId === node.id ? 'link-source' : '';
@@ -8100,7 +8416,9 @@
       const title = displayNodeTitle(node, roleLabel);
       const headerTags = renderHeaderTags(node);
       const footer = renderCardFoot(node);
-      return `<article class="card ${selected} ${running} ${failed} ${candidate} ${linkSource} ${linkTarget} ${linkHover}" style="left:${node.x}px;top:${node.y}px;width:${nodeWidth(node)}px" data-node-id="${node.id}" data-family="${escapeHtml(node.family || '')}" data-role="${escapeHtml(node.role || '')}">
+      const mediaBodyKey = mediaBodyRenderKey(node);
+      const mediaBodyKeyAttr = mediaBodyKey ? ` data-media-body-key="${escapeHtml(mediaBodyKey)}"` : '';
+      return `<article class="card ${selected} ${running} ${failed} ${candidate} ${linkSource} ${linkTarget} ${linkHover}" style="left:${node.x}px;top:${node.y}px;width:${nodeWidth(node)}px" data-node-id="${node.id}" data-family="${escapeHtml(node.family || '')}" data-role="${escapeHtml(node.role || '')}"${mediaBodyKeyAttr}>
         <button class="astra-port input" data-port="input" title="接入 Astra" aria-label="接入 Astra"></button>
         <button class="astra-port output" data-port="output" title="连出 Astra" aria-label="连出 Astra"></button>
         <div class="card-head" data-drag-handle>
@@ -8219,6 +8537,7 @@
       if (kind === 'video') {
         return `<div class="prompt-generation-controls" data-prompt-generation-controls>
           ${renderPromptGenerationControlButton(node, 'model', settings.model, compactMediaModelLabel(settings.model, kind), '模型')}
+          ${renderPromptGenerationControlButton(node, 'videoAspectRatio', settings.mediaSettings.videoAspectRatio, settings.mediaSettings.videoAspectRatio, '比例')}
           ${renderPromptGenerationControlButton(node, 'segmentDurationSeconds', settings.mediaSettings.segmentDurationSeconds, `${settings.mediaSettings.segmentDurationSeconds}s`, '时长')}
           ${renderPromptGenerationControlButton(node, 'videoResolution', settings.mediaSettings.videoResolution, settings.mediaSettings.videoResolution, '清晰度')}
         </div>`;
@@ -8249,6 +8568,7 @@
         return values.map(value => ({ value, label: compactMediaModelLabel(value, kind) }));
       }
       if (field === 'imageAspectRatio') return PLANNER_IMAGE_ASPECT_RATIOS.map(value => ({ value, label: value }));
+      if (field === 'videoAspectRatio') return PLANNER_VIDEO_ASPECT_RATIOS.map(value => ({ value, label: value }));
       if (field === 'imageResolution') return PLANNER_IMAGE_RESOLUTIONS.map(value => ({ value, label: imageResolutionCompactLabel(value) }));
       if (field === 'segmentDurationSeconds') {
         return Array.from({ length: SEEDANCE2_DURATION_MAX - SEEDANCE2_DURATION_MIN + 1 }, (_, index) => {
@@ -8300,7 +8620,7 @@
 
     function renderMediaAnalysisChip(node) {
       const status = node.mediaAnalysis?.status;
-      if (!node.assetUrl || !status) return '';
+      if (!nodeHasAsset(node) || !status) return '';
       if (status === 'pending' || status === 'running') return '<span class="astra-chip analysis">&#29702;&#35299;&#20013;</span>';
       if (status === 'failed') return '<span class="astra-chip analysis failed">&#29702;&#35299;&#22833;&#36133;</span>';
       if (status === 'completed') return '<span class="astra-chip analysis">&#24050;&#29702;&#35299;</span>';
@@ -8759,6 +9079,7 @@
       const node = nodeById(state.mediaViewerNodeId);
       const assetUrl = node ? assetDisplayUrl(node) : '';
       if (!node || !assetUrl || !(node.mime?.startsWith('image/') || node.mime?.startsWith('video/'))) {
+        if (state.mediaViewerNodeId && !node) state.mediaViewerNodeId = '';
         root.innerHTML = '';
         return;
       }
@@ -8860,6 +9181,10 @@
       const node = nodeById(state.frameCutNodeId);
       const assetUrl = node ? assetDisplayUrl(node) : '';
       if (!node || !assetUrl || !isVideoAstra(node)) {
+        if (state.frameCutNodeId && !node) {
+          state.frameCutNodeId = '';
+          state.frameCutDraft = null;
+        }
         root.innerHTML = '';
         return;
       }
@@ -9037,6 +9362,11 @@
         <label>视频分辨率
           <select data-planner-field="videoResolution">
             ${plannerSelectOptions(plannerVideoResolutionOptions(), normalizePlannerVideoResolution(fields.videoResolution))}
+          </select>
+        </label>
+        <label>视频比例
+          <select data-planner-field="videoAspectRatio">
+            ${plannerSelectOptions(PLANNER_VIDEO_ASPECT_RATIOS, fields.videoAspectRatio)}
           </select>
         </label>
         <label>图片比例
@@ -9282,6 +9612,7 @@
         segmentCount: fields.segmentCount ?? fields.segment_count ?? node?.meta?.segmentCount,
         segmentDurationSeconds: fields.segmentDurationSeconds ?? fields.segment_duration_seconds ?? node?.meta?.segmentDurationSeconds,
         videoResolution: fields.videoResolution ?? fields.video_resolution ?? node?.meta?.videoResolution,
+        videoAspectRatio: fields.videoAspectRatio ?? fields.video_aspect_ratio ?? node?.meta?.videoAspectRatio ?? fields.imageAspectRatio ?? fields.image_aspect_ratio ?? fields.aspectRatio ?? fields.aspect_ratio,
         imageAspectRatio: fields.imageAspectRatio ?? fields.image_aspect_ratio ?? fields.aspectRatio ?? fields.aspect_ratio ?? node?.meta?.imageAspectRatio,
         imageResolution: fields.imageResolution ?? fields.image_resolution ?? fields.resolution ?? node?.meta?.imageResolution
       });
@@ -9304,6 +9635,7 @@
         segmentCount: fields.segmentCount ?? fields.segment_count,
         segmentDurationSeconds: fields.segmentDurationSeconds ?? fields.segment_duration_seconds,
         videoResolution: fields.videoResolution ?? fields.video_resolution,
+        videoAspectRatio: fields.videoAspectRatio ?? fields.video_aspect_ratio ?? fields.imageAspectRatio ?? fields.image_aspect_ratio ?? fields.aspectRatio ?? fields.aspect_ratio,
         imageAspectRatio: fields.imageAspectRatio ?? fields.image_aspect_ratio ?? fields.aspectRatio ?? fields.aspect_ratio,
         imageResolution: fields.imageResolution ?? fields.image_resolution ?? fields.resolution
       };
@@ -9317,6 +9649,7 @@
         segment_count: normalizedFields.segmentCount,
         segment_duration_seconds: normalizedFields.segmentDurationSeconds,
         video_resolution: normalizedFields.videoResolution,
+        video_aspect_ratio: normalizedFields.videoAspectRatio,
         image_aspect_ratio: normalizedFields.imageAspectRatio,
         image_resolution: normalizedFields.imageResolution
       };
@@ -9325,12 +9658,16 @@
 
     function normalizeStarFlowPlannerFieldObject(fields = {}) {
       const productionMode = fields.productionMode ?? fields.production_mode ?? 'first_frame';
+      const imageAspectInput = fields.imageAspectRatio ?? fields.image_aspect_ratio ?? fields.aspectRatio ?? fields.aspect_ratio;
+      const imageAspectRatio = normalizePlannerImageAspectRatio(imageAspectInput);
+      const videoAspectInput = fields.videoAspectRatio ?? fields.video_aspect_ratio ?? fields.aspectRatio ?? fields.aspect_ratio ?? imageAspectInput;
       return {
         productionMode: normalizeProductionMode(productionMode),
         segmentCount: clampPlannerSegmentCount(fields.segmentCount ?? fields.segment_count ?? 1),
         segmentDurationSeconds: clampSeedance2Duration(fields.segmentDurationSeconds ?? fields.segment_duration_seconds ?? SEEDANCE2_DURATION_MIN),
         videoResolution: normalizePlannerVideoResolution(fields.videoResolution ?? fields.video_resolution),
-        imageAspectRatio: normalizePlannerImageAspectRatio(fields.imageAspectRatio ?? fields.image_aspect_ratio ?? fields.aspectRatio ?? fields.aspect_ratio),
+        videoAspectRatio: normalizePlannerVideoAspectRatio(videoAspectInput, imageAspectRatio),
+        imageAspectRatio,
         imageResolution: normalizePlannerImageResolution(fields.imageResolution ?? fields.image_resolution ?? fields.resolution)
       };
     }
@@ -9356,6 +9693,7 @@
         && Number(fields.segmentCount) > 0
         && Number(fields.segmentDurationSeconds) > 0
         && fields.videoResolution
+        && fields.videoAspectRatio
         && fields.imageAspectRatio
         && fields.imageResolution;
     }
@@ -9373,6 +9711,11 @@
     function normalizePlannerImageAspectRatio(value) {
       const fallback = PLANNER_IMAGE_ASPECT_RATIOS.includes(state.settings.aspectRatio) ? state.settings.aspectRatio : '9:16';
       return PLANNER_IMAGE_ASPECT_RATIOS.includes(String(value || '')) ? String(value) : fallback;
+    }
+
+    function normalizePlannerVideoAspectRatio(value, fallback = '1:1') {
+      const resolvedFallback = PLANNER_VIDEO_ASPECT_RATIOS.includes(String(fallback || '')) ? String(fallback) : '1:1';
+      return PLANNER_VIDEO_ASPECT_RATIOS.includes(String(value || '')) ? String(value) : resolvedFallback;
     }
 
     function normalizePlannerImageResolution(value) {
@@ -9398,6 +9741,7 @@
       const planner = activeStarFlowPlanner(project);
       const fields = planner ? starFlowPlannerFields(planner) : normalizeStarFlowPlannerFieldObject({
         imageAspectRatio: state.settings.aspectRatio,
+        videoAspectRatio: '1:1',
         segmentDurationSeconds: state.settings.duration,
         videoResolution: '720p',
         imageResolution: '2k'
@@ -9409,6 +9753,7 @@
         segmentCount: fields.segmentCount,
         segmentDurationSeconds: duration,
         videoResolution: fields.videoResolution,
+        videoAspectRatio: fields.videoAspectRatio,
         imageAspectRatio: fields.imageAspectRatio,
         imageResolution: fields.imageResolution
       };
@@ -9426,12 +9771,14 @@
       const media = generation.mediaSettings && typeof generation.mediaSettings === 'object' ? generation.mediaSettings : {};
       if (kind === 'video') {
         const model = visibleMediaModel(generation.model || project?.runtime?.videoModel || state.settings.videoModel, 'video');
+        const videoAspect = media.videoAspectRatio ?? media.video_aspect_ratio ?? media.aspectRatio ?? media.aspect_ratio ?? media.imageAspectRatio ?? media.image_aspect_ratio;
         const mediaSettings = {
           plannerNodeId: media.plannerNodeId || mediaDefaults.plannerNodeId,
           productionMode: media.productionMode || mediaDefaults.productionMode,
           segmentCount: clampPlannerSegmentCount(media.segmentCount ?? mediaDefaults.segmentCount ?? 1),
           segmentDurationSeconds: clampSeedance2Duration(media.segmentDurationSeconds ?? media.duration ?? mediaDefaults.segmentDurationSeconds ?? state.settings.duration),
           videoResolution: normalizePlannerVideoResolution(media.videoResolution || media.resolution || mediaDefaults.videoResolution, model),
+          videoAspectRatio: normalizePlannerVideoAspectRatio(videoAspect, mediaDefaults.videoAspectRatio),
           imageAspectRatio: normalizePlannerImageAspectRatio(media.imageAspectRatio || media.aspectRatio || mediaDefaults.imageAspectRatio),
           imageResolution: normalizePlannerImageResolution(media.imageResolution || mediaDefaults.imageResolution)
         };
@@ -9444,6 +9791,7 @@
         segmentCount: clampPlannerSegmentCount(media.segmentCount ?? mediaDefaults.segmentCount ?? 1),
         segmentDurationSeconds: clampSeedance2Duration(media.segmentDurationSeconds ?? mediaDefaults.segmentDurationSeconds ?? state.settings.duration),
         videoResolution: normalizePlannerVideoResolution(media.videoResolution || mediaDefaults.videoResolution),
+        videoAspectRatio: normalizePlannerVideoAspectRatio(media.videoAspectRatio ?? media.video_aspect_ratio ?? mediaDefaults.videoAspectRatio, mediaDefaults.videoAspectRatio),
         imageAspectRatio: normalizePlannerImageAspectRatio(media.imageAspectRatio || media.aspectRatio || mediaDefaults.imageAspectRatio),
         imageResolution: normalizePlannerImageResolution(media.imageResolution || media.resolution || mediaDefaults.imageResolution)
       };
@@ -9461,11 +9809,14 @@
     function mergeMediaSettings(base = {}, override = null, kind = 'image', model = '') {
       const next = { ...(base || {}) };
       if (override && typeof override === 'object') {
-        const aspect = override.imageAspectRatio || override.image_aspect_ratio || override.aspectRatio || override.aspect_ratio;
+        const legacyAspect = override.aspectRatio || override.aspect_ratio;
+        const imageAspect = override.imageAspectRatio || override.image_aspect_ratio || (kind === 'image' ? legacyAspect : undefined);
+        const videoAspect = override.videoAspectRatio || override.video_aspect_ratio || (kind === 'video' ? legacyAspect || override.imageAspectRatio || override.image_aspect_ratio : undefined);
         const imageResolution = override.imageResolution || override.image_resolution || override.resolution;
         const videoResolution = override.videoResolution || override.video_resolution;
         const duration = override.segmentDurationSeconds ?? override.segment_duration_seconds ?? override.duration;
-        if (aspect !== undefined) next.imageAspectRatio = aspect;
+        if (imageAspect !== undefined) next.imageAspectRatio = imageAspect;
+        if (videoAspect !== undefined) next.videoAspectRatio = videoAspect;
         if (imageResolution !== undefined) next.imageResolution = imageResolution;
         if (videoResolution !== undefined) next.videoResolution = videoResolution;
         if (duration !== undefined) next.segmentDurationSeconds = duration;
@@ -9474,6 +9825,7 @@
         ...next,
         segmentDurationSeconds: clampSeedance2Duration(next.segmentDurationSeconds ?? state.settings.duration ?? 5),
         videoResolution: normalizePlannerVideoResolution(next.videoResolution, kind === 'video' ? model : undefined),
+        videoAspectRatio: normalizePlannerVideoAspectRatio(next.videoAspectRatio, next.imageAspectRatio),
         imageAspectRatio: normalizePlannerImageAspectRatio(next.imageAspectRatio),
         imageResolution: normalizePlannerImageResolution(next.imageResolution)
       };
@@ -9489,6 +9841,7 @@
         segmentCount: clampPlannerSegmentCount(provided.segmentCount ?? fallback.segmentCount ?? 1),
         segmentDurationSeconds: clampSeedance2Duration(provided.segmentDurationSeconds ?? fallback.segmentDurationSeconds ?? state.settings.duration ?? 5),
         videoResolution: normalizePlannerVideoResolution(provided.videoResolution || fallback.videoResolution, videoModel),
+        videoAspectRatio: normalizePlannerVideoAspectRatio(provided.videoAspectRatio ?? provided.video_aspect_ratio ?? provided.aspectRatio ?? provided.aspect_ratio ?? fallback.videoAspectRatio, fallback.videoAspectRatio || provided.imageAspectRatio || fallback.imageAspectRatio),
         imageAspectRatio: normalizePlannerImageAspectRatio(provided.imageAspectRatio || fallback.imageAspectRatio),
         imageResolution: normalizePlannerImageResolution(provided.imageResolution || fallback.imageResolution)
       };
@@ -9669,7 +10022,16 @@
     }
 
     function assetDisplayUrl(node) {
-      return normalizeMediaUrl(node?.displayUrl || node?.assetUrl || node?.meta?.remoteAssetUrl || '');
+      const assetUrl = normalizeMediaUrl(node?.assetUrl || '');
+      return normalizeMediaUrl(node?.displayUrl || node?.meta?.remoteAssetUrl || (/^data:/i.test(assetUrl) ? assetUrl : assetUrl) || '');
+    }
+
+    function nodeHasAsset(node) {
+      return !!(node?.meta?.localAssetId || assetDisplayUrl(node));
+    }
+
+    function assetSourceUrl(node) {
+      return normalizeMediaUrl(node?.meta?.remoteAssetUrl || node?.assetUrl || node?.displayUrl || '');
     }
 
     function mediaDownloadFileName(node, ext = '') {
@@ -9834,6 +10196,7 @@
         : current.model;
       const nextMedia = { ...current.mediaSettings };
       if (field === 'imageAspectRatio') nextMedia.imageAspectRatio = normalizePlannerImageAspectRatio(value);
+      if (field === 'videoAspectRatio') nextMedia.videoAspectRatio = normalizePlannerVideoAspectRatio(value, nextMedia.imageAspectRatio);
       if (field === 'imageResolution') nextMedia.imageResolution = normalizePlannerImageResolution(value);
       if (field === 'segmentDurationSeconds') nextMedia.segmentDurationSeconds = clampSeedance2Duration(value);
       if (field === 'videoResolution') nextMedia.videoResolution = normalizePlannerVideoResolution(value, nextModel);
@@ -10173,43 +10536,45 @@
 
     function addNode(partial, project = currentProject()) {
       if (!project) return null;
-      const width = Number(partial.w) || defaultAstraWidth(partial);
-      const height = estimatedNodeHeight({ ...partial, w: width });
-      const position = findFreePosition(width, height, partial.x ?? 80, partial.y ?? 84);
+      const nodeId = partial.id || uid('node');
+      const prepared = prepareNodeAssetFields(partial, nodeId);
+      const width = Number(prepared.w) || defaultAstraWidth(prepared);
+      const height = estimatedNodeHeight({ ...prepared, w: width });
+      const position = findFreePosition(width, height, prepared.x ?? 80, prepared.y ?? 84);
       const node = {
-        id: uid('node'),
-        title: partial.title || 'Untitled',
-        type: partial.type || 'input',
-        status: partial.status || 'draft',
-        content: partial.content || '',
-        summary: partial.summary || '',
-        assetUrl: partial.assetUrl || '',
-        displayUrl: partial.displayUrl || '',
-        mime: partial.mime || '',
-        model: partial.model || '',
+        id: nodeId,
+        title: prepared.title || 'Untitled',
+        type: prepared.type || 'input',
+        status: prepared.status || 'draft',
+        content: prepared.content || '',
+        summary: prepared.summary || '',
+        assetUrl: prepared.assetUrl || '',
+        displayUrl: prepared.displayUrl || '',
+        mime: prepared.mime || '',
+        model: prepared.model || '',
         x: position.x,
         y: position.y,
         w: width,
         createdAt: nowText(),
         updatedAt: nowText(),
-        meta: partial.meta || {},
-        family: partial.family || '',
-        role: partial.role || '',
-        version: partial.version ?? (partial.status === 'placeholder' ? 0 : 1),
-        asset: partial.asset || null,
-        mediaAnalysis: partial.mediaAnalysis || null,
-        userLabels: partial.userLabels || [],
-        entityAliases: partial.entityAliases || [],
-        sequence: partial.sequence || null,
-        generation: partial.generation || null,
-        assetState: partial.assetState || '',
-        librarySourceId: partial.librarySourceId || null
+        meta: prepared.meta || {},
+        family: prepared.family || '',
+        role: prepared.role || '',
+        version: prepared.version ?? (prepared.status === 'placeholder' ? 0 : 1),
+        asset: prepared.asset || null,
+        mediaAnalysis: prepared.mediaAnalysis || null,
+        userLabels: prepared.userLabels || [],
+        entityAliases: prepared.entityAliases || [],
+        sequence: prepared.sequence || null,
+        generation: prepared.generation || null,
+        assetState: prepared.assetState || '',
+        librarySourceId: prepared.librarySourceId || null
       };
       normalizeNode(node);
       project.nodes.push(node);
       project.updatedAt = new Date().toISOString();
       recordEvent('astra_created', { astraIds: [node.id], summary: `${node.title} 已创建` }, project);
-      if (isProjectActive(project) && partial.select !== false) state.selectedNodeIds = [node.id];
+      if (isProjectActive(project) && prepared.select !== false) state.selectedNodeIds = [node.id];
       scheduleSave();
       refreshProjectSurface(project, { addedNodeIds: [node.id] });
       return node;
@@ -10219,14 +10584,15 @@
       project = project || currentProject()?.nodes?.some(n => n.id === id) && currentProject() || projectContainingNode(id);
       const node = project?.nodes?.find(n => n.id === id);
       if (!node) return null;
-      const meaningfulChange = 'content' in patch || 'summary' in patch || 'assetUrl' in patch || 'displayUrl' in patch || 'mime' in patch || 'mediaAnalysis' in patch || 'userLabels' in patch || 'assetState' in patch || ('status' in patch && patch.status !== node.status);
-      const nextVersion = patch.version ?? (meaningfulChange ? Number(node.version || 0) + 1 : node.version);
-      Object.assign(node, patch, { version: nextVersion, updatedAt: nowText() });
+      const prepared = prepareNodeAssetFields(patch, id, node);
+      const meaningfulChange = 'content' in prepared || 'summary' in prepared || 'assetUrl' in prepared || 'displayUrl' in prepared || 'mime' in prepared || 'mediaAnalysis' in prepared || 'userLabels' in prepared || 'assetState' in prepared || ('status' in prepared && prepared.status !== node.status);
+      const nextVersion = prepared.version ?? (meaningfulChange ? Number(node.version || 0) + 1 : node.version);
+      Object.assign(node, prepared, { version: nextVersion, updatedAt: nowText() });
       normalizeNode(node);
       if (meaningfulChange) {
         project.updatedAt = new Date().toISOString();
         recordEvent('astra_updated', { astraIds: [node.id], summary: `${node.title} 已更新` }, project);
-        if (patch.status === 'completed' || patch.assetUrl || patch.displayUrl) markProjectHasNewContent(project);
+        if (prepared.status === 'completed' || nodeHasAsset(node)) markProjectHasNewContent(project);
       }
       scheduleSave();
       refreshProjectSurface(project, { nodeIds: [id] });
@@ -10338,7 +10704,7 @@
         clone.librarySourceId = null;
         delete clone.displayUrl;
         if (['running', 'queued', 'analyzing'].includes(clone.status)) {
-          clone.status = clone.assetUrl ? 'completed' : 'placeholder';
+          clone.status = nodeHasAsset(clone) ? 'completed' : 'placeholder';
           clone.progressText = '';
           clone.error = '';
         }
@@ -10504,7 +10870,7 @@
         title: node.title,
         content: node.content || node.summary || '',
         summary: node.summary || truncateText(node.content || node.mediaAnalysis?.summary || node.title, 220),
-        assetUrl: node.assetUrl || '',
+        assetUrl: '',
         mime: node.mime || '',
         asset: node.asset || null,
         mediaAnalysis: node.mediaAnalysis || null,
@@ -10538,8 +10904,8 @@
         minX: Math.min(acc.minX, node.x),
         minY: Math.min(acc.minY, node.y)
       }), { minX: Infinity, minY: Infinity });
-      const nodes = selected.map(({ displayUrl, ...node }) => structuredCloneSafe({
-        ...node,
+      const nodes = selected.map(node => structuredCloneSafe({
+        ...serializableNode(node),
         x: node.x - bounds.minX,
         y: node.y - bounds.minY
       }));
@@ -10581,7 +10947,8 @@
         status: 'completed',
         content: item.content || item.summary || '',
         summary: item.summary || '',
-        assetUrl: item.assetUrl || '',
+        assetUrl: '',
+        displayUrl: assetDisplayUrl(item),
         mime: item.mime || '',
         mediaAnalysis: item.mediaAnalysis || null,
         userLabels: item.userLabels || [],
@@ -10952,11 +11319,12 @@
       delete candidate.meta.candidateOfNodeId;
       normalizeNode(candidate);
       if (official) normalizeNode(official);
-      addAstraLink(official?.id, candidate.id, { relation: 'candidate_of', inputRole: 'none', visualStyle: 'dashed', actionRunId: run?.id, project });
+      const link = addAstraLink(official?.id, candidate.id, { relation: 'candidate_of', inputRole: 'none', visualStyle: 'dashed', actionRunId: run?.id, project });
       addActivity('candidate', '候选已替换为正式素材', 'ok');
-      finishActionRun(run, 'completed', { astraIds: [candidate.id, official?.id].filter(Boolean), summary: '候选已转正' }, project);
-      scheduleSave();
-      render();
+      const astraIds = [candidate.id, official?.id].filter(Boolean);
+      const linkIds = link?.id ? [link.id] : [];
+      finishActionRun(run, 'completed', { astraIds, linkIds, summary: '候选已转正' }, project);
+      return { astraIds, linkIds };
     }
 
     function findOfficialForCandidate(candidate, project = currentProject()) {
@@ -11306,7 +11674,7 @@
     function quoteNode(id) {
       const node = currentProject().nodes.find(n => n.id === id);
       if (!node) return;
-      const snippet = node.assetUrl ? quoteAssetNode(node) : `[引用 ${node.title} · ${node.family}.${node.role}]\n${truncateText(node.content || node.summary || '', 700)}`;
+      const snippet = nodeHasAsset(node) ? quoteAssetNode(node) : `[引用 ${node.title} · ${node.family}.${node.role}]\n${truncateText(node.content || node.summary || '', 700)}`;
       $('chatInput').value = ($('chatInput').value + '\n' + snippet).trim();
       $('chatInput').focus();
     }
@@ -11665,9 +12033,9 @@
         n.entityAliases?.length ? `aliases=${n.entityAliases.map(item => item.label).filter(Boolean).join(', ')}` : '',
         n.mediaAnalysis?.summary ? `media_analysis=${truncateText(n.mediaAnalysis.summary, 700)}` : '',
         n.model ? `model=${n.model}` : '',
-        n.assetUrl ? '' : (n.content ? truncateText(n.content, 1800) : ''),
-        n.assetUrl ? '' : (n.summary ? truncateText(n.summary, 900) : ''),
-        n.assetUrl ? `[asset ${n.mime || 'unknown'} attached on canvas]` : ''
+        nodeHasAsset(n) ? '' : (n.content ? truncateText(n.content, 1800) : ''),
+        nodeHasAsset(n) ? '' : (n.summary ? truncateText(n.summary, 900) : ''),
+        nodeHasAsset(n) ? `[asset ${n.mime || 'unknown'} attached on canvas]` : ''
       ].filter(Boolean).join('\n')).join('\n\n');
     }
 
@@ -12180,7 +12548,10 @@
       const beforeNodeIds = new Set(beforeNodes.map(node => node.id).filter(Boolean));
       const afterNodeIds = new Set(afterNodes.map(node => node.id).filter(Boolean));
       const removedNodeIds = [...beforeNodeIds].filter(id => !afterNodeIds.has(id));
-      if (removedNodeIds.length) return render();
+      if (removedNodeIds.length) {
+        if (removeRenderedNodes(removedNodeIds, project)) return;
+        return render();
+      }
 
       const addedNodeIds = [...afterNodeIds].filter(id => !beforeNodeIds.has(id));
       const linkEndpointIds = controllerOperationLinkEndpointIds(applied, beforeLinks, project);
@@ -12790,14 +13161,16 @@
         .filter(node => ['genImage', 'genVideo'].includes(node.role) && node.assetState === 'candidate');
       if (!targets.length) throw new Error(`${op.id} did not resolve any candidate media Astra.`);
       const affectedIds = [];
+      const linkIds = [];
       targets.forEach(node => {
         const officialId = node.meta?.candidateOfNodeId || findOfficialForCandidate(node, project)?.id || '';
-        promoteMediaCandidate(node.id, project);
+        const result = promoteMediaCandidate(node.id, project);
         const candidate = nodeById(node.id, project);
         if (candidate) affectedIds.push(candidate.id);
         if (officialId) affectedIds.push(officialId);
+        linkIds.push(...arrayFrom(result?.linkIds));
       });
-      return { id: op.id, op: op.op, count: targets.length, astraIds: uniqueIds(affectedIds) };
+      return { id: op.id, op: op.op, count: targets.length, astraIds: uniqueIds(affectedIds), linkIds: uniqueIds(linkIds) };
     }
 
     async function draftPromptsByOperation(op, project = currentProject()) {
@@ -12904,7 +13277,7 @@
 
     function fillableGenerationTargetIds(targets, expectedRole) {
       return new Set(arrayFrom(targets)
-        .filter(node => node?.role === expectedRole && !assetDisplayUrl(node))
+        .filter(node => canFillGenerationTarget(node, expectedRole))
         .map(node => node.id)
         .filter(Boolean));
     }
@@ -12968,11 +13341,14 @@
       const raw = payload?.mediaSettings || payload?.media_settings;
       if (!raw || typeof raw !== 'object') return null;
       const mediaSettings = {};
-      const aspect = raw.imageAspectRatio || raw.image_aspect_ratio || raw.aspectRatio || raw.aspect_ratio;
+      const legacyAspect = raw.aspectRatio || raw.aspect_ratio;
+      const imageAspect = raw.imageAspectRatio || raw.image_aspect_ratio || (kind === 'image' ? legacyAspect : undefined);
+      const videoAspect = raw.videoAspectRatio || raw.video_aspect_ratio || (kind === 'video' ? legacyAspect || raw.imageAspectRatio || raw.image_aspect_ratio : undefined);
       const imageResolution = raw.imageResolution || raw.image_resolution || (kind === 'image' ? raw.resolution : '');
       const videoResolution = raw.videoResolution || raw.video_resolution || (kind === 'video' ? raw.resolution : '');
       const duration = raw.segmentDurationSeconds ?? raw.segment_duration_seconds ?? raw.duration;
-      if (aspect !== undefined) mediaSettings.imageAspectRatio = normalizePlannerImageAspectRatio(aspect);
+      if (imageAspect !== undefined) mediaSettings.imageAspectRatio = normalizePlannerImageAspectRatio(imageAspect);
+      if (videoAspect !== undefined) mediaSettings.videoAspectRatio = normalizePlannerVideoAspectRatio(videoAspect, mediaSettings.imageAspectRatio);
       if (imageResolution !== undefined && imageResolution !== '') mediaSettings.imageResolution = normalizePlannerImageResolution(imageResolution);
       if (videoResolution !== undefined && videoResolution !== '') mediaSettings.videoResolution = normalizePlannerVideoResolution(videoResolution, operationModelValue(payload.model, 'video'));
       if (duration !== undefined) mediaSettings.segmentDurationSeconds = clampSeedance2Duration(duration);
@@ -13099,6 +13475,10 @@
       if (idSet.has(state.pendingLink?.fromNodeId) || idSet.has(state.pendingLink?.targetNodeId)) state.pendingLink = null;
       if (idSet.has(state.linkRoleMenu?.fromNodeId) || idSet.has(state.linkRoleMenu?.toNodeId)) state.linkRoleMenu = null;
       if (idSet.has(state.mentionMenu?.nodeId)) state.mentionMenu = null;
+      if (idSet.has(state.inlineEditorNodeId)) {
+        state.inlineEditorNodeId = '';
+        closePromptMentionMenu({ render: false });
+      }
       if (idSet.has(state.editorNodeId)) closeEditor();
       if (idSet.has(state.sequenceRunner?.currentNodeId)) {
         state.sequenceRunner.stopRequested = true;
@@ -13766,7 +14146,7 @@
     }
 
     function creativeMviHasMaterialDirection(userText, nodes, corpus) {
-      if ((nodes || []).some(node => node.assetUrl || ['referenceBrief', 'referenceImagePrompt', 'referenceVideoPrompt'].includes(node.role))) return true;
+      if ((nodes || []).some(node => nodeHasAsset(node) || ['referenceBrief', 'referenceImagePrompt', 'referenceVideoPrompt'].includes(node.role))) return true;
       const text = String(userText || '').trim();
       return text.length >= 28 || /素材|画面|图片|视频|角色|场景|道具|UI|参考|生成.*图|生成.*视频|关键帧|片段/i.test(corpus);
     }
@@ -13776,14 +14156,24 @@
       const segmentCount = extractSegmentCount(value);
       const productionMode = inferProductionModeFromText(value);
       if (!segmentCount || !productionMode) return null;
+      const aspectRatio = inferAspectRatioFromText(value) || state.settings.aspectRatio;
       return normalizeStarFlowPlannerFieldObject({
         productionMode,
         segmentCount,
         segmentDurationSeconds: state.settings.duration,
-        imageAspectRatio: state.settings.aspectRatio,
+        imageAspectRatio: aspectRatio,
+        videoAspectRatio: aspectRatio,
         videoResolution: '720p',
         imageResolution: '2k'
       });
+    }
+
+    function inferAspectRatioFromText(text) {
+      const value = String(text || '');
+      if (/9\s*[:：]\s*16|竖屏|竖版|vertical|portrait/i.test(value)) return '9:16';
+      if (/16\s*[:：]\s*9|横屏|横版|horizontal|landscape/i.test(value)) return '16:9';
+      if (/1\s*[:：]\s*1|方图|方形|square/i.test(value)) return '1:1';
+      return '';
     }
 
     function inferProductionModeFromText(text) {
@@ -13932,7 +14322,7 @@
       const result = await executeControllerOperationPlan({
         summary: `${label} 生成已完成。`,
         ops: [{
-          id: `op_generate_${kind}_${Date.now()}`,
+          id: uid(`op_generate_${kind}`),
           op: 'generateMedia',
           reason: options.instruction || summary,
           payload: {
@@ -14996,9 +15386,9 @@
         `input.${item.inputRole}=${node.title}`,
         `${node.family}.${node.role}`,
         node.sequence?.index ? `sequence.index=${node.sequence.index}` : '',
-        node.assetUrl ? `asset=${node.mime || 'media'}` : '',
+        nodeHasAsset(node) ? `asset=${node.mime || 'media'}` : '',
         node.mediaAnalysis?.summary ? `analysis=${truncateText(node.mediaAnalysis.summary, 220)}` : '',
-        node.content && !node.assetUrl ? `text=${truncateText(node.content, 260)}` : ''
+        node.content && !nodeHasAsset(node) ? `text=${truncateText(node.content, 260)}` : ''
       ];
       return details.filter(Boolean).join(' | ');
     }
@@ -15337,6 +15727,10 @@
       return config.requestModel || model;
     }
 
+    function isRgSeedanceSoraRequestModel(model) {
+      return /^ws-seedance-2\.0(?:-|$)/.test(String(model || ''));
+    }
+
     function mediaModelFamily(model, kind) {
       return mediaModelConfig(model, kind).family || '';
     }
@@ -15630,9 +16024,10 @@
       const node = addNode({ type: 'analysis', family: 'Polaris', role: 'creativeBrief', title: '创意 Brief', status: 'running', model: state.settings.analysisModel, progressText: '正在生成创意 Brief' });
         const styleNode = addNode({ type: 'analysis', family: 'Polaris', role: 'styleLock', title: '画风锁', status: 'running', model: state.settings.analysisModel, progressText: '正在提炼统一画风', x: node.x + nodeWidth(node) + 72, y: node.y });
         const videoNode = addNode({ type: 'analysis', family: 'Polaris', role: 'videoLock', title: '视频锁', status: 'running', model: state.settings.analysisModel, progressText: '正在提炼统一运镜', x: styleNode.x + nodeWidth(styleNode) + 72, y: node.y });
+      const mediaParts = (await Promise.all(refs.map(mediaPromptContentPart))).flat();
       const content = [
         { type: 'text', text: buildAnalyzePrompt(refs, options.mviStatus) },
-        ...refs.flatMap(fileNodeToContentPart)
+        ...mediaParts
       ];
       try {
         updateApiStatus('busy');
@@ -15965,9 +16360,9 @@
         return await videoGeneration(model, prompt, nodeId, resolvedExecution);
       } catch (endpointError) {
         const refs = videoReferenceNodesForExecution(resolvedExecution);
-        const referenceParts = [refs.first, refs.last, ...refs.refs]
+        const referenceParts = (await Promise.all([refs.first, refs.last, ...refs.refs]
           .filter(Boolean)
-          .map(n => ({ type: 'image_url', image_url: { url: assetRequestUrl(n) } }));
+          .map(mediaPromptContentPart))).flat();
         const messages = [{
           role: 'user',
           content: [
@@ -15982,51 +16377,65 @@
     }
 
     async function videoGeneration(model, prompt, nodeId, resolvedExecution = null) {
-      const body = buildVideoGenerationBody(model, prompt, resolvedExecution);
-      const response = await apiJson('/video/generations', body);
+      const body = await buildVideoGenerationBody(model, prompt, resolvedExecution);
+      const usesSoraVideoApi = isRgSeedanceSoraRequestModel(body.model);
+      const response = await apiJson(usesSoraVideoApi ? '/videos' : '/video/generations', body);
       const media = mediaFromGenerationResponse(response, 'video');
       if (media.url) return { ...media, raw: JSON.stringify(response, null, 2) };
       const taskId = extractTaskId(response);
       if (!taskId) throw new Error('视频接口未返回 URL 或 task id。');
-      return pollGenerationTask(taskId, 'video', nodeId);
+      return pollGenerationTask(taskId, 'video', nodeId, usesSoraVideoApi ? {
+        paths: [`/videos/${encodeURIComponent(taskId)}`],
+        contentPath: `/videos/${encodeURIComponent(taskId)}/content`
+      } : {});
     }
 
-    function buildVideoGenerationBody(model, prompt, resolvedExecution = null) {
+    async function buildVideoGenerationBody(model, prompt, resolvedExecution = null) {
       const mediaSettings = mediaSettingsForExecution(resolvedExecution);
       const references = videoReferenceNodesForExecution(resolvedExecution);
-      const firstImageUrl = assetRequestUrl(references.first);
-      const lastImageUrl = assetRequestUrl(references.last);
-      const referenceUrls = references.refs.map(assetRequestUrl).filter(Boolean);
+      const firstImageUrl = await dataUrlForAsset(references.first);
+      const lastImageUrl = await dataUrlForAsset(references.last);
+      const referenceUrls = (await Promise.all(references.refs.map(dataUrlForAsset))).filter(Boolean);
+      const requestModel = mediaModelRequestModel(model, 'video', !!firstImageUrl);
+      const durationSeconds = videoDurationForMediaSettings(mediaSettings);
+      const usesSoraVideoApi = isRgSeedanceSoraRequestModel(requestModel);
       const body = {
-        model: mediaModelRequestModel(model, 'video', !!firstImageUrl),
+        model: requestModel,
         prompt,
-        aspect_ratio: mediaSettings.imageAspectRatio,
-        duration: videoDurationForMediaSettings(mediaSettings),
-        resolution: mediaSettings.videoResolution,
-        mode: resolvedExecution?.mode || 'text_to_video'
+        aspect_ratio: mediaSettings.videoAspectRatio,
+        resolution: mediaSettings.videoResolution
       };
+      if (usesSoraVideoApi) body.seconds = String(durationSeconds);
+      else {
+        body.duration = durationSeconds;
+        body.mode = resolvedExecution?.mode || 'text_to_video';
+      }
       if (firstImageUrl) {
         body.image = firstImageUrl;
-        body.image_url = firstImageUrl;
-        body.first_image = firstImageUrl;
-        body.first_frame_image = firstImageUrl;
+        if (!usesSoraVideoApi) {
+          body.image_url = firstImageUrl;
+          body.first_image = firstImageUrl;
+          body.first_frame_image = firstImageUrl;
+        }
       }
       if (lastImageUrl) {
         body.last_image = lastImageUrl;
-        body.last_image_url = lastImageUrl;
-        body.last_frame_image = lastImageUrl;
+        if (!usesSoraVideoApi) {
+          body.last_image_url = lastImageUrl;
+          body.last_frame_image = lastImageUrl;
+        }
       }
       if (referenceUrls.length) {
-        body.images = referenceUrls;
         body.reference_images = referenceUrls;
+        if (!usesSoraVideoApi) body.images = referenceUrls;
       }
       return body;
     }
 
     function videoReferenceNodesForExecution(resolvedExecution = null) {
       const first = nodeById(resolvedExecution?.firstFrameNodeId)
-        || selectedNodes().find(n => n.assetUrl && n.mime?.startsWith('image/'))
-        || currentProject().nodes.findLast?.(n => n.assetUrl && n.mime?.startsWith('image/'))
+        || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/'))
+        || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/'))
         || null;
       const last = nodeById(resolvedExecution?.lastFrameNodeId) || null;
       const refs = (resolvedExecution?.referenceNodeIds || [])
@@ -16109,8 +16518,8 @@
       return json?.task_id || json?.taskId || json?.job_id || json?.jobId || json?.id || json?.data?.task_id || json?.data?.taskId;
     }
 
-    async function pollGenerationTask(taskId, preferred, nodeId) {
-      const paths = [
+    async function pollGenerationTask(taskId, preferred, nodeId, options = {}) {
+      const paths = options.paths || [
         `/video/generations/${encodeURIComponent(taskId)}`,
         `/videos/generations/${encodeURIComponent(taskId)}`,
         `/tasks/${encodeURIComponent(taskId)}`,
@@ -16127,6 +16536,9 @@
             if (media.url) return { ...media, raw: JSON.stringify(json, null, 2) };
             const status = String(json?.data?.status || json?.status || json?.data?.data?.status || json?.state || '').toLowerCase();
             if (['failed', 'error', 'cancelled', 'canceled'].includes(status)) throw new Error(json?.error || json?.message || `任务失败：${status}`);
+            if (options.contentPath && ['success', 'succeeded', 'completed', 'done'].includes(status)) {
+              return downloadGenerationTaskContent(options.contentPath, preferred, json);
+            }
             if (['success', 'succeeded', 'completed', 'done'].includes(status)) throw new Error('生成任务完成，但没有返回可识别的素材 URL。');
             if (status || json?.data || extractTaskId(json)) {
               lastError = null;
@@ -16140,6 +16552,23 @@
         await wait(4000);
       }
       throw new Error(`生成任务超时：${taskId}`);
+    }
+
+    async function downloadGenerationTaskContent(path, preferred, statusJson = null) {
+      requireApiKey();
+      const response = await fetch(`${trimSlash(state.settings.baseUrl)}${path}`, {
+        method: 'GET',
+        headers: { Authorization: `Bearer ${state.settings.apiKey}` }
+      });
+      if (!response.ok) throw new Error(await responseErrorText(response));
+      const fallbackMime = preferred === 'video' ? 'video/mp4' : preferred === 'audio' ? 'audio/mpeg' : 'image/png';
+      const blob = await response.blob();
+      const mime = concreteMime(blob.type, fallbackMime);
+      return {
+        url: URL.createObjectURL(blob),
+        mime,
+        raw: JSON.stringify(statusJson || { contentPath: path, mime }, null, 2)
+      };
     }
 
     function generationProgressText(json, attempt) {
@@ -16311,7 +16740,7 @@
       if (shouldUseWaveSpeedMedia(model, 'video')) {
         if (!state.settings.wavespeedApiKey) throw new Error('missing WaveSpeed API key for video generation');
         const settings = starFlowMediaSettings();
-        return `${modelDisplayLabel(model)} -> ${resolveWaveSpeedVideoModel(model, false)} / ${resolveWaveSpeedVideoModel(model, true)}, duration=${waveSpeedVideoDuration()}s, resolution=${settings.videoResolution}, aspect=${settings.imageAspectRatio}`;
+        return `${modelDisplayLabel(model)} -> ${resolveWaveSpeedVideoModel(model, false)} / ${resolveWaveSpeedVideoModel(model, true)}, duration=${waveSpeedVideoDuration()}s, resolution=${settings.videoResolution}, aspect=${settings.videoAspectRatio}`;
       }
       if (!state.settings.apiKey) throw new Error('missing company API key for video generation');
       return `${modelDisplayLabel(model)} -> ${mediaModelRequestModel(model, 'video', true)} / ${mediaModelRequestModel(model, 'video', false)}`;
@@ -16406,6 +16835,12 @@
         .filter(Boolean);
     }
 
+    async function imageInputDataUrlsForExecution(resolvedExecution = null) {
+      return (await Promise.all(imageInputNodeIdsForExecution(resolvedExecution)
+        .map(id => dataUrlForAsset(nodeById(id)))))
+        .filter(Boolean);
+    }
+
     function resolveWaveSpeedImageModel(model, resolvedExecution = null) {
       const config = mediaModelConfig(model, 'image');
       if (hasImageInputsForExecution(resolvedExecution) && config.editEndpointModel) return config.editEndpointModel;
@@ -16429,10 +16864,10 @@
       return normalized;
     }
 
-    function buildWaveSpeedImageBody(model, prompt, resolvedExecution = null) {
+    async function buildWaveSpeedImageBody(model, prompt, resolvedExecution = null) {
       const config = mediaModelConfig(model, 'image');
       const mediaSettings = mediaSettingsForExecution(resolvedExecution);
-      const referenceImages = imageInputUrlsForExecution(resolvedExecution);
+      const referenceImages = await imageInputDataUrlsForExecution(resolvedExecution);
       const usesEditEndpoint = hasImageInputsForExecution(resolvedExecution) && !!config.editEndpointModel;
       if (config.bodyKind === 'midjourney') {
         return {
@@ -16469,7 +16904,7 @@
         model: endpointModel,
         preferred: 'image',
         nodeId,
-        body: buildWaveSpeedImageBody(model, prompt, resolvedExecution)
+        body: await buildWaveSpeedImageBody(model, prompt, resolvedExecution)
       });
     }
 
@@ -16477,11 +16912,11 @@
       requireWaveSpeedKey();
       const mediaSettings = mediaSettingsForExecution(resolvedExecution);
       const sourceImage = nodeById(resolvedExecution?.firstFrameNodeId)
-        || selectedNodes().find(n => n.assetUrl && n.mime?.startsWith('image/'))
-        || currentProject().nodes.findLast?.(n => n.assetUrl && n.mime?.startsWith('image/'));
+        || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/'))
+        || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/'));
       const lastImage = nodeById(resolvedExecution?.lastFrameNodeId);
-      const sourceImageUrl = assetRequestUrl(sourceImage);
-      const lastImageUrl = assetRequestUrl(lastImage);
+      const sourceImageUrl = await dataUrlForAsset(sourceImage);
+      const lastImageUrl = await dataUrlForAsset(lastImage);
       const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl);
       const audioInstruction = '无口播 无BGM 只有音效';
       return waveSpeedSubmitAndPoll({
@@ -16490,7 +16925,7 @@
         nodeId,
         body: {
           prompt: [prompt, audioInstruction].filter(Boolean).join('\n'),
-          aspect_ratio: mediaSettings.imageAspectRatio,
+          aspect_ratio: mediaSettings.videoAspectRatio,
           duration: waveSpeedVideoDuration(resolvedExecution),
           resolution: mediaSettings.videoResolution,
           generate_audio: true,
@@ -16611,12 +17046,38 @@
       return chatImageGeneration(model, prompt, resolvedExecution);
     }
 
+    async function cacheBlobAsset(blob, fallbackMime = '', options = {}) {
+      const mime = concreteMime(blob.type, fallbackMime || 'application/octet-stream');
+      const storedBlob = blob.type === mime ? blob : blob.slice(0, blob.size, mime);
+      await ensureDisplayableMediaBlob(storedBlob, mime);
+      const assetId = options.assetId || uid('asset');
+      const displayUrl = URL.createObjectURL(storedBlob);
+      await dbSetAsset(assetId, {
+        blob: storedBlob,
+        mime,
+        size: storedBlob.size,
+        remoteUrl: options.remoteUrl || '',
+        savedAt: new Date().toISOString()
+      });
+      return {
+        assetUrl: '',
+        displayUrl,
+        mime,
+        meta: {
+          ...(options.remoteUrl ? { remoteAssetUrl: options.remoteUrl } : {}),
+          localAssetId: assetId,
+          localAssetStatus: 'cached',
+          localAssetSize: storedBlob.size
+        }
+      };
+    }
+
     async function cacheMediaAsset(nodeId, url, fallbackMime) {
       const mime = fallbackMime || mediaFromUrl(url, 'image').mime || 'application/octet-stream';
       const isDataUrl = /^data:/i.test(String(url || ''));
       const base = {
-        assetUrl: url,
-        displayUrl: url,
+        assetUrl: '',
+        displayUrl: isDataUrl ? '' : url,
         mime,
         meta: { ...(isDataUrl ? {} : { remoteAssetUrl: url }), localAssetStatus: 'remote-only' }
       };
@@ -16627,29 +17088,13 @@
         const blob = isDataUrl
           ? dataUriToBlob(url)
           : await fetchAssetBlob(url);
-        const assetId = `asset_${nodeId}`;
-        const cachedMime = concreteMime(blob.type, mime);
-        await ensureDisplayableMediaBlob(blob, cachedMime);
-        fallbackCachedMime = cachedMime;
+        const cached = await cacheBlobAsset(blob, mime, { remoteUrl: isDataUrl ? '' : url });
+        fallbackCachedMime = cached.mime;
         fallbackAssetSize = blob.size;
-        fallbackDisplayUrl = URL.createObjectURL(blob);
-        await dbSetAsset(assetId, {
-          blob,
-          mime: cachedMime,
-          size: blob.size,
-          remoteUrl: url,
-          savedAt: new Date().toISOString()
-        });
+        fallbackDisplayUrl = cached.displayUrl;
         return {
-          assetUrl: url,
-          displayUrl: fallbackDisplayUrl,
-          mime: cachedMime,
-          meta: {
-            ...(isDataUrl ? {} : { remoteAssetUrl: url }),
-            localAssetId: assetId,
-            localAssetStatus: 'cached',
-            localAssetSize: blob.size
-          }
+          ...cached,
+          meta: { ...cached.meta }
         };
       } catch (error) {
         if (error?.mediaDecodeFailed) throw error;
@@ -16715,9 +17160,9 @@
 
     function dataUriToBlob(uri) {
       try {
-        const normalized = normalizeDataUrl(uri);
-        const mime = normalized.slice(5, normalized.indexOf(';')) || 'application/octet-stream';
-        const bytes = dataUriToBytes(normalized);
+        const parsed = parseDataUri(uri);
+        const mime = parsed.mime || 'application/octet-stream';
+        const bytes = parsed.bytes;
         return new Blob([bytes], { type: mime });
       } catch (error) {
         throw mediaDecodeError(`模型返回了素材数据，但不是有效的 data URI：${error.message}`);
@@ -16788,7 +17233,7 @@
 
     async function imageGeneration(model, prompt, withSize, resolvedExecution = null) {
       requireApiKey();
-      const body = buildImageGenerationBody(model, prompt, withSize, resolvedExecution);
+      const body = await buildImageGenerationBody(model, prompt, withSize, resolvedExecution);
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}/images/generations`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${state.settings.apiKey}`, 'Content-Type': 'application/json' },
@@ -16799,10 +17244,10 @@
       return imageResponseMedia(json);
     }
 
-    function buildImageGenerationBody(model, prompt, withSize, resolvedExecution = null) {
+    async function buildImageGenerationBody(model, prompt, withSize, resolvedExecution = null) {
       const config = mediaModelConfig(model, 'image');
       const body = { model: mediaModelRequestModel(model, 'image'), prompt, n: 1 };
-      const imageUrls = imageInputUrlsForExecution(resolvedExecution);
+      const imageUrls = await imageInputDataUrlsForExecution(resolvedExecution);
       if (config.referenceImages && imageUrls.length) body.images = imageUrls;
       if (withSize) {
         const mediaSettings = mediaSettingsForExecution(resolvedExecution);
@@ -16811,8 +17256,8 @@
       return body;
     }
 
-    function buildImageEditBody(model, prompt, withSize, resolvedExecution = null) {
-      const images = imageInputUrlsForExecution(resolvedExecution).map(url => ({ image_url: url }));
+    async function buildImageEditBody(model, prompt, withSize, resolvedExecution = null) {
+      const images = (await imageInputDataUrlsForExecution(resolvedExecution)).map(url => ({ image_url: url }));
       if (!images.length) throw new Error('原图修改需要先连接一张原图。');
       const body = {
         model: mediaModelRequestModel(model, 'image'),
@@ -16829,7 +17274,7 @@
     }
 
     async function buildImageEditFormData(model, prompt, withSize, resolvedExecution = null) {
-      const body = buildImageEditBody(model, prompt, withSize, resolvedExecution);
+      const body = await buildImageEditBody(model, prompt, withSize, resolvedExecution);
       const form = new FormData();
       form.append('model', body.model);
       form.append('prompt', body.prompt);
@@ -17071,7 +17516,7 @@
       if (directPrompt) {
         const downstreamTarget = downstreamTargetForPrompt(directPrompt.id, targetRole);
         const sourceImage = kind === 'video'
-          ? (linkedImageForRole(directPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || selectedNodes().find(n => n.assetUrl && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || currentProject().nodes.findLast?.(n => n.assetUrl && n.mime?.startsWith('image/')))
+          ? (linkedImageForRole(directPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')))
           : null;
         return promptPick(promptTextFromNode(directPrompt, { allowSummary: true }), options, {
           nodeId: directPrompt.id,
@@ -17494,9 +17939,9 @@
       const selected = new Set(state.selectedNodeIds);
       const polarisNodes = globalPolarisContextNodes(project);
       const polarisIds = new Set(polarisNodes.map(node => node.id));
-      const textNodes = project.nodes.filter(node => !node.assetUrl && !polarisIds.has(node.id));
-      const selectedMedia = project.nodes.filter(node => selected.has(node.id) && node.assetUrl);
-      const recentMedia = project.nodes.filter(node => node.assetUrl).slice(-8);
+      const textNodes = project.nodes.filter(node => !nodeHasAsset(node) && !polarisIds.has(node.id));
+      const selectedMedia = project.nodes.filter(node => selected.has(node.id) && nodeHasAsset(node));
+      const recentMedia = project.nodes.filter(node => nodeHasAsset(node)).slice(-8);
       const nonPolarisBudget = Math.max(8, 32 - polarisNodes.length);
       const nonPolarisNodes = uniqueNodes([
         ...textNodes.slice(-24),
@@ -17547,7 +17992,7 @@
         node.userLabels?.length ? `labels=${node.userLabels.join(', ')}` : '',
         node.mediaAnalysis?.summary ? `media_analysis=${truncateText(node.mediaAnalysis.summary, 600)}` : ''
       ];
-      if (node.assetUrl) {
+      if (nodeHasAsset(node)) {
         lines.push(`[asset ${node.mime || node.type}]`);
       } else {
         lines.push(truncateText(node.content || node.summary || '', 1800));
@@ -17565,7 +18010,7 @@
     }
 
     async function mediaPromptContentPart(node) {
-      const url = assetRequestUrl(node);
+      const url = await dataUrlForAsset(node);
       const mime = node?.mime || mimeFromDataUrl(url);
       if (!url) return [];
       if (mime.startsWith('image/')) {
@@ -17588,7 +18033,10 @@
     }
 
     async function geminiVideoUrlForPrompt(node, url = assetRequestUrl(node)) {
-      const sourceUrl = String(url || '');
+      let sourceUrl = String(url || '');
+      if (sourceUrl.startsWith('blob:')) {
+        sourceUrl = await dataUrlForAsset(node) || sourceUrl;
+      }
       const mime = node?.mime || mimeFromDataUrl(sourceUrl);
       const isDataVideo = sourceUrl.startsWith('data:video/');
       const isMp4Data = sourceUrl.startsWith('data:video/mp4');
@@ -17627,11 +18075,17 @@
     }
 
     async function lightweightImageUrlForPrompt(url) {
-      if (!String(url || '').startsWith('data:image/') || String(url).length < 1200000) return url;
+      let source = String(url || '');
+      if (source.startsWith('blob:')) {
+        const response = await fetch(source);
+        const blob = await response.blob();
+        source = await fileToDataUrl(blob);
+      }
+      if (!source.startsWith('data:image/') || source.length < 1200000) return source;
       try {
-        return await resizeImageDataUrl(url, 1024, 0.82);
+        return await resizeImageDataUrl(source, 1024, 0.82);
       } catch (_) {
-        return url;
+        return source;
       }
     }
 
@@ -17657,8 +18111,8 @@
     async function handleFiles(files, options = {}) {
       const list = [...(files || [])].filter(Boolean);
       for (const [index, file] of list.entries()) {
-        const dataUrl = await fileToDataUrl(file);
         const mime = file.type || inferMime(file.name);
+        const cached = await cacheBlobAsset(file, mime);
         const astra = astraForUpload(mime);
         const shouldAnalyze = mime.startsWith('image/') || mime.startsWith('video/');
         const point = options.point
@@ -17670,12 +18124,13 @@
           family: astra.family,
           role: astra.role,
           status: shouldAnalyze ? 'analyzing' : 'completed',
-          assetUrl: dataUrl,
-          mime,
+          assetUrl: cached.assetUrl,
+          displayUrl: cached.displayUrl,
+          mime: cached.mime,
           content: `Uploaded file: ${file.name}`,
           summary: `${ASTRA_ROLE_LABELS[astra.role] || '参考素材'} · ${file.name}`,
           mediaAnalysis: shouldAnalyze ? { status: 'pending', model: state.settings.analysisModel, summary: '' } : null,
-          meta: { fileName: file.name, size: file.size, uploadSource: options.source || 'file_input' },
+          meta: { fileName: file.name, size: file.size, uploadSource: options.source || 'file_input', ...cached.meta },
           ...(point ? { x: point.x, y: point.y } : {})
         });
         if (shouldAnalyze) analyzeUploadedMedia(node.id, { silent: options.silent ?? true });
@@ -17980,6 +18435,9 @@
             sourceVideoNodeId: source.id,
             sourceNodeId: source.id,
             sourceVideoTitle: source.title,
+            localAssetId: source.meta?.localAssetId || '',
+            remoteAssetUrl: source.meta?.remoteAssetUrl || '',
+            localAssetSize: source.meta?.localAssetSize || 0,
             segmentStart: segment.start,
             segmentEnd: segment.end,
             requestedEnd: segment.requestedEnd,
@@ -18081,7 +18539,7 @@
 
     function starFlowPlannerSummary(fields) {
       const normalized = normalizeStarFlowPlannerFieldObject(fields);
-      return `制作方式 ${referenceModeLabel(normalized.productionMode)}，${normalized.segmentCount} 段，每段约 ${normalized.segmentDurationSeconds}s，图片 ${normalized.imageAspectRatio} ${normalized.imageResolution}，视频 ${normalized.videoResolution}`;
+      return `制作方式 ${referenceModeLabel(normalized.productionMode)}，${normalized.segmentCount} 段，每段约 ${normalized.segmentDurationSeconds}s，图片 ${normalized.imageAspectRatio} ${normalized.imageResolution}，视频 ${normalized.videoAspectRatio} ${normalized.videoResolution}`;
     }
 
     function createReferenceVideoPromptPlaceholders({ source, frames, segments, mode, run, project, x, y }) {
@@ -18624,7 +19082,7 @@
         if (!segment) throw new Error('找不到这个参考视频 Prompt 对应的视频片段。');
         const content = [
           { type: 'text', text: buildReferenceVideoPrompt(source, [], [segment], mode) },
-          ...await mediaPromptContentPart(segment?.assetUrl ? segment : source)
+          ...await mediaPromptContentPart(nodeHasAsset(segment) ? segment : source)
         ];
         const requestMeta = reversePromptRequestMeta('video', REVERSE_PROMPT_MODEL, content);
         updateNode(prompt.id, {
@@ -19073,19 +19531,31 @@
             to_astra_id: link.toNodeId || link.to_astra_id,
             relation: link.relation || '',
             input_role: link.inputRole || link.input_role || ''
-          }))
+        }))
       };
+    }
+
+    async function dataUrlForAsset(node) {
+      if (!node) return '';
+      const asset = await dataForAsset(node);
+      if (asset?.bytes) {
+        const blob = new Blob([asset.bytes], { type: asset.mime || node.mime || 'application/octet-stream' });
+        return fileToDataUrl(blob);
+      }
+      const fallback = assetSourceUrl(node);
+      return fallback && !fallback.startsWith('blob:') ? fallback : '';
     }
 
     async function dataForAsset(node) {
       const mime = node.mime || '';
-      const ext = extensionFromMime(mime, node.assetUrl || node.title || '');
+      const sourceUrl = assetSourceUrl(node);
+      const ext = extensionFromMime(mime, sourceUrl || node.title || '');
       if (node.meta?.localAssetId) {
         try {
           const record = await dbGetAsset(node.meta.localAssetId);
           if (record?.blob) {
-            const localMime = record.blob.type || mime;
-            return { ext: extensionFromMime(localMime, node.assetUrl || node.title || ''), mime: localMime, bytes: new Uint8Array(await record.blob.arrayBuffer()) };
+            const localMime = concreteMime(record.blob.type, record.mime || mime || 'application/octet-stream');
+            return { ext: extensionFromMime(localMime, sourceUrl || node.title || ''), mime: localMime, bytes: new Uint8Array(await record.blob.arrayBuffer()) };
           }
         } catch (_) {}
       }
@@ -19093,13 +19563,13 @@
       if (isSubtitleNode(node) && (node.content || node.summary)) {
         return { ext, mime: mime || 'text/plain', bytes: new TextEncoder().encode(node.content || node.summary || '') };
       }
-      if (!node.assetUrl) return null;
+      if (!sourceUrl) return null;
       try {
-        const response = await fetch(node.assetUrl);
+        const response = await fetch(sourceUrl);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const blob = await response.blob();
         const fetchedMime = blob.type || mime;
-        return { ext: extensionFromMime(fetchedMime, node.assetUrl), mime: fetchedMime, bytes: new Uint8Array(await blob.arrayBuffer()) };
+        return { ext: extensionFromMime(fetchedMime, sourceUrl), mime: fetchedMime, bytes: new Uint8Array(await blob.arrayBuffer()) };
       } catch (_) {
         return null;
       }
@@ -19111,7 +19581,7 @@
     }
 
     function isSubtitleNode(node) {
-      const value = [node.type, node.mime, node.title, node.meta?.fileName, node.assetUrl].filter(Boolean).join(' ').toLowerCase();
+      const value = [node.type, node.mime, node.title, node.meta?.fileName, assetSourceUrl(node)].filter(Boolean).join(' ').toLowerCase();
       return value.includes('subtitle') || value.includes('caption') || value.includes('subrip') || /\.(srt|vtt|ass|ssa|lrc)(\?|$)/.test(value);
     }
 
@@ -19123,9 +19593,25 @@
     }
 
     function dataUriToBytes(uri) {
-      const normalized = normalizeDataUrl(uri);
-      const base64 = normalized.slice(normalized.indexOf(',') + 1);
-      const bin = atob(base64);
+      return parseDataUri(uri).bytes;
+    }
+
+    function parseDataUri(uri) {
+      const raw = String(uri || '').trim().replace(/[)\].,;]+$/g, '');
+      const match = raw.match(/^data:([^,]*),(.*)$/is);
+      if (!match) throw new Error('missing data URI header');
+      const header = match[1] || '';
+      const mime = header.split(';')[0] || 'application/octet-stream';
+      if (/;base64/i.test(`;${header}`)) {
+        const base64 = compactBase64Payload(match[2]);
+        return { mime, bytes: bytesFromBinaryString(atob(base64)) };
+      }
+      const text = decodeURIComponent(match[2] || '');
+      const bytes = new TextEncoder().encode(text);
+      return { mime, bytes };
+    }
+
+    function bytesFromBinaryString(bin) {
       const bytes = new Uint8Array(bin.length);
       for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
       return bytes;
@@ -19715,6 +20201,15 @@
       currentProject,
       addNode,
       updateNode,
+      saveState,
+      dbGet,
+      dbGetAsset,
+      flushPendingAssetWrites,
+      serializableProjects,
+      nodeHasAsset,
+      assetDisplayUrl,
+      dataUrlForAsset,
+      dataForAsset,
       normalizeProject,
       normalizeNode,
       recoverInterruptedRuntimeState,
