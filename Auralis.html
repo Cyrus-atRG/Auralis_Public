@@ -401,6 +401,65 @@
       margin-left: 0;
     }
 
+    .update-reminder {
+      position: relative;
+      height: 38px;
+      width: max-content;
+      min-width: 0;
+      max-width: 260px;
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      padding: 0 12px 0 10px;
+      border-radius: 12px;
+      border: 1px solid oklch(0.98 0.004 250 / 0.92);
+      background: oklch(0.98 0.004 250 / 0.98);
+      color: oklch(0.15 0.02 250);
+      box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.9), 0 0 0 1px oklch(0 0 0 / 0.16);
+    }
+
+    .update-reminder[hidden] {
+      display: none !important;
+    }
+
+    .update-reminder-text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 11px;
+      font-weight: 780;
+      letter-spacing: 0;
+      line-height: 1;
+    }
+
+    .update-reminder-dismiss {
+      position: absolute;
+      top: 2px;
+      right: 3px;
+      width: 12px;
+      height: 12px;
+      min-height: 12px;
+      max-height: 12px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      opacity: 0.58;
+      font-size: 12px;
+      line-height: 12px;
+    }
+
+    .update-reminder-dismiss:hover,
+    .update-reminder-dismiss:focus-visible {
+      background: oklch(0.15 0.02 250 / 0.12);
+      opacity: 1;
+      outline: none;
+    }
+
     .visual-scheme-toggle {
       color: var(--silver);
     }
@@ -817,6 +876,7 @@
       user-select: none;
       scrollbar-width: none;
       -ms-overflow-style: none;
+      z-index: 1;
     }
 
     .canvas-scroll::-webkit-scrollbar {
@@ -1051,6 +1111,63 @@
       backdrop-filter: blur(10px);
       box-shadow: var(--shadow-sm);
       z-index: 5;
+    }
+
+    .astra-jump-layer {
+      position: static;
+      pointer-events: auto;
+    }
+
+    .astra-jump-btn {
+      position: absolute;
+      z-index: 4;
+      min-width: 54px;
+      min-height: 32px;
+      padding: 0 10px;
+      border: 1px solid oklch(0.84 0.018 255 / 0.38);
+      border-radius: 8px;
+      background: oklch(0.13 0.018 250 / 0.92);
+      color: var(--silver);
+      box-shadow: 0 4px 8px oklch(0.05 0.014 250 / 0.32);
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 720;
+      line-height: 1;
+      transform: translate(-50%, -50%);
+      transition: border-color .16s ease, color .16s ease, background .16s ease;
+    }
+
+    .astra-jump-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.001);
+    }
+
+    .astra-jump-btn span {
+      position: relative;
+      z-index: 1;
+    }
+
+    .astra-jump-btn:hover,
+    .astra-jump-btn:focus-visible {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: oklch(0.16 0.024 250 / 0.96);
+    }
+
+    .astra-jump-btn:active {
+      transform: translate(-50%, calc(-50% + 1px));
+    }
+
+    .astra-jump-count {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
     }
 
     .zoom-readout {
@@ -2155,6 +2272,40 @@
     .msg.agent { align-self: flex-start; }
     .msg.system { align-self: center; background: transparent; border-style: dashed; color: var(--muted); }
 
+    .msg-actions {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 9px;
+      white-space: normal;
+    }
+
+    .large-selection-action-btn {
+      width: 30px;
+      height: 30px;
+      min-height: 30px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: oklch(0.15 0.02 250 / 0.94);
+      color: var(--silver);
+      font-size: 15px;
+      font-weight: 780;
+      line-height: 1;
+    }
+
+    .large-selection-action-btn:hover,
+    .large-selection-action-btn:focus-visible {
+      background: oklch(0.19 0.026 245 / 0.96);
+      border-color: var(--primary);
+      color: var(--ink);
+    }
+
+    .large-selection-action-btn.confirm { color: var(--success); }
+    .large-selection-action-btn.cancel { color: var(--danger); }
+
     .composer {
       position: relative;
       padding: 12px;
@@ -2540,6 +2691,22 @@
       box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.86), 0 4px 10px oklch(0.28 0.025 250 / 0.1);
     }
 
+    html[data-visual-scheme="caelum"] .update-reminder {
+      border-color: oklch(0.18 0.02 250 / 0.92);
+      background: oklch(0.18 0.02 250 / 0.98);
+      color: oklch(0.98 0.004 250);
+      box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.12), 0 0 0 1px oklch(1 0 0 / 0.26);
+    }
+
+    html[data-visual-scheme="caelum"] .update-reminder-dismiss {
+      background: transparent;
+    }
+
+    html[data-visual-scheme="caelum"] .update-reminder-dismiss:hover,
+    html[data-visual-scheme="caelum"] .update-reminder-dismiss:focus-visible {
+      background: oklch(1 0 0 / 0.16);
+    }
+
     html[data-visual-scheme="caelum"] .visual-scheme-toggle {
       color: var(--ink);
     }
@@ -2789,6 +2956,18 @@
       border-color: oklch(0.55 0.13 215 / 0.34);
     }
 
+    html[data-visual-scheme="caelum"] .large-selection-action-btn {
+      background: oklch(0.975 0.006 250 / 0.96);
+      border-color: oklch(0.74 0.028 250 / 0.72);
+      box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.82);
+    }
+
+    html[data-visual-scheme="caelum"] .large-selection-action-btn:hover,
+    html[data-visual-scheme="caelum"] .large-selection-action-btn:focus-visible {
+      background: oklch(0.94 0.028 215 / 0.96);
+      border-color: var(--primary);
+    }
+
     html[data-visual-scheme="caelum"] .mention-menu,
     html[data-visual-scheme="caelum"] .context-menu {
       background: oklch(0.99 0.004 250 / 0.98);
@@ -2844,7 +3023,7 @@
       .app.inspector-collapsed .topbar { grid-template-columns: var(--rail) minmax(300px, 1fr) 160px; }
       .top-controls {
         display: grid;
-        grid-template-columns: minmax(112px, 1fr) repeat(3, minmax(92px, 112px)) max-content;
+        grid-template-columns: minmax(112px, 1fr) repeat(3, minmax(92px, 112px)) max-content max-content;
         gap: 6px;
         padding: 8px;
         overflow-x: auto;
@@ -2854,6 +3033,9 @@
         max-width: none;
         min-width: 0;
         padding-inline: 8px;
+      }
+      .update-reminder {
+        min-width: 0;
       }
       .top-action-buttons { margin-left: 0; gap: 6px; }
       .top-status {
@@ -2948,6 +3130,10 @@
         <select id="runtimeLlmSelect" aria-label="主 LLM"></select>
         <select id="runtimeImageSelect" aria-label="生图模型"></select>
         <select id="runtimeVideoSelect" aria-label="生视频模型"></select>
+        <div class="update-reminder" id="updateReminder" role="status" aria-live="polite" hidden>
+          <span class="update-reminder-text" id="updateReminderText">Auralis有新版本，请前往启动器更新</span>
+          <button class="update-reminder-dismiss" id="updateReminderDismissBtn" type="button" title="关闭新版提醒" aria-label="关闭新版提醒">&times;</button>
+        </div>
         <div class="top-action-buttons">
           <button class="feedback-btn" id="undoCanvasBtn" title="&#25764;&#22238;&#19978;&#19968;&#27493;" aria-label="&#25764;&#22238;&#19978;&#19968;&#27493;" disabled>&#8630;</button>
           <button class="feedback-btn" id="redoCanvasBtn" title="&#37325;&#20570;&#19979;&#19968;&#27493;" aria-label="&#37325;&#20570;&#19979;&#19968;&#27493;" disabled>&#8631;</button>
@@ -2987,6 +3173,7 @@
       <div class="canvas-scroll" id="canvasScroll">
         <div class="canvas" id="canvas"></div>
       </div>
+      <div class="astra-jump-layer" id="astraJumpLayer" aria-label="Off-screen Astra"></div>
       <div class="canvas-hud">
         <button class="icon-btn" id="zoomOutBtn" title="缩小">−</button>
         <div class="zoom-readout" id="zoomReadout">100%</div>
@@ -3014,7 +3201,7 @@
       <div class="composer">
         <button class="composer-resize-handle" id="composerResizeHandle" type="button" title="调整输入框高度" aria-label="调整输入框高度"></button>
         <div class="context-chip" id="selectedRef"></div>
-        <textarea id="chatInput" placeholder="描述需求，给主控指令，或引用画布 Astra。Ctrl+Enter 发送。"></textarea>
+        <textarea id="chatInput" data-mention-editor placeholder="描述需求，给主控指令，或引用画布 Astra。Ctrl+Enter 发送。"></textarea>
         <div class="composer-row">
           <button class="icon-btn" id="attachBtn" title="上传参考素材">＋</button>
           <button class="primary-btn" id="sendBtn">发送</button>
@@ -3260,9 +3447,9 @@
     connectAstra: {
       from: 'selector',
       to: 'selector',
-      inputRole: 'prompt|first_frame|last_frame|ref|source_image|subject_ref|style_ref|none',
+      inputRole: 'prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|none',
       relation: 'input',
-      batch: 'supports one-to-many, many-to-one, or equal-count paired connections'
+      batch: 'supports one-to-many, many-to-one, equal-count paired connections, or reference fanout from multiple reference sources to multiple targets'
     },
     disconnectLinks: {
       target: 'link selector'
@@ -3474,8 +3661,8 @@
     }),
     connectAstra: operationPlannerHint({
       intent: 'Create input links between existing Astra.',
-      target: 'Use from/to selectors plus inputRole. One source may connect to many targets, many sources may connect to one target, or equal source/target counts are paired by order. Resolve endpoints from target_context, selected/referenced Astra, or resultOfOps.',
-      notes: ['Use inputRole source_image for original-image edits, ref for reference images, first_frame/last_frame for video frame control, prompt for prompt outputs, or none. Legacy subject_ref/style_ref are accepted as references. For one reference Astra feeding several newly created prompt Astra, connect from that reference selector to target.resultOfOps with inputRole ref. Do not use connectAstra for layout-only adjacency.']
+      target: 'Use from/to selectors plus inputRole. One source may connect to many targets, many sources may connect to one target, equal source/target counts are paired by order, and reference roles may fan out all sources to all targets. Resolve endpoints from target_context, selected/referenced Astra, or resultOfOps.',
+      notes: ['Use inputRole source_image for original-image edits, ref for reference images, reference_video for video references, video_edit for editing from a source video, first_frame/last_frame for video frame control, prompt for prompt outputs, or none. Legacy subject_ref/style_ref are accepted as references. For one or more reference Astra feeding several newly created prompt Astra, connect from those reference selectors to target.resultOfOps with inputRole ref or reference_video; each target receives every reference. Do not use connectAstra for layout-only adjacency.']
     }),
     layoutAstra: operationPlannerHint({
       intent: 'Tidy selected/referenced ordinary Astra.',
@@ -3500,12 +3687,12 @@
     generateMedia: operationPlannerHint({
       intent: 'Generate image or video once with the current or a specified model.',
       target: 'For kind:image target image prompts or Sol.genImage; for kind:video target video prompts or Luna.genVideo.',
-      notes: ['Images may run parallel; videos default to serial unless explicitly parallel-safe.', 'For one-off square, horizontal, vertical, 1080, 2k, 4k, duration, or resolution requests, put overrides in payload.mediaSettings instead of changing StarFlow Planner.', 'For direct image creation, generateMedia.target may use resultOfOps from a newly created Comet.imagePrompt.']
+      notes: ['Images and videos run parallel by default; only set concurrency serial when the user explicitly asks to generate one by one.', 'For multiple image or video targets, use one generateMedia op with a multi-target selector instead of splitting into separate generateMedia ops.', 'If the user asks for multiple outputs, versions, or candidates from one prompt/target, use generateMediaVariants instead of generateMedia.', 'For one-off square, horizontal, vertical, 1080, 2k, 4k, duration, or resolution requests, put overrides in payload.mediaSettings instead of changing StarFlow Planner.', 'For direct image creation, generateMedia.target may use resultOfOps from a newly created Comet.imagePrompt.']
     }),
     generateMediaVariants: operationPlannerHint({
       intent: 'Generate multiple candidate versions, usually with multiple models or variants per model.',
       target: 'Same target rules as generateMedia, plus models and variantsPerModel.',
-      notes: ['Use for requests like gi2 and nbp each make two versions.', 'Use payload.mediaSettings for one-off aspect ratio, image resolution, video resolution, or duration overrides.']
+      notes: ['Use for requests like gi2 and nbp each make two versions.', 'Use for requests like generate two videos from this prompt by setting models to the current video model and variantsPerModel to the requested count.', 'Use payload.mediaSettings for one-off aspect ratio, image resolution, video resolution, or duration overrides.']
     }),
     markStale: operationPlannerHint({
       intent: 'Mark downstream generated media as needing regeneration after upstream text/prompt/style changes.',
@@ -3595,6 +3782,7 @@
       ops: ['generateMediaVariants'],
       notes: [
         'Use controller_capabilities.model_aliases for oral model names.',
+        'When the user asks for N videos/images from one selected or mentioned prompt, use models with the current media model and variantsPerModel:N.',
         'For recent batches, target with recentBatch, runActionIds, runStatuses, roles, assetStates, and models instead of inventing ids.'
       ]
     })
@@ -4043,7 +4231,7 @@
         to: 'target Astra selector',
         flowId: 'flow id',
         scope: 'active_flow|all',
-        inputRoles: ['prompt|first_frame|last_frame|ref|source_image|subject_ref|style_ref|none'],
+        inputRoles: ['prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|none'],
         relations: ['input|sequence_next|candidate_of|reverse_prompt'],
         limit: 'maximum links'
       },
@@ -4161,8 +4349,8 @@
         {
           const fromTargets = requireTargets(payload.from, 'source');
           const toTargets = requireTargets(payload.to, 'target');
-          if (fromTargets.length > 1 && toTargets.length > 1 && fromTargets.length !== toTargets.length) {
-            fail(`connectAstra supports one-to-many, many-to-one, or equal source/target counts; resolved ${fromTargets.length} sources and ${toTargets.length} targets.`);
+          if (fromTargets.length > 1 && toTargets.length > 1 && fromTargets.length !== toTargets.length && !isReferenceFanoutInputRole(payload.inputRole)) {
+            fail(`connectAstra supports one-to-many, many-to-one, equal source/target counts, or reference fanout; resolved ${fromTargets.length} sources and ${toTargets.length} targets.`);
           }
         }
         if (!allowedInputRoles().has(String(payload.inputRole || ''))) fail('connectAstra requires a valid payload.inputRole.');
@@ -4850,7 +5038,11 @@
   }
 
   function allowedInputRoles() {
-    return new Set(['prompt', 'first_frame', 'last_frame', 'ref', 'source_image', 'subject_ref', 'style_ref', 'none']);
+    return new Set(['prompt', 'first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'source_image', 'subject_ref', 'style_ref', 'none']);
+  }
+
+  function isReferenceFanoutInputRole(inputRole) {
+    return new Set(['ref', 'style_ref', 'subject_ref']).has(String(inputRole || '').trim());
   }
 
   function sanitizeRuntime(runtime) {
@@ -4968,12 +5160,19 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.02';
+    const AURALIS_VERSION = 'Auralis v1.03';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
+    const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
+    const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
+    const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
+    const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '进行大幅性能优化，避免画布内容较多时，部分设备删除节点等操作导致浏览器页面容易崩溃的问题。',
-      '按 BI 的建议修正公司网关调用 Seedance 的方式，解决此前图生视频时时长参数无效的问题。',
-      '修复生成视频后比例偶尔出错的问题。'
+      '优化节点放置位置和跳转导航，避免多次拖动画布后找不到已有节点。',
+      '新增应用内版本更新提醒，方便用户及时收到更新提示。',
+      '现在可在对话框内@已引用的节点，同时描述多个不同类型内容时表述更精准。',
+      '扩展主控Agent的活动范围，现在可以多个参考类型并行生成。',
+      '新增大范围选择确认和过多并行操作确认，减少误操作风险。',
+      '视频并行批量生成逻辑优化。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -5058,16 +5257,18 @@
       'ws-midjourney': { provider: 'wavespeed', endpointModel: 'midjourney/text-to-image', bodyKind: 'midjourney' }
     };
     const VIDEO_MODEL_REGISTRY = {
-      'rg-seedance-2-fast': { provider: 'company', requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', family: 'seedance2-fast' },
-      'rg-seedance-2': { provider: 'company', requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', family: 'seedance2' },
-      'ws-seedance-2-fast': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', family: 'seedance2-fast' },
-      'ws-seedance-2': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', family: 'seedance2' },
-      'ws-seedance-2.0-fast-image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
-      'ws-seedance-2.0-fast-text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0-fast/image-to-video', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
-      'ws-seedance-2.0-image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', family: 'seedance2', canonical: 'ws-seedance-2' },
-      'ws-seedance-2.0-text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0/image-to-video', family: 'seedance2', canonical: 'ws-seedance-2' },
-      'bytedance/seedance-2.0/image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', family: 'seedance2', canonical: 'ws-seedance-2' },
-      'bytedance/seedance-2.0/text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0/image-to-video', family: 'seedance2', canonical: 'ws-seedance-2' }
+      'rg-seedance-2-fast': { provider: 'company', requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-fast-video-edit', family: 'seedance2-fast' },
+      'rg-seedance-2': { provider: 'company', requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
+      'ws-seedance-2-fast': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast' },
+      'ws-seedance-2': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2' },
+      'ws-seedance-2.0-fast-image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
+      'ws-seedance-2.0-fast-text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0-fast/image-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
+      'ws-seedance-2.0-image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
+      'ws-seedance-2.0-text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0/image-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
+      'bytedance/seedance-2.0/image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
+      'bytedance/seedance-2.0/text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0/image-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
+      'bytedance/seedance-2.0/video-edit': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/video-edit', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
+      'bytedance/seedance-2.0-fast/video-edit': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/video-edit', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' }
     };
     const MODEL_LABELS = {
       'rg-gpt-image-2': 'RG / GPT Image 2',
@@ -5154,6 +5355,8 @@
 
     const INPUT_ROLE_LABELS = {
       prompt: 'Prompt',
+      reference_video: '视频参考',
+      video_edit: '视频编辑',
       ref: '参考',
       source_image: '原图修改',
       first_frame: '首帧',
@@ -5174,6 +5377,11 @@
     const DEFAULT_ASTRA_WIDTH = 320;
     const MEDIA_ASTRA_SCALE = 0.7;
     const MEDIA_ASTRA_WIDTH = Math.round(DEFAULT_ASTRA_WIDTH * MEDIA_ASTRA_SCALE);
+    const ASTRA_PLACEMENT_MARGIN = 28;
+    const ASTRA_CLUSTER_DISTANCE = 620;
+    const ASTRA_CLUSTER_CELL = 900;
+    const ASTRA_JUMP_EDGE_MARGIN = 48;
+    const ASTRA_JUMP_MAX_BUTTONS = 8;
 
     const NEW_ASTRA_MENU_GROUPS = newAstraMenuGroupsFromRegistry(FOUNDATION_ASTRA_FAMILIES, FOUNDATION_ASTRA_ROLE_DEFINITIONS);
     const NEW_ASTRA_MENU_ITEMS = NEW_ASTRA_MENU_GROUPS.flatMap(group => group.items);
@@ -5413,7 +5621,7 @@
           'AURALIS_INTENT_CLASSIFIER',
           '你是 Auralis 主控入口的意图分类器。只输出一个合法 JSON object，不要 Markdown，不要解释，不要代码围栏。',
           '任务：判断用户这句话是否应该交给 operation_contract 里的画布操作规划器。',
-          '只根据输入 JSON 的 user_message、pending_intent、selected_astra、selected_count、canvas_graph、operation_contract、creative_mvi、context_pack、recent_messages、recent_events 判断，不要猜测没有提供的 Astra。',
+          '只根据输入 JSON 的 user_message、message_mentions、pending_intent、selected_astra、selected_count、canvas_graph、operation_contract、creative_mvi、context_pack、recent_messages、recent_events 判断，不要猜测没有提供的 Astra。',
           'intent 只能是 canvas_operation、creative、feedback、question、confirmation、internal_info、chat。',
           'canvas_operation 表示用户要修改画布、创建/删除/连接/断开/布局 Astra，改写 Astra 内容，生成图片/视频/候选，调整星流结构，或在 MVI 齐全时把创意落成 Astra。',
           '用户说“做图/生图/生成图片/制作一张图/画一张图”，并给出画布引用、选中参考图，或清楚的画面描述时，就是 canvas_operation；不要因为没有现成 Prompt/目标 Astra 而归为 creative 或要求补目标。',
@@ -5439,6 +5647,7 @@
         lines: [
           'AURALIS_OPS_PLANNER',
           'Use input JSON target_context as the selector-oriented target catalog. Prefer target_context.selected, selectedNeighborhood, activeFlow, capabilityTargets, labelIndex, recentRuns, and recentBatches before guessing ids.',
+          'Use input JSON message_mentions when the user writes @ references in the controller input. message_mentions only resolves Astra in the current selected/reference range, including selected Astra and directly linked inputs/outputs. message_mentions.direct resolves single Astra; message_mentions.groups resolves scoped batch shortcuts such as @所有<同类型Astra>, for example @所有图片prompt, @所有生成图片, @所有视频prompt, or @所有镜头脚本. Prefer their astraIds for selectors before inferring targets from prose.',
           'Use controller_capabilities.controller_profile for Auralis product semantics, chat-vs-canvas boundaries, assistant modes, and Astra family meanings.',
           'Use operation_contract.operationCatalog as the primary action catalog. Each row combines name, schema, plannerHint, executionPolicy, and targetCompatibility.',
           'Operation-specific intent, target, and hard-rule guidance is in operation_contract.operationPlannerHints. Read those hints before choosing an op, and never invent ops outside operation_contract.operations.',
@@ -5659,6 +5868,7 @@
     const CHAT_INPUT_MIN_HEIGHT = 96;
     const CHAT_INPUT_MAX_HEIGHT = 420;
     const LARGE_SELECTION_CONFIRMATION_COUNT = 13;
+    const LARGE_VIDEO_GENERATION_CONFIRMATION_COUNT = 10;
     const SELECTED_ASTRA_DEFAULT_GAP_X = 80;
     const SELECTED_ASTRA_DEFAULT_GAP_Y = 80;
     const AUTO_BACKUP_FILE_NAME = 'auralis-auto-backup.json';
@@ -5732,6 +5942,13 @@
         feedbackMessages: [],
         pendingFeedback: [],
         lastFlushAt: ''
+      },
+      updateCheck: {
+        latestVersion: '',
+        visible: false,
+        checkedAt: '',
+        error: '',
+        timer: 0
       },
       saveTimer: null,
       backup: {
@@ -5849,6 +6066,15 @@
     }
     let canvasGeometryFrame = 0;
     let lastCanvasPointerPoint = null;
+    let astraJumpFrame = 0;
+    let astraJumpFrameProjectId = '';
+    let astraJumpNeedsRecompute = false;
+    let astraNavigationBuildCount = 0;
+    const astraClusterCache = {
+      projectId: '',
+      signature: '',
+      clusters: []
+    };
     const canvasHistory = {
       undoStack: [],
       redoStack: [],
@@ -6235,6 +6461,7 @@
         actionSequences: [],
         events: [],
         pendingControllerIntent: null,
+        largeSelectionConfirmation: null,
         unreadCount: 0,
         lastUnreadAt: '',
         agent: {
@@ -6259,6 +6486,7 @@
       project.actionSequences = Array.isArray(project.actionSequences) ? project.actionSequences : [];
       project.events = Array.isArray(project.events) ? project.events : [];
       project.pendingControllerIntent = project.pendingControllerIntent || null;
+      project.largeSelectionConfirmation = project.largeSelectionConfirmation || null;
       project.unreadCount = Math.max(0, Number(project.unreadCount) || 0);
       project.lastUnreadAt = project.lastUnreadAt || '';
       project.agent = project.agent || { kind: 'idle', stage: 'input', text: '等待指令', detail: '' };
@@ -6745,6 +6973,107 @@
         url.hash = '';
         window.history.replaceState(null, document.title, url.toString());
       } catch (_) {}
+    }
+
+    function extractAuralisVersionFromHtml(html) {
+      const match = String(html || '').match(/const\s+AURALIS_VERSION\s*=\s*(['"])([\s\S]*?)\1\s*;/);
+      return match ? match[2].trim() : '';
+    }
+
+    function versionNumberParts(version) {
+      const match = String(version || '').match(/v?\s*(\d+(?:[._-]\d+)*)/i);
+      if (!match) return [];
+      return match[1].split(/[._-]/).map(part => Number.parseInt(part, 10)).filter(Number.isFinite);
+    }
+
+    function compareAuralisVersions(left, right) {
+      const a = versionNumberParts(left);
+      const b = versionNumberParts(right);
+      const length = Math.max(a.length, b.length);
+      if (!length) return String(left || '').localeCompare(String(right || ''));
+      for (let index = 0; index < length; index += 1) {
+        const delta = (a[index] || 0) - (b[index] || 0);
+        if (delta) return delta > 0 ? 1 : -1;
+      }
+      return 0;
+    }
+
+    function readIgnoredUpdateVersion() {
+      try {
+        return localStorage.getItem(AURALIS_IGNORED_UPDATE_STORAGE_KEY) || '';
+      } catch (_) {
+        return '';
+      }
+    }
+
+    function writeIgnoredUpdateVersion(version) {
+      try {
+        if (version) localStorage.setItem(AURALIS_IGNORED_UPDATE_STORAGE_KEY, version);
+      } catch (_) {}
+    }
+
+    function shouldShowUpdateReminder(latestVersion, currentVersion = AURALIS_VERSION) {
+      const normalizedLatest = String(latestVersion || '').trim();
+      if (!normalizedLatest) return false;
+      if (compareAuralisVersions(normalizedLatest, currentVersion) <= 0) return false;
+      return readIgnoredUpdateVersion() !== normalizedLatest;
+    }
+
+    function renderUpdateReminder() {
+      const root = $('updateReminder');
+      if (!root) return;
+      const text = $('updateReminderText');
+      const latestVersion = state.updateCheck.latestVersion || '';
+      root.hidden = !state.updateCheck.visible;
+      root.dataset.version = latestVersion;
+      if (text && latestVersion) {
+        text.textContent = 'Auralis有新版本，请前往启动器更新';
+        root.title = text.textContent;
+        root.setAttribute('aria-label', text.textContent);
+      }
+    }
+
+    function dismissUpdateReminder() {
+      if (state.updateCheck.latestVersion) writeIgnoredUpdateVersion(state.updateCheck.latestVersion);
+      state.updateCheck.visible = false;
+      renderUpdateReminder();
+    }
+
+    async function fetchLatestAuralisHtml(url = AURALIS_UPDATE_CHECK_URL) {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`Update check failed: ${response.status}`);
+      return response.text();
+    }
+
+    async function checkForAuralisUpdate(options = {}) {
+      try {
+        const html = Object.prototype.hasOwnProperty.call(options, 'html')
+          ? String(options.html || '')
+          : await fetchLatestAuralisHtml(options.url || AURALIS_UPDATE_CHECK_URL);
+        const latestVersion = extractAuralisVersionFromHtml(html);
+        state.updateCheck.latestVersion = latestVersion;
+        state.updateCheck.checkedAt = nowText();
+        state.updateCheck.error = '';
+        state.updateCheck.visible = shouldShowUpdateReminder(latestVersion);
+        renderUpdateReminder();
+        return { ...state.updateCheck };
+      } catch (error) {
+        state.updateCheck.error = error?.message || String(error);
+        return { ...state.updateCheck };
+      }
+    }
+
+    function scheduleAuralisUpdateChecks() {
+      if (state.updateCheck.timer) {
+        clearTimeout(state.updateCheck.timer);
+        clearInterval(state.updateCheck.timer);
+        state.updateCheck.timer = 0;
+      }
+      const runCheck = () => { checkForAuralisUpdate(); };
+      state.updateCheck.timer = setTimeout(() => {
+        runCheck();
+        state.updateCheck.timer = setInterval(runCheck, AURALIS_UPDATE_CHECK_INTERVAL_MS);
+      }, AURALIS_UPDATE_INITIAL_DELAY_MS);
     }
 
     function normalizeLibraryItem(item) {
@@ -7726,6 +8055,7 @@
       renderMediaViewer();
       renderFrameCutPanel();
       renderCanvasHistoryButtons();
+      renderUpdateReminder();
       applyZoom();
       scheduleCanvasGeometrySync(currentProject());
       const p = currentProject();
@@ -7984,6 +8314,7 @@
       $('canvas').classList.toggle('relation-active', project.nodes.length > 0);
       attachNodeEvents();
       attachCanvasEvents();
+      scheduleAstraJumpLayerUpdate(project, { recompute: true });
     }
 
     function patchRenderedProjectSurface(project, options = {}) {
@@ -8038,6 +8369,7 @@
       if (changedNodeIds.includes(state.frameCutNodeId) && !isActiveFrameCutPanelStable(project)) renderFrameCutPanel();
       applyZoom();
       scheduleCanvasGeometrySync(project);
+      scheduleAstraJumpLayerUpdate(project, { recompute: true });
       $('projectNameInput').value = project.name || '';
       $('projectCount').textContent = state.activeLeftPanel === 'astra_library' ? state.astraLibrary.length : state.projects.length;
       $('railCountLabel').textContent = state.activeLeftPanel === 'astra_library' ? 'Astra' : '项目';
@@ -8147,6 +8479,144 @@
       canvas.style.setProperty('--canvas-height', `${height}px`);
     }
 
+    function astraClusterSignature(project = currentProject()) {
+      const nodes = arrayFrom(project?.nodes)
+        .map(node => {
+          const rect = nodeRect(node);
+          return [
+            node.id,
+            Math.round(rect.left),
+            Math.round(rect.top),
+            Math.round(rect.right),
+            Math.round(rect.bottom)
+          ].join(':');
+        })
+        .join('|');
+      const links = arrayFrom(project?.links)
+        .map(link => [
+          link.fromNodeId || link.from_astra_id || '',
+          link.toNodeId || link.to_astra_id || '',
+          link.inputRole || link.input_role || '',
+          link.relation || ''
+        ].join(':'))
+        .sort()
+        .join('|');
+      return `${nodes}::${links}`;
+    }
+
+    function getAstraNavigationClusters(project = currentProject(), options = {}) {
+      if (!project?.nodes?.length) return [];
+      if (
+        !options.recompute
+        && astraClusterCache.projectId === project.id
+        && astraClusterCache.signature
+      ) {
+        return astraClusterCache.clusters;
+      }
+      const signature = astraClusterSignature(project);
+      if (
+        astraClusterCache.projectId === project.id
+        && astraClusterCache.signature === signature
+      ) {
+        return astraClusterCache.clusters;
+      }
+      const clusters = buildAstraNavigationClusters(project);
+      astraClusterCache.projectId = project.id;
+      astraClusterCache.signature = signature;
+      astraClusterCache.clusters = clusters;
+      astraNavigationBuildCount += 1;
+      return clusters;
+    }
+
+    function buildAstraNavigationClusters(project = currentProject()) {
+      const nodes = arrayFrom(project?.nodes).filter(node => node?.id);
+      const rects = new Map(nodes.map(node => [node.id, nodeRect(node)]));
+      const parent = new Map(nodes.map(node => [node.id, node.id]));
+      const find = id => {
+        let current = parent.get(id) || id;
+        while (parent.get(current) && parent.get(current) !== current) current = parent.get(current);
+        let next = id;
+        while (parent.get(next) && parent.get(next) !== current) {
+          const previous = parent.get(next);
+          parent.set(next, current);
+          next = previous;
+        }
+        return current;
+      };
+      const union = (a, b) => {
+        if (!parent.has(a) || !parent.has(b)) return;
+        const rootA = find(a);
+        const rootB = find(b);
+        if (rootA !== rootB) parent.set(rootB, rootA);
+      };
+
+      arrayFrom(project?.links).forEach(link => {
+        union(link.fromNodeId || link.from_astra_id, link.toNodeId || link.to_astra_id);
+      });
+
+      const cells = new Map();
+      nodes.forEach(node => {
+        const rect = rects.get(node.id);
+        const center = rectCenter(rect);
+        const cellX = Math.floor(center.x / ASTRA_CLUSTER_CELL);
+        const cellY = Math.floor(center.y / ASTRA_CLUSTER_CELL);
+        for (let dx = -1; dx <= 1; dx += 1) {
+          for (let dy = -1; dy <= 1; dy += 1) {
+            const key = `${cellX + dx}:${cellY + dy}`;
+            arrayFrom(cells.get(key)).forEach(otherId => {
+              if (rectDistance(rect, rects.get(otherId)) <= ASTRA_CLUSTER_DISTANCE) union(node.id, otherId);
+            });
+          }
+        }
+        const key = `${cellX}:${cellY}`;
+        cells.set(key, [...arrayFrom(cells.get(key)), node.id]);
+      });
+
+      const grouped = new Map();
+      nodes.forEach(node => {
+        const root = find(node.id);
+        grouped.set(root, [...arrayFrom(grouped.get(root)), node]);
+      });
+
+      return [...grouped.values()]
+        .map((items, index) => {
+          const itemRects = items.map(node => rects.get(node.id)).filter(Boolean);
+          const bounds = boundsForRects(itemRects);
+          return {
+            id: `cluster_${index + 1}`,
+            nodeIds: items.map(node => node.id),
+            rects: itemRects,
+            bounds,
+            center: rectCenter(bounds),
+            count: items.length
+          };
+        })
+        .filter(cluster => cluster.rects.length);
+    }
+
+    function rectCenter(rect) {
+      return {
+        x: (Number(rect?.left) + Number(rect?.right)) / 2,
+        y: (Number(rect?.top) + Number(rect?.bottom)) / 2
+      };
+    }
+
+    function boundsForRects(rects) {
+      return rects.reduce((bounds, rect) => ({
+        left: Math.min(bounds.left, rect.left),
+        top: Math.min(bounds.top, rect.top),
+        right: Math.max(bounds.right, rect.right),
+        bottom: Math.max(bounds.bottom, rect.bottom)
+      }), { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity });
+    }
+
+    function rectDistance(a, b) {
+      if (!a || !b) return Number.POSITIVE_INFINITY;
+      const dx = a.right < b.left ? b.left - a.right : b.right < a.left ? a.left - b.right : 0;
+      const dy = a.bottom < b.top ? b.top - a.bottom : b.bottom < a.top ? a.top - b.bottom : 0;
+      return Math.hypot(dx, dy);
+    }
+
     function renderEdges(project) {
       const edges = canvasEdges(project);
       if (!edges.length) return '';
@@ -8210,7 +8680,7 @@
       if (link.relation === 'reverse_prompt' || link.visualStyle === 'dashed' || link.inputRole === 'derived_prompt') return 'reference';
       const target = to || nodeById(link.toNodeId || link.to_astra_id);
       if (target && (target.role === 'genImage' || target.role === 'genVideo')) return 'media';
-      if (['first_frame', 'last_frame', 'ref', 'source_image', 'subject_ref', 'style_ref'].includes(link.inputRole || link.input_role)) return 'media';
+      if (['first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'source_image', 'subject_ref', 'style_ref'].includes(link.inputRole || link.input_role)) return 'media';
       return link.kind || 'prompt';
     }
 
@@ -8271,6 +8741,161 @@
       if (existing && html) existing.outerHTML = html;
       else if (existing) existing.remove();
       else if (html) canvas.insertAdjacentHTML('afterbegin', html);
+    }
+
+    function scheduleAstraJumpLayerUpdate(project = currentProject(), options = {}) {
+      if (!isProjectActive(project)) return;
+      if (options.recompute) astraJumpNeedsRecompute = true;
+      const projectId = project?.id || '';
+      if (astraJumpFrame) {
+        if (astraJumpFrameProjectId === projectId) return;
+        cancelAnimationFrame(astraJumpFrame);
+        astraJumpFrame = 0;
+      }
+      astraJumpFrameProjectId = projectId;
+      astraJumpFrame = requestAnimationFrame(() => {
+        astraJumpFrame = 0;
+        astraJumpFrameProjectId = '';
+        if (currentProject()?.id !== projectId) return;
+        const recompute = astraJumpNeedsRecompute;
+        astraJumpNeedsRecompute = false;
+        updateAstraJumpLayer({ recompute });
+      });
+    }
+
+    function updateAstraJumpLayer(options = {}) {
+      const layer = $('astraJumpLayer');
+      const project = currentProject();
+      if (!layer || !project?.nodes?.length) {
+        if (layer) layer.innerHTML = '';
+        return [];
+      }
+      const visible = visibleCanvasRect();
+      if (!visible) {
+        layer.innerHTML = '';
+        return [];
+      }
+      const visibleCenter = rectCenter(visible);
+      const buttons = getAstraNavigationClusters(project, options)
+        .filter(cluster => cluster.rects.every(rect => !rectsOverlap(visible, rect)))
+        .map(cluster => astraJumpButtonModel(cluster, visible, visibleCenter))
+        .filter(Boolean)
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, ASTRA_JUMP_MAX_BUTTONS);
+      layer.innerHTML = buttons.map(renderAstraJumpButton).join('');
+      attachAstraJumpEvents();
+      return buttons;
+    }
+
+    function visibleCanvasRect() {
+      const scroll = $('canvasScroll');
+      if (!scroll) return null;
+      const box = scroll.getBoundingClientRect();
+      const zoom = Math.max(0.01, Number(state.zoom) || 1);
+      return {
+        left: scroll.scrollLeft / zoom,
+        top: scroll.scrollTop / zoom,
+        right: (scroll.scrollLeft + box.width) / zoom,
+        bottom: (scroll.scrollTop + box.height) / zoom,
+        screenWidth: box.width,
+        screenHeight: box.height,
+        zoom,
+        scrollLeft: scroll.scrollLeft,
+        scrollTop: scroll.scrollTop
+      };
+    }
+
+    function astraJumpButtonModel(cluster, visible, visibleCenter) {
+      const screenX = cluster.center.x * visible.zoom - visible.scrollLeft;
+      const screenY = cluster.center.y * visible.zoom - visible.scrollTop;
+      const halfW = visible.screenWidth / 2;
+      const halfH = visible.screenHeight / 2;
+      const dx = screenX - halfW;
+      const dy = screenY - halfH;
+      if (!Number.isFinite(dx) || !Number.isFinite(dy) || (!dx && !dy)) return null;
+      const maxX = Math.max(1, halfW - ASTRA_JUMP_EDGE_MARGIN);
+      const maxY = Math.max(1, halfH - ASTRA_JUMP_EDGE_MARGIN);
+      const scaleX = dx ? maxX / Math.abs(dx) : Number.POSITIVE_INFINITY;
+      const scaleY = dy ? maxY / Math.abs(dy) : Number.POSITIVE_INFINITY;
+      const scale = Math.min(scaleX, scaleY);
+      const x = Math.min(visible.screenWidth - ASTRA_JUMP_EDGE_MARGIN, Math.max(ASTRA_JUMP_EDGE_MARGIN, halfW + dx * scale));
+      const y = Math.min(visible.screenHeight - ASTRA_JUMP_EDGE_MARGIN, Math.max(ASTRA_JUMP_EDGE_MARGIN, halfH + dy * scale));
+      return {
+        id: cluster.id,
+        count: cluster.count,
+        x,
+        y,
+        arrow: astraJumpArrow(dx, dy),
+        distance: Math.hypot(cluster.center.x - visibleCenter.x, cluster.center.y - visibleCenter.y)
+      };
+    }
+
+    function astraJumpArrow(dx, dy) {
+      const horizontal = Math.abs(dx) > Math.abs(dy) * 0.55;
+      const vertical = Math.abs(dy) > Math.abs(dx) * 0.55;
+      if (horizontal && vertical) {
+        if (dx < 0 && dy < 0) return '&nwarr;';
+        if (dx > 0 && dy < 0) return '&nearr;';
+        if (dx < 0 && dy > 0) return '&swarr;';
+        return '&searr;';
+      }
+      if (horizontal) return dx < 0 ? '&larr;' : '&rarr;';
+      return dy < 0 ? '&uarr;' : '&darr;';
+    }
+
+    function renderAstraJumpButton(button) {
+      return `<button class="astra-jump-btn" type="button" data-astra-jump="${escapeHtml(button.id)}" style="left:${Math.round(button.x)}px;top:${Math.round(button.y)}px" aria-label="Jump to ${button.count} off-screen Astra"><span aria-hidden="true">${button.arrow}</span><span class="astra-jump-count">${button.count}</span></button>`;
+    }
+
+    function attachAstraJumpEvents() {
+      const layer = $('astraJumpLayer');
+      if (!layer) return;
+      const jump = event => {
+        const button = event.currentTarget?.dataset?.astraJump
+          ? event.currentTarget
+          : event.target?.closest?.('[data-astra-jump]');
+        if (!button) return;
+        event.preventDefault();
+        event.stopPropagation();
+        jumpToAstraCluster(button.dataset.astraJump);
+      };
+      layer.querySelectorAll('[data-astra-jump]').forEach(button => {
+        button.onclick = jump;
+      });
+      layer.onclick = event => {
+        const button = event.target?.closest?.('[data-astra-jump]');
+        if (!button) return;
+        jump(event);
+      };
+    }
+
+    function jumpToAstraCluster(clusterId) {
+      const scroll = $('canvasScroll');
+      const visible = visibleCanvasRect();
+      if (!scroll || !visible) return;
+      const cluster = getAstraNavigationClusters(currentProject()).find(item => item.id === clusterId);
+      if (!cluster) return;
+      const targetLeft = Math.max(0, cluster.center.x * state.zoom - visible.screenWidth / 2);
+      const targetTop = Math.max(0, cluster.center.y * state.zoom - visible.screenHeight / 2);
+      const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+      scroll.scrollTo({ left: targetLeft, top: targetTop, behavior: reduced ? 'auto' : 'smooth' });
+      scheduleAstraJumpLayerUpdate(currentProject(), { recompute: false });
+    }
+
+    function astraNavigationDebug() {
+      const clusters = getAstraNavigationClusters(currentProject()).map(cluster => ({
+        id: cluster.id,
+        count: cluster.count,
+        nodeIds: [...cluster.nodeIds],
+        center: { ...cluster.center }
+      }));
+      const buttons = [...document.querySelectorAll('[data-astra-jump]')].map(button => ({
+        id: button.dataset.astraJump,
+        count: Number(button.querySelector('.astra-jump-count')?.textContent || 0),
+        left: parseFloat(button.style.left || '0'),
+        top: parseFloat(button.style.top || '0')
+      }));
+      return { buildCount: astraNavigationBuildCount, clusters, buttons };
     }
 
     function scheduleCanvasGeometrySync(project = currentProject()) {
@@ -8820,7 +9445,7 @@
     function canCreateLinkedAstra(from, item) {
       const candidate = { type: item.type, family: item.family, role: item.role };
       if (from.role === 'imagePrompt') return candidate.role === 'genImage';
-      if (from.role === 'videoPrompt') return candidate.role === 'genVideo';
+      if (isVideoPromptInputTarget(from)) return candidate.role === 'genVideo';
       if (isImageAstra(from) && assetDisplayUrl(from)) return ['imagePrompt', 'videoPrompt'].includes(candidate.role);
       if (isVideoAstra(from) && assetDisplayUrl(from)) return candidate.role === 'videoPrompt';
       if (from.family === 'Polaris' || from.family === 'Comet' || from.type === 'prompt') return ['imagePrompt', 'videoPrompt', 'genImage', 'genVideo'].includes(candidate.role) && allowedInputRoles(from, candidate).length > 0;
@@ -8974,6 +9599,7 @@
         role: config.role,
         title: config.title,
         status: 'placeholder',
+        placement: 'avoid',
         x: prompt.x + nodeWidth(prompt) + 84,
         y: prompt.y,
         sequence: prompt.sequence || { group_id: 'seq_main_video', kind: config.sequenceKind, index: nextSequenceIndex(config.role) },
@@ -9405,7 +10031,7 @@
         root.innerHTML = '';
         return;
       }
-      const items = filteredPromptReferenceCandidates(menu.nodeId, menu.query);
+      const items = mentionMenuItems(menu);
       if (!items.length) {
         root.innerHTML = '';
         return;
@@ -9414,12 +10040,13 @@
       state.mentionMenu.activeIndex = activeIndex;
       const x = Math.max(8, Math.min(Number(menu.x) || 8, window.innerWidth - 332));
       const y = Math.max(8, Math.min(Number(menu.y) || 8, window.innerHeight - 8));
+      const title = menu.source === 'chat' ? '选择画布引用目标' : '选择已连接素材';
       root.innerHTML = `<div class="mention-menu" style="left:${x}px;top:${y}px" data-mention-menu data-placement="${escapeHtml(menu.placement || 'above')}">
-        <div class="mention-menu-title">选择已连接素材</div>
-        ${items.map((item, index) => `<button class="mention-option ${index === activeIndex ? 'active' : ''}" type="button" data-mention-alias="${escapeHtml(item.alias)}" data-mention-node-id="${escapeHtml(item.node.id)}">
+        <div class="mention-menu-title">${escapeHtml(title)}</div>
+        ${items.map((item, index) => `<button class="mention-option ${index === activeIndex ? 'active' : ''}" type="button" data-mention-alias="${escapeHtml(item.alias)}" data-mention-node-id="${escapeHtml(item.node?.id || '')}">
           ${renderMentionThumb(item)}
           <span class="mention-main">
-            <span class="mention-name">${escapeHtml(item.node.title || item.alias)}</span>
+            <span class="mention-name">${escapeHtml(item.title || item.node?.title || item.alias)}</span>
             <span class="mention-alias">@${escapeHtml(item.alias)}</span>
           </span>
           <span class="mention-kind">${escapeHtml(item.kindLabel)}</span>
@@ -9430,15 +10057,21 @@
         if (!option) return;
         event.preventDefault();
         event.stopPropagation();
-        insertPromptReferenceMention(option.dataset.mentionAlias, option.dataset.mentionNodeId);
+        insertMentionFromMenu(option.dataset.mentionAlias, option.dataset.mentionNodeId);
       };
     }
 
     function renderMentionThumb(item) {
-      const url = assetDisplayUrl(item.node);
+      const url = item.node ? assetDisplayUrl(item.node) : '';
       if (url && item.mediaKind === 'image') return `<span class="mention-thumb"><img src="${escapeHtml(url)}" alt=""></span>`;
       if (url && item.mediaKind === 'video') return `<span class="mention-thumb"><video src="${escapeHtml(url)}" muted playsinline preload="metadata"></video></span>`;
+      if (item.group) return '<span class="mention-thumb icon" aria-hidden="true">@</span>';
       return `<span class="mention-thumb icon" aria-hidden="true">${escapeHtml(item.mediaKind === 'music' ? '♪' : item.mediaKind === 'video' ? 'V' : 'I')}</span>`;
+    }
+
+    function mentionMenuItems(menu = state.mentionMenu) {
+      if (menu?.source === 'chat') return filteredControllerMentionCandidates(menu.query);
+      return filteredPromptReferenceCandidates(menu?.nodeId, menu?.query);
     }
 
     function updatePromptMentionMenuForEditor(textarea, nodeSource) {
@@ -9462,6 +10095,29 @@
         y: placement === 'below' ? rect.bottom + 8 : rect.top,
         placement,
         activeIndex: previous?.nodeId === node.id && previous?.query === trigger.query ? previous.activeIndex || 0 : 0
+      };
+      renderMentionMenu();
+    }
+
+    function updateControllerMentionMenuForChat(textarea) {
+      if (!textarea) return closePromptMentionMenu();
+      const trigger = promptMentionTriggerAtCursor(textarea);
+      if (!trigger) return closePromptMentionMenu();
+      const items = filteredControllerMentionCandidates(trigger.query);
+      if (!items.length) return closePromptMentionMenu();
+      const rect = textareaCaretClientRect(textarea);
+      const placement = rect.top < 190 ? 'below' : 'above';
+      const previous = state.mentionMenu;
+      state.mentionMenu = {
+        nodeId: '__chat_input__',
+        source: 'chat',
+        query: trigger.query,
+        start: trigger.start,
+        end: trigger.end,
+        x: rect.left,
+        y: placement === 'below' ? rect.bottom + 8 : rect.top,
+        placement,
+        activeIndex: previous?.source === 'chat' && previous?.query === trigger.query ? previous.activeIndex || 0 : 0
       };
       renderMentionMenu();
     }
@@ -9531,6 +10187,37 @@
       return false;
     }
 
+    function handleControllerMentionKeydown(event, textarea) {
+      const menu = state.mentionMenu;
+      if (menu?.source !== 'chat') return false;
+      const items = filteredControllerMentionCandidates(menu.query);
+      if (!items.length) return false;
+      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const offset = event.key === 'ArrowDown' ? 1 : -1;
+        state.mentionMenu.activeIndex = (Math.max(0, Number(menu.activeIndex) || 0) + offset + items.length) % items.length;
+        renderMentionMenu();
+        return true;
+      }
+      if (event.key === 'Enter' || event.key === 'Tab') {
+        event.preventDefault();
+        const item = items[Math.max(0, Math.min(Number(menu.activeIndex) || 0, items.length - 1))];
+        insertControllerReferenceMention(item.alias, textarea);
+        return true;
+      }
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closePromptMentionMenu();
+        return true;
+      }
+      return false;
+    }
+
+    function insertMentionFromMenu(alias, targetNodeId) {
+      if (state.mentionMenu?.source === 'chat') return insertControllerReferenceMention(alias);
+      return insertPromptReferenceMention(alias, targetNodeId);
+    }
+
     function insertPromptReferenceMention(alias, targetNodeId, textarea = null) {
       const menu = state.mentionMenu;
       if (!menu?.nodeId || !alias) return;
@@ -9548,8 +10235,26 @@
       closePromptMentionMenu();
     }
 
+    function insertControllerReferenceMention(alias, textarea = null) {
+      const menu = state.mentionMenu;
+      if (menu?.source !== 'chat' || !alias) return;
+      const editor = textarea || activeMentionTextarea(menu);
+      if (!editor) return closePromptMentionMenu();
+      const value = String(editor.value || '');
+      const after = value.slice(menu.end);
+      const needsSpace = after && !/^[\s.,，。；;:：)\]}]/.test(after);
+      const inserted = `@${alias}${needsSpace || !after ? ' ' : ''}`;
+      editor.value = value.slice(0, menu.start) + inserted + after;
+      const caret = menu.start + inserted.length;
+      editor.focus();
+      editor.setSelectionRange(caret, caret);
+      closePromptMentionMenu();
+      renderSendAction();
+    }
+
     function activeMentionTextarea(menu = state.mentionMenu) {
       if (!menu) return null;
+      if (menu.source === 'chat') return $('chatInput');
       if (menu.source === 'panel') return $('editorTextarea');
       return document.querySelector(`[data-node-id="${cssEscape(menu.nodeId)}"] [data-inline-editor]`);
     }
@@ -10264,6 +10969,7 @@
           }, 0);
         }
         scheduleSave({ quiet: true, layoutOnly: true });
+        scheduleAstraJumpLayerUpdate(project, { recompute: true });
       };
       window.addEventListener('pointermove', move);
       window.addEventListener('pointerup', up);
@@ -10334,6 +11040,9 @@
       };
       scroll.ondragleave = event => {
         if (!scroll.contains(event.relatedTarget)) scroll.classList.remove('file-drag-over');
+      };
+      scroll.onscroll = () => {
+        scheduleAstraJumpLayerUpdate(currentProject(), { recompute: false });
       };
       scroll.ondrop = event => {
         if (!isFileDrag(event)) return;
@@ -10471,29 +11180,63 @@
       };
     }
 
-    function findFreePosition(width, height, preferredX = 80, preferredY = 84) {
-      const project = currentProject();
-      const margin = 28;
+    function findFreePosition(width, height, preferredX = 80, preferredY = 84, options = {}) {
+      const project = options.project || currentProject();
+      const margin = ASTRA_PLACEMENT_MARGIN;
       const stepX = Math.max(356, width + margin);
       const stepY = Math.max(230, height + margin);
-      const occupied = (project?.nodes || []).map(node => expandRect(nodeRect(node), margin));
+      const preferred = {
+        x: Number.isFinite(Number(preferredX)) ? Number(preferredX) : 80,
+        y: Number.isFinite(Number(preferredY)) ? Number(preferredY) : 84
+      };
+      const excluded = new Set(arrayFrom(options.excludeIds).map(String));
+      const occupied = (project?.nodes || [])
+        .filter(node => !excluded.has(String(node.id || '')))
+        .map(node => expandRect(nodeRect(node), margin));
+      const candidates = [];
+      const seen = new Set();
+      const pushCandidate = (x, y) => {
+        const left = Math.max(40, Math.round(x));
+        const top = Math.max(40, Math.round(y));
+        const key = `${left}:${top}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+        candidates.push({ left, top, right: left + width, bottom: top + height });
+      };
 
-      for (let row = 0; row < 28; row++) {
-        for (let col = 0; col < 14; col++) {
-          const candidate = {
-            left: Math.max(40, preferredX + col * stepX),
-            top: Math.max(40, preferredY + row * stepY)
-          };
-          candidate.right = candidate.left + width;
-          candidate.bottom = candidate.top + height;
-          if (!occupied.some(rect => rectsOverlap(candidate, rect))) {
-            return { x: candidate.left, y: candidate.top };
-          }
+      pushCandidate(preferred.x, preferred.y);
+      for (let ring = 1; ring <= 16; ring += 1) {
+        for (let dx = -ring; dx <= ring; dx += 1) {
+          pushCandidate(preferred.x + dx * stepX, preferred.y - ring * stepY);
+          pushCandidate(preferred.x + dx * stepX, preferred.y + ring * stepY);
+        }
+        for (let dy = -ring + 1; dy <= ring - 1; dy += 1) {
+          pushCandidate(preferred.x - ring * stepX, preferred.y + dy * stepY);
+          pushCandidate(preferred.x + ring * stepX, preferred.y + dy * stepY);
         }
       }
 
+      const preferredCenter = { x: preferred.x + width / 2, y: preferred.y + height / 2 };
+      candidates.sort((a, b) => {
+        const ac = rectCenter(a);
+        const bc = rectCenter(b);
+        return Math.hypot(ac.x - preferredCenter.x, ac.y - preferredCenter.y) - Math.hypot(bc.x - preferredCenter.x, bc.y - preferredCenter.y);
+      });
+      const available = candidates.find(candidate => !occupied.some(rect => rectsOverlap(candidate, rect)));
+      if (available) return { x: available.left, y: available.top };
+
       const index = project?.nodes?.length || 0;
       return { x: 80 + (index % 12) * stepX, y: 84 + Math.floor(index / 12) * stepY };
+    }
+
+    function defaultNodeInsertionPoint(project = currentProject()) {
+      const selected = (project?.nodes || []).filter(node => state.selectedNodeIds.includes(node.id));
+      if (selected.length) {
+        const bounds = boundsForRects(selected.map(nodeRect));
+        return { x: bounds.right + 84, y: bounds.top };
+      }
+      if (isProjectActive(project)) return visibleCanvasCenterPoint();
+      return { x: 80, y: 84 };
     }
 
     function canvasPointFromEvent(event) {
@@ -10511,8 +11254,13 @@
 
     function visibleCanvasCenterPoint() {
       const scroll = $('canvasScroll');
+      if (!scroll) return { x: 80, y: 84 };
       const rect = scroll.getBoundingClientRect();
-      return canvasPointFromClient(rect.left + rect.width / 2, rect.top + rect.height / 2);
+      const zoom = Number.isFinite(Number(state.zoom)) && Number(state.zoom) > 0 ? Number(state.zoom) : 1;
+      return {
+        x: (scroll.scrollLeft + rect.width / 2) / zoom,
+        y: (scroll.scrollTop + rect.height / 2) / zoom
+      };
     }
 
     function canvasPastePoint(event) {
@@ -10536,11 +11284,19 @@
 
     function addNode(partial, project = currentProject()) {
       if (!project) return null;
+      const hasExplicitX = Object.prototype.hasOwnProperty.call(partial, 'x') && Number.isFinite(Number(partial.x));
+      const hasExplicitY = Object.prototype.hasOwnProperty.call(partial, 'y') && Number.isFinite(Number(partial.y));
       const nodeId = partial.id || uid('node');
       const prepared = prepareNodeAssetFields(partial, nodeId);
       const width = Number(prepared.w) || defaultAstraWidth(prepared);
       const height = estimatedNodeHeight({ ...prepared, w: width });
-      const position = findFreePosition(width, height, prepared.x ?? 80, prepared.y ?? 84);
+      const fallbackPoint = defaultNodeInsertionPoint(project);
+      const preferredX = hasExplicitX ? Number(partial.x) : fallbackPoint.x;
+      const preferredY = hasExplicitY ? Number(partial.y) : fallbackPoint.y;
+      const shouldAvoidCollision = partial.placement === 'avoid';
+      const position = hasExplicitX && hasExplicitY && !shouldAvoidCollision
+        ? { x: Math.max(40, Math.round(preferredX)), y: Math.max(40, Math.round(preferredY)) }
+        : findFreePosition(width, height, preferredX, preferredY, { project });
       const node = {
         id: nodeId,
         title: prepared.title || 'Untitled',
@@ -11193,9 +11949,9 @@
       const fromPrompt = from.family === 'Comet' || from.type === 'prompt' || ['creativeBrief', 'styleLock', 'videoLock', 'customPolaris'].includes(from.role);
       const fromImage = isImageAstra(from);
       const fromVideo = isVideoAstra(from);
-      if (to.role === 'videoPrompt') {
-        if (fromImage) return ['first_frame', 'last_frame', 'ref', 'style_ref', 'subject_ref'];
-        if (fromVideo) return ['ref'];
+      if (isVideoPromptInputTarget(to)) {
+        if (fromImage) return ['first_frame', 'last_frame', 'ref'];
+        if (fromVideo) return ['reference_video', 'video_edit'];
         if (fromPrompt) return ['context'];
         return [];
       }
@@ -11218,8 +11974,12 @@
       return ['ref', 'context'];
     }
 
+    function isVideoPromptInputTarget(node) {
+      return ['videoPrompt', 'referenceVideoPrompt'].includes(node?.role);
+    }
+
     function suggestInputRole(from, to) {
-      if (to.role === 'videoPrompt' && isImageAstra(from)) {
+      if (isVideoPromptInputTarget(to) && isImageAstra(from)) {
         const used = new Set((currentProject().links || [])
           .filter(link => (link.toNodeId || link.to_astra_id) === to.id)
           .map(link => link.inputRole || link.input_role));
@@ -11227,6 +11987,7 @@
         if (!used.has('last_frame')) return 'last_frame';
         return 'ref';
       }
+      if (isVideoPromptInputTarget(to) && isVideoAstra(from)) return 'reference_video';
       if (to.role === 'imagePrompt' && isImageAstra(from)) return 'ref';
       if ((to.role === 'genImage' || to.role === 'genVideo') && (from.family === 'Comet' || from.type === 'prompt')) return 'prompt';
       if (from.role === 'styleLock') return 'style_ref';
@@ -11238,6 +11999,15 @@
     function normalizeInputRole(value, fallback = 'ref') {
       const raw = String(value || '').trim();
       const aliases = {
+        视频参考: 'reference_video',
+        参考视频: 'reference_video',
+        reference_video: 'reference_video',
+        video_reference: 'reference_video',
+        video_ref: 'reference_video',
+        视频编辑: 'video_edit',
+        编辑视频: 'video_edit',
+        video_edit: 'video_edit',
+        edit_video: 'video_edit',
         首帧: 'first_frame',
         尾帧: 'last_frame',
         参考: 'ref',
@@ -11296,14 +12066,25 @@
     function promoteMediaCandidate(id, project = currentProject()) {
       const candidate = project.nodes.find(n => n.id === id);
       if (!candidate || candidate.assetState !== 'candidate') return;
-      const officialId = candidate.meta?.candidateOfNodeId;
-      const official = officialId ? project.nodes.find(n => n.id === officialId) : findOfficialForCandidate(candidate, project);
+      const recordedOfficialId = candidate.meta?.candidateOfNodeId || '';
+      const recordedOfficial = recordedOfficialId ? project.nodes.find(n => n.id === recordedOfficialId) : null;
+      const official = recordedOfficial?.assetState === 'official'
+        ? recordedOfficial
+        : findOfficialForCandidate(candidate, project);
+      const promptNodeId = candidate.meta?.promptNodeId || official?.meta?.promptNodeId || recordedOfficial?.meta?.promptNodeId || '';
+      const groupAnchorIds = new Set([candidate.id, official?.id, recordedOfficial?.id].filter(Boolean));
+      const peerCandidates = project.nodes.filter(node => {
+        if (!node || node.id === candidate.id || node.role !== candidate.role || node.assetState !== 'candidate') return false;
+        if (promptNodeId && node.meta?.promptNodeId === promptNodeId) return true;
+        return groupAnchorIds.has(node.meta?.candidateOfNodeId || '');
+      });
       const run = createActionRun(candidate.role === 'genVideo' ? 'promoteVideoCandidate' : 'promoteImageCandidate', [candidate.id, official?.id].filter(Boolean), [], 'astra_control', project);
+      const groupNodeIds = new Set([candidate.id, official?.id, recordedOfficial?.id, ...peerCandidates.map(node => node.id)].filter(Boolean));
       project.links = (project.links || []).filter(link => {
         if (link.relation !== 'candidate_of') return true;
         const from = link.fromNodeId || link.from_astra_id;
         const to = link.toNodeId || link.to_astra_id;
-        return ![from, to].includes(candidate.id) && (!official || ![from, to].includes(official.id));
+        return !groupNodeIds.has(from) && !groupNodeIds.has(to);
       });
       if (official) {
         const candidatePosition = { x: candidate.x, y: candidate.y };
@@ -11311,18 +12092,25 @@
         candidate.y = official.y;
         official.x = candidatePosition.x;
         official.y = candidatePosition.y;
-        official.assetState = 'candidate';
-        official.meta = { ...(official.meta || {}), candidateOfNodeId: candidate.id };
       }
       candidate.assetState = 'official';
       candidate.meta = { ...(candidate.meta || {}) };
       delete candidate.meta.candidateOfNodeId;
       normalizeNode(candidate);
-      if (official) normalizeNode(official);
-      const link = addAstraLink(official?.id, candidate.id, { relation: 'candidate_of', inputRole: 'none', visualStyle: 'dashed', actionRunId: run?.id, project });
+      const relinkCandidates = uniqueIds([official?.id, ...peerCandidates.map(node => node.id)])
+        .map(nodeId => project.nodes.find(node => node.id === nodeId))
+        .filter(Boolean);
+      relinkCandidates.forEach(node => {
+        node.assetState = 'candidate';
+        node.meta = { ...(node.meta || {}), candidateOfNodeId: candidate.id };
+        normalizeNode(node);
+      });
+      const links = relinkCandidates
+        .map(node => addAstraLink(node.id, candidate.id, { relation: 'candidate_of', inputRole: 'none', visualStyle: 'dashed', actionRunId: run?.id, project }))
+        .filter(Boolean);
       addActivity('candidate', '候选已替换为正式素材', 'ok');
-      const astraIds = [candidate.id, official?.id].filter(Boolean);
-      const linkIds = link?.id ? [link.id] : [];
+      const astraIds = uniqueIds([candidate.id, ...relinkCandidates.map(node => node.id)]);
+      const linkIds = uniqueIds(links.map(link => link.id).filter(Boolean));
       finishActionRun(run, 'completed', { astraIds, linkIds, summary: '候选已转正' }, project);
       return { astraIds, linkIds };
     }
@@ -11351,11 +12139,70 @@
 
     function renderMessages() {
       const project = currentProject();
-      $('messages').innerHTML = (project?.messages || []).map(msg => {
-        const cls = msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'agent';
-        return `<div class="msg ${cls}">${escapeHtml(msg.content)}${msg.at ? `\n\n${escapeHtml(msg.at)}` : ''}</div>`;
-      }).join('');
+      $('messages').innerHTML = (project?.messages || []).map(renderMessage).join('');
+      bindLargeSelectionMessageActions();
+      bindPendingControllerMessageActions();
       $('messages').scrollTop = $('messages').scrollHeight;
+    }
+
+    function renderMessage(msg) {
+      const cls = msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'agent';
+      const content = `${escapeHtml(msg.content)}${msg.at ? `\n\n${escapeHtml(msg.at)}` : ''}`;
+      return `<div class="msg ${cls}">${content}${renderMessageActions(msg)}</div>`;
+    }
+
+    function renderMessageActions(msg) {
+      const pendingControllerActions = renderPendingControllerMessageActions(msg);
+      if (pendingControllerActions) return pendingControllerActions;
+      return renderLargeSelectionMessageActions(msg);
+    }
+
+    function renderLargeSelectionMessageActions(msg) {
+      const confirmation = msg.largeSelectionConfirmation;
+      if (confirmation?.type !== 'largeSelection') return '';
+      const active = activeLargeSelectionConfirmation();
+      if (!active || active.id !== confirmation.id) return '';
+      const id = escapeHtml(confirmation.id);
+      return `<div class="msg-actions" data-large-selection-confirmation="${id}">
+        <button class="large-selection-action-btn confirm" type="button" data-large-selection-action="confirm" data-large-selection-confirmation-id="${id}" title="引用全部选中" aria-label="引用全部选中">✓</button>
+        <button class="large-selection-action-btn cancel" type="button" data-large-selection-action="cancel" data-large-selection-confirmation-id="${id}" title="取消引用" aria-label="取消引用">×</button>
+      </div>`;
+    }
+
+    function renderPendingControllerMessageActions(msg) {
+      const confirmation = msg.pendingControllerConfirmation;
+      if (confirmation?.type !== 'controllerOperationPlan') return '';
+      const active = activePendingControllerIntent();
+      if (!active || active.id !== confirmation.id) return '';
+      const id = escapeHtml(confirmation.id);
+      return `<div class="msg-actions" data-pending-controller-confirmation="${id}">
+        <button class="large-selection-action-btn confirm" type="button" data-pending-controller-action="confirm" data-pending-controller-intent-id="${id}" title="确认执行" aria-label="确认执行">&#10003;</button>
+        <button class="large-selection-action-btn cancel" type="button" data-pending-controller-action="cancel" data-pending-controller-intent-id="${id}" title="取消执行" aria-label="取消执行">&times;</button>
+      </div>`;
+    }
+
+    function bindLargeSelectionMessageActions() {
+      document.querySelectorAll('[data-large-selection-action]').forEach(button => {
+        button.onclick = event => {
+          event.preventDefault();
+          const target = event.currentTarget;
+          const confirmationId = target.dataset.largeSelectionConfirmationId || '';
+          if (target.dataset.largeSelectionAction === 'confirm') confirmLargeSelectionReference(confirmationId);
+          else cancelLargeSelectionReference(confirmationId);
+        };
+      });
+    }
+
+    function bindPendingControllerMessageActions() {
+      document.querySelectorAll('[data-pending-controller-action]').forEach(button => {
+        button.onclick = event => {
+          event.preventDefault();
+          const target = event.currentTarget;
+          const intentId = target.dataset.pendingControllerIntentId || '';
+          if (target.dataset.pendingControllerAction === 'confirm') void confirmPendingControllerIntent(intentId);
+          else cancelPendingControllerIntent(intentId);
+        };
+      });
     }
 
     function renderActivity() {
@@ -11892,9 +12739,12 @@
       $('editorPanel').classList.remove('open');
     }
 
-    function addMessage(role, content) {
+    function addMessage(role, content, options = {}) {
       const project = currentProject();
-      project.messages.push({ role, content, at: nowText() });
+      const message = { role, content, at: nowText() };
+      if (options.largeSelectionConfirmation) message.largeSelectionConfirmation = options.largeSelectionConfirmation;
+      if (options.pendingControllerConfirmation) message.pendingControllerConfirmation = options.pendingControllerConfirmation;
+      project.messages.push(message);
       scheduleSave();
       renderMessages();
       renderFlow();
@@ -11904,6 +12754,75 @@
       const prepared = prepareAgentChatContent(content, options);
       addMessage(prepared.role, prepared.content);
       return prepared;
+    }
+
+    function activeLargeSelectionConfirmation(project = currentProject()) {
+      const confirmation = project?.largeSelectionConfirmation;
+      if (!confirmation || confirmation.status !== 'awaiting_confirmation') return null;
+      return confirmation;
+    }
+
+    function sameIdList(left = [], right = []) {
+      const a = uniqueIds(arrayFrom(left).map(String).filter(Boolean));
+      const b = uniqueIds(arrayFrom(right).map(String).filter(Boolean));
+      return a.length === b.length && a.every((id, index) => id === b[index]);
+    }
+
+    function clearLargeSelectionConfirmation(project = currentProject(), options = {}) {
+      if (!project?.largeSelectionConfirmation) return;
+      project.largeSelectionConfirmation = null;
+      project.updatedAt = new Date().toISOString();
+      scheduleSave();
+      if (options.render !== false && isProjectActive(project)) renderMessages();
+    }
+
+    function saveLargeSelectionConfirmation(text, selectedNodeIds, project = currentProject()) {
+      if (!project) return null;
+      const ids = uniqueIds(arrayFrom(selectedNodeIds).map(String).filter(Boolean));
+      const active = activeLargeSelectionConfirmation(project);
+      if (active && active.text === text && sameIdList(active.selectedNodeIds, ids)) {
+        renderMessages();
+        return active;
+      }
+      const confirmation = {
+        id: uid('large_select_confirm'),
+        status: 'awaiting_confirmation',
+        text,
+        selectedNodeIds: ids,
+        count: ids.length,
+        createdAt: new Date().toISOString()
+      };
+      project.largeSelectionConfirmation = confirmation;
+      addMessage('system', `本次引用 ${ids.length} 个 Astra，数量较多，请确认是否全部引用。`, {
+        largeSelectionConfirmation: { type: 'largeSelection', id: confirmation.id }
+      });
+      return confirmation;
+    }
+
+    function cancelLargeSelectionReference(confirmationId) {
+      const project = currentProject();
+      const confirmation = activeLargeSelectionConfirmation(project);
+      if (!confirmation || confirmation.id !== confirmationId) return;
+      clearLargeSelectionConfirmation(project);
+      $('chatInput').focus();
+    }
+
+    function confirmLargeSelectionReference(confirmationId) {
+      const project = currentProject();
+      const confirmation = activeLargeSelectionConfirmation(project);
+      if (!confirmation || confirmation.id !== confirmationId) return;
+      const existingIds = new Set((project.nodes || []).map(node => node.id));
+      const selectedNodeIds = uniqueIds(arrayFrom(confirmation.selectedNodeIds).map(String).filter(id => existingIds.has(id)));
+      $('chatInput').value = confirmation.text || $('chatInput').value;
+      clearLargeSelectionConfirmation(project, { render: false });
+      if (!selectedNodeIds.length) {
+        addMessage('system', '待引用的 Astra 已不在当前项目里，本次没有发送。');
+        $('chatInput').focus();
+        return;
+      }
+      state.selectedNodeIds = selectedNodeIds;
+      refreshSelectionSurface();
+      void sendChat({ skipLargeSelectionGuard: true });
     }
 
     const INTERNAL_INFO_REDIRECT = '这部分属于内部设计/实现信息。请点击页面上方的企鹅 icon，在飞书找 Cyrus 问。';
@@ -12018,6 +12937,19 @@
       return null;
     }
 
+    async function confirmPendingControllerIntent(intentId) {
+      const intent = activePendingControllerIntent();
+      if (!intent || intent.id !== intentId) return null;
+      return runPendingControllerIntent(intent, '确认');
+    }
+
+    function cancelPendingControllerIntent(intentId) {
+      const intent = activePendingControllerIntent();
+      if (!intent || intent.id !== intentId) return;
+      clearPendingControllerIntent();
+      addMessage('system', '已取消本次操作。');
+    }
+
     function buildReferenceText() {
       const nodes = selectedNodes();
       if (!nodes.length) return '';
@@ -12057,6 +12989,7 @@
       }));
       return {
         user_message: userText,
+        message_mentions: controllerMessageMentionContext(userText, project),
         pending_intent: activePendingControllerIntent() || null,
         selected_astra: selected,
         selected_count: state.selectedNodeIds.length,
@@ -12149,7 +13082,87 @@
       });
       const parsed = parseStructuredJsonObject(content);
       if (!parsed || typeof parsed !== 'object') return { ok: false, plan: null, issues: [{ severity: 'error', message: 'Operation planner did not return JSON.' }] };
-      return validateControllerOperationPlan(repairControllerImageReferencePlan(parsed, userText));
+      return validateControllerOperationPlan(repairControllerOperationPlan(parsed, userText));
+    }
+
+    function repairControllerOperationPlan(planInput, userText, project = currentProject()) {
+      const withImageReferences = repairControllerImageReferencePlan(planInput, userText, project);
+      return repairControllerMediaVariantCountPlan(withImageReferences, userText, project);
+    }
+
+    function repairControllerMediaVariantCountPlan(planInput, userText, project = currentProject()) {
+      const requestedVideoCount = requestedControllerMediaVariantCount(userText, 'video');
+      if (requestedVideoCount < 2 || controllerTextRequestsSerialGeneration(userText)) return planInput;
+
+      const foundation = window.AuralisFoundation;
+      const plan = foundation?.normalizeOperationPlan ? foundation.normalizeOperationPlan(planInput) : planInput;
+      const ops = arrayFrom(plan?.ops);
+      let changed = false;
+      const repairedOps = ops.map(op => {
+        if (!['generateMedia', 'generateMediaVariants'].includes(op?.op)) return op;
+        if (String(op?.payload?.kind || 'image').trim() !== 'video') return op;
+        if (String(op?.payload?.concurrency || '').trim().toLowerCase() === 'serial') return op;
+        const currentOutputCount = controllerVideoGenerationOutputCount(op, plan, project);
+        if (currentOutputCount !== 1 || currentOutputCount >= requestedVideoCount) return op;
+
+        const model = operationModelValue(
+          op.payload?.model || arrayFrom(op.payload?.models)[0] || project?.runtime?.videoModel || state.settings.videoModel,
+          'video'
+        );
+        if (!model) return op;
+        changed = true;
+        return {
+          ...op,
+          op: 'generateMediaVariants',
+          reason: op.reason || `Generate ${requestedVideoCount} video candidate versions from one target.`,
+          payload: {
+            ...(op.payload || {}),
+            kind: 'video',
+            models: uniqueIds([model]),
+            variantsPerModel: requestedVideoCount
+          }
+        };
+      });
+      return changed ? { ...plan, ops: repairedOps } : planInput;
+    }
+
+    function requestedControllerMediaVariantCount(text, kind = 'video') {
+      const value = String(text || '').trim().toLowerCase();
+      if (!value) return 0;
+      const mediaNoun = kind === 'video'
+        ? '(?:video|videos|\\u89c6\\u9891|\\u5f71\\u7247|\\u7247\\u5b50|\\u77ed\\u7247)'
+        : '(?:image|images|\\u56fe\\u7247|\\u56fe\\u50cf|\\u7167\\u7247)';
+      const numberToken = '(\\d+|\\u4e00|\\u4e8c|\\u4e24|\\u5169|\\u4fe9|\\u4e09|\\u56db|\\u4e94|\\u516d|\\u4e03|\\u516b|\\u4e5d|\\u5341)';
+      const unitToken = '(?:\\u4e2a|\\u500b|\\u6761|\\u689d|\\u6bb5|\\u7248|\\u79cd|\\u7a2e|\\u6b3e|\\u652f|\\u4efd|\\u5f20|\\u5f35)?';
+      const beforeMedia = new RegExp(`${numberToken}\\s*${unitToken}\\s*${mediaNoun}`, 'i');
+      const afterMedia = new RegExp(`${mediaNoun}\\s*(?:\\u751f\\u6210|\\u505a|\\u51fa|\\u6765|\\u4f86|\\u8981|\\u4ea7\\u51fa|\\u7522\\u51fa|\\u7ed9\\u6211|\\u7d66\\u6211|make|create|generate)?\\s*${numberToken}\\s*${unitToken}`, 'i');
+      const match = value.match(beforeMedia) || value.match(afterMedia);
+      const count = smallRequestedCountValue(match?.[1]);
+      return count > 1 ? Math.min(count, 12) : 0;
+    }
+
+    function smallRequestedCountValue(value) {
+      const raw = String(value || '').trim().toLowerCase();
+      if (/^\d+$/.test(raw)) return Number(raw);
+      return {
+        '\u4e00': 1,
+        '\u4e8c': 2,
+        '\u4e24': 2,
+        '\u5169': 2,
+        '\u4fe9': 2,
+        '\u4e09': 3,
+        '\u56db': 4,
+        '\u4e94': 5,
+        '\u516d': 6,
+        '\u4e03': 7,
+        '\u516b': 8,
+        '\u4e5d': 9,
+        '\u5341': 10
+      }[raw] || 0;
+    }
+
+    function controllerTextRequestsSerialGeneration(text) {
+      return /\u4e32\u884c|\u4f9d\u6b21|\u4e00\u4e2a\u4e00\u4e2a|\u4e00\u500b\u4e00\u500b|\u4e00\u6761\u4e00\u6761|\u4e00\u689d\u4e00\u689d|\bserial\b|\bsequential\b|\bone by one\b/i.test(String(text || ''));
     }
 
     function repairControllerImageReferencePlan(planInput, userText, project = currentProject()) {
@@ -12175,11 +13188,12 @@
       ops.forEach(op => {
         if (isImageInputConnectOperation(op)) {
           if (insertedOrRepairedConnect) return;
+          const sourceIds = imageInputSourceIdsForControllerPlan(op, selectedImageIds, project);
           repairedOps.push({
             ...op,
             payload: {
               ...(op.payload || {}),
-              from: { ids: selectedImageIds },
+              from: { ids: sourceIds },
               to: { resultOfOps: createOpIds, roles: ['imagePrompt'] },
               inputRole,
               relation: 'input'
@@ -12216,6 +13230,16 @@
       });
 
       return { ...plan, requiresConfirmation: false, ops: repairedOps };
+    }
+
+    function imageInputSourceIdsForControllerPlan(op, fallbackIds = [], project = currentProject()) {
+      try {
+        const targets = resolveControllerOperationTargets(op?.payload?.from, project)
+          .filter(controllerNodeCanFeedImagePrompt)
+          .map(node => node.id);
+        if (targets.length) return uniqueIds(targets);
+      } catch (_) {}
+      return uniqueIds(fallbackIds);
     }
 
     function isCreateImagePromptOperation(op) {
@@ -12458,7 +13482,11 @@
           operationPlan: validation.plan,
           sourceText: validation.plan.summary || ''
         });
-        if (options.silent !== true) addMessage('system', confirmation.summary);
+        if (options.silent !== true) {
+          addMessage('system', confirmation.summary, {
+            pendingControllerConfirmation: { type: 'controllerOperationPlan', id: pending?.id || '' }
+          });
+        }
         return {
           ok: false,
           requiresConfirmation: true,
@@ -12627,7 +13655,16 @@
           dangerous.push({ op, kind: op.op, count: 1 });
         }
       }
-      if (!dangerous.length) return { required: false };
+      const largeVideoGenerations = largeVideoGenerationConfirmationItems(plan, project);
+      const videoGenerationCount = largeVideoGenerations.reduce((sum, item) => sum + item.count, 0);
+      if (!dangerous.length && videoGenerationCount < LARGE_VIDEO_GENERATION_CONFIRMATION_COUNT) return { required: false };
+      if (!dangerous.length) {
+        return {
+          required: true,
+          label: '确认批量视频生成',
+          summary: `本次将生成 ${videoGenerationCount} 个视频，数量较多，请确认是否继续。`
+        };
+      }
       const deleteCount = dangerous.filter(item => item.kind === 'delete').reduce((sum, item) => sum + item.count, 0);
       const linkCount = dangerous.filter(item => item.kind === 'disconnect').reduce((sum, item) => sum + item.count, 0);
       const completedMediaCount = dangerous.reduce((sum, item) => sum + (item.completedMediaCount || 0), 0);
@@ -12643,6 +13680,53 @@
         label: '确认画布危险操作',
         summary: `这个操作需要确认：${parts.join('；')}。确认后回复“确认”或“执行”。`
       };
+    }
+
+    function largeVideoGenerationConfirmationItems(plan, project = currentProject()) {
+      return arrayFrom(plan?.ops)
+        .map(op => ({
+          op,
+          count: controllerVideoGenerationOutputCount(op, plan, project)
+        }))
+        .filter(item => item.count > 0);
+    }
+
+    function controllerVideoGenerationOutputCount(op, plan, project = currentProject()) {
+      const kind = String(op?.payload?.kind || 'image').trim();
+      if (!['generateMedia', 'generateMediaVariants'].includes(op?.op) || kind !== 'video') return 0;
+      const targets = safeResolveControllerOperationTargets(op.payload?.target, project)
+        .filter(node => isGenerationOperationTarget(node, 'video'));
+      const targetCount = Math.max(targets.length, plannedVideoGenerationTargetCount(op, plan));
+      if (op.op === 'generateMediaVariants') {
+        const modelCount = Math.max(1, uniqueIds(arrayFrom(op.payload?.models).map(value => operationModelValue(value, 'video')).filter(Boolean)).length);
+        const variantsPerModel = Math.max(1, Math.min(Number(op.payload?.variantsPerModel) || 1, 12));
+        return targetCount * modelCount * variantsPerModel;
+      }
+      return targetCount;
+    }
+
+    function plannedVideoGenerationTargetCount(op, plan) {
+      const refs = new Set(controllerOperationResultRefs(op?.payload?.target));
+      if (!refs.size) return 0;
+      return arrayFrom(plan?.ops)
+        .filter(candidate => refs.has(String(candidate?.id || '')))
+        .reduce((sum, candidate) => sum + plannedCreatedVideoTargetCount(candidate), 0);
+    }
+
+    function controllerOperationResultRefs(selector) {
+      if (!selector || typeof selector !== 'object') return [];
+      return arrayFrom(selector.resultOfOps || selector.resultOfOp || selector.resultOfOpIds)
+        .map(String)
+        .map(value => value.trim())
+        .filter(Boolean);
+    }
+
+    function plannedCreatedVideoTargetCount(op) {
+      if (op?.op !== 'createAstra') return 0;
+      const astra = op.payload?.astra || {};
+      const family = String(astra.family || '').trim();
+      const role = String(astra.role || '').trim();
+      return (family === 'Comet' && ['videoPrompt', 'referenceVideoPrompt'].includes(role)) || (family === 'Luna' && role === 'genVideo') ? 1 : 0;
     }
 
     function safeResolveControllerOperationTargets(selector, project = currentProject()) {
@@ -13021,7 +14105,20 @@
 
     function createAstraByOperation(op, project = currentProject()) {
       const node = createControllerAstraFromOperation(op, project);
-      return { id: op.id, op: op.op, count: 1, astraIds: [node.id] };
+      return {
+        id: op.id,
+        op: op.op,
+        count: 1,
+        astraIds: [node.id],
+        placementExplicit: hasExplicitControllerAstraPosition(op)
+      };
+    }
+
+    function hasExplicitControllerAstraPosition(op) {
+      const astra = op?.payload?.astra || {};
+      const position = op?.payload?.position || {};
+      return Number.isFinite(Number(position.x ?? astra.x))
+        || Number.isFinite(Number(position.y ?? astra.y));
     }
 
     function duplicateAstraByOperation(op, project = currentProject()) {
@@ -13136,7 +14233,51 @@
         .filter(Boolean);
       const linkIds = uniqueIds(links.map(link => link.id));
       if (!linkIds.length) throw new Error(`${op.id} did not create any links.`);
-      return { id: op.id, op: op.op, count: linkIds.length, linkIds };
+      const movedIds = repositionImplicitControllerAstraPairs(pairs, project);
+      return { id: op.id, op: op.op, count: linkIds.length, linkIds, astraIds: movedIds };
+    }
+
+    function repositionImplicitControllerAstraPairs(pairs, project = currentProject()) {
+      const movableIds = implicitControllerCreatedAstraIds();
+      if (!movableIds.size) return [];
+      const moved = new Set();
+      pairs.forEach(([source, target]) => {
+        if (target?.id && movableIds.has(target.id) && !moved.has(target.id)) {
+          placeAstraBesideAnchor(target, source, 'right', project);
+          moved.add(target.id);
+        } else if (source?.id && movableIds.has(source.id) && !moved.has(source.id)) {
+          placeAstraBesideAnchor(source, target, 'left', project);
+          moved.add(source.id);
+        }
+      });
+      return [...moved];
+    }
+
+    function implicitControllerCreatedAstraIds() {
+      const results = Object.values(activeControllerOperationContext?.resultsByOpId || {});
+      return new Set(results
+        .filter(result => result?.op === 'createAstra' && result.placementExplicit !== true)
+        .flatMap(result => arrayFrom(result.astraIds))
+        .map(String));
+    }
+
+    function placeAstraBesideAnchor(node, anchor, side = 'right', project = currentProject()) {
+      if (!node || !anchor) return null;
+      const width = nodeWidth(node);
+      const height = estimatedNodeHeight(node);
+      const anchorRect = nodeRect(anchor);
+      const preferredX = side === 'left'
+        ? anchorRect.left - width - 84
+        : anchorRect.right + 84;
+      const position = findFreePosition(width, height, preferredX, anchorRect.top, {
+        project,
+        excludeIds: [node.id]
+      });
+      node.x = position.x;
+      node.y = position.y;
+      node.updatedAt = nowText();
+      normalizeNode(node);
+      return node;
     }
 
     function connectAstraPairsForOperation(from, to, op) {
@@ -13144,7 +14285,14 @@
       if (from.length === 1) return to.map(target => [from[0], target]);
       if (to.length === 1) return from.map(source => [source, to[0]]);
       if (from.length === to.length) return from.map((source, index) => [source, to[index]]);
-      throw new Error(`${op.id} must resolve one-to-many, many-to-one, or equal source/target counts; resolved ${from.length} sources and ${to.length} targets.`);
+      if (isReferenceFanoutInputRole(normalizeInputRole(op.payload?.inputRole || 'prompt', 'prompt'))) {
+        return from.flatMap(source => to.map(target => [source, target]));
+      }
+      throw new Error(`${op.id} must resolve one-to-many, many-to-one, equal source/target counts, or reference fanout; resolved ${from.length} sources and ${to.length} targets.`);
+    }
+
+    function isReferenceFanoutInputRole(inputRole) {
+      return new Set(['ref', 'style_ref', 'subject_ref']).has(String(inputRole || '').trim());
     }
 
     function markStaleByOperation(op, project = currentProject()) {
@@ -13216,11 +14364,7 @@
       const generatedIds = [];
       try {
         if (model) project.runtime[runtimeKey] = model;
-        const concurrency = op.payload?.concurrency === 'parallel'
-          ? 'parallel'
-          : op.payload?.concurrency === 'serial' || kind === 'video'
-            ? 'serial'
-            : 'parallel';
+        const concurrency = op.payload?.concurrency === 'serial' ? 'serial' : 'parallel';
         const canUseImageStageBatch = kind === 'image'
           && concurrency === 'parallel'
           && targets.length > 1
@@ -13228,8 +14372,8 @@
         const results = canUseImageStageBatch
           ? await generateImageTargetsWithStageBatches(targets, overrides)
           : concurrency === 'parallel'
-          ? await Promise.all(targets.map(target => generateMediaForOperationTarget(kind, target, overrides)))
-          : await runGenerationTargetsSerial(kind, targets, overrides);
+          ? await Promise.all(mediaGenerationJobsForTargets(kind, targets, overrides).map(job => runMediaGenerationJob(kind, job)))
+          : await runGenerationJobsSerial(kind, mediaGenerationJobsForTargets(kind, targets, overrides));
         const resultNodes = generationOperationResultNodes(results, targets, op, kind, project, fillableTargetIds);
         if (resultNodes.length < targets.length) throw new Error(`${op.id} generated ${resultNodes.length} of ${targets.length} ${kind} Astra.`);
         const failed = resultNodes.find(node => !node || node.status !== 'completed' || !assetDisplayUrl(node));
@@ -13244,7 +14388,7 @@
     async function generateMediaVariantsByOperation(op, project = currentProject()) {
       const kind = op.payload?.kind === 'video' ? 'video' : 'image';
       const models = uniqueIds(arrayFrom(op.payload?.models).map(value => operationModelValue(value, kind)).filter(Boolean));
-      const variantsPerModel = Math.max(1, Math.min(Number(op.payload?.variantsPerModel) || 1, 6));
+      const variantsPerModel = Math.max(1, Math.min(Number(op.payload?.variantsPerModel) || 1, 12));
       if (!models.length) throw new Error(`${op.id} has no models.`);
       const targets = resolveControllerOperationTargets(op.payload?.target, project).filter(node => isGenerationOperationTarget(node, kind));
       if (!targets.length) throw new Error(`${op.id} did not resolve any ${kind} targets.`);
@@ -13256,23 +14400,40 @@
       try {
         for (const model of models) {
           project.runtime[runtimeKey] = model;
-          for (let variantIndex = 0; variantIndex < variantsPerModel; variantIndex += 1) {
-            const fillableTargetIds = fillableGenerationTargetIds(targets, expectedRole);
-            const overrides = { model, mediaSettings };
-            const results = kind === 'image'
-              ? await Promise.all(targets.map(target => generateMediaForOperationTarget(kind, target, overrides)))
-              : await runGenerationTargetsSerial(kind, targets, overrides);
-            const resultNodes = generationOperationResultNodes(results, targets, op, kind, project, fillableTargetIds);
+          const overrides = { model, mediaSettings };
+          const createVariantRun = () => ({
+            fillableTargetIds: fillableGenerationTargetIds(targets, expectedRole),
+            jobs: mediaGenerationJobsForTargets(kind, targets, overrides)
+          });
+          const runVariant = async variantRun => {
+            const results = await Promise.all(variantRun.jobs.map(job => runMediaGenerationJob(kind, job)));
+            const resultNodes = generationOperationResultNodes(results, targets, op, kind, project, variantRun.fillableTargetIds);
             if (resultNodes.length < targets.length) throw new Error(`${op.id} generated ${resultNodes.length} of ${targets.length} ${kind} Astra.`);
             const failed = resultNodes.find(node => !node || node.status !== 'completed' || !assetDisplayUrl(node));
             if (failed) throw new Error(`${op.id} failed while generating ${kind} variants${failed?.error ? `: ${failed.error}` : ''}.`);
-            generatedIds.push(...resultNodes.map(node => node.id).filter(Boolean));
+            return resultNodes;
+          };
+          if (canRunGenerationVariantCyclesInParallel(targets, expectedRole)) {
+            const variantRuns = Array.from({ length: variantsPerModel }, createVariantRun);
+            const variantResults = await Promise.all(variantRuns.map(runVariant));
+            variantResults.forEach(resultNodes => {
+              generatedIds.push(...resultNodes.map(node => node.id).filter(Boolean));
+            });
+          } else {
+            for (let variantIndex = 0; variantIndex < variantsPerModel; variantIndex += 1) {
+              const resultNodes = await runVariant(createVariantRun());
+              generatedIds.push(...resultNodes.map(node => node.id).filter(Boolean));
+            }
           }
         }
       } finally {
         project.runtime[runtimeKey] = previousModel;
       }
       return { id: op.id, op: op.op, count: generatedIds.length, astraIds: generatedIds };
+    }
+
+    function canRunGenerationVariantCyclesInParallel(targets, expectedRole) {
+      return arrayFrom(targets).every(target => !canFillGenerationTarget(target, expectedRole));
     }
 
     function fillableGenerationTargetIds(targets, expectedRole) {
@@ -13368,24 +14529,42 @@
     }
 
     async function runGenerationTargetsSerial(kind, targets, overrides = {}) {
+      return runGenerationJobsSerial(kind, mediaGenerationJobsForTargets(kind, targets, overrides));
+    }
+
+    async function runGenerationJobsSerial(kind, jobs) {
       const results = [];
-      for (const target of targets) {
-        results.push(await generateMediaForOperationTarget(kind, target, overrides));
+      for (const job of jobs) {
+        results.push(await runMediaGenerationJob(kind, job));
       }
       return results;
     }
 
-    function generateMediaForOperationTarget(kind, target, overrides = {}) {
-      const pick = applyPromptPickGenerationSettings(kind, promptPickForGenerationNode(kind, target), overrides);
+    function mediaGenerationJobsForTargets(kind, targets, overrides = {}) {
+      return arrayFrom(targets).map(target => ({
+        target,
+        pick: applyPromptPickGenerationSettings(kind, promptPickForGenerationNode(kind, target), overrides)
+      }));
+    }
+
+    function runMediaGenerationJob(kind, job) {
       return kind === 'image'
-        ? generateImageFromPromptPick(pick, { manageAgentStatus: false })
-        : generateVideoFromPromptPick(pick, { manageAgentStatus: false });
+        ? generateImageFromPromptPick(job.pick, { manageAgentStatus: false })
+        : generateVideoFromPromptPick(job.pick, { manageAgentStatus: false });
+    }
+
+    function generateMediaForOperationTarget(kind, target, overrides = {}) {
+      return runMediaGenerationJob(kind, {
+        target,
+        pick: applyPromptPickGenerationSettings(kind, promptPickForGenerationNode(kind, target), overrides)
+      });
     }
 
     function createControllerAstraFromOperation(op, project = currentProject()) {
       const astra = op.payload?.astra && typeof op.payload.astra === 'object' ? op.payload.astra : {};
       const position = op.payload?.position && typeof op.payload.position === 'object' ? op.payload.position : {};
       const partial = safeControllerAstraPartial(astra, position);
+      partial.placement = 'avoid';
       const node = addNode(partial, project);
       if (!node) throw new Error(`${op.id} did not create an Astra.`);
       recordEvent('controller_op_create_astra', {
@@ -14255,9 +15434,16 @@
 
     function promptPickForGenerationNode(kind, node) {
       const previousSelection = [...state.selectedNodeIds];
+      const selectedSourceImage = kind === 'video'
+        ? selectedNodes().find(item => nodeHasAsset(item) && item.mime?.startsWith('image/'))
+        : null;
       state.selectedNodeIds = [node.id];
       try {
-        return applyPromptPickGenerationSettings(kind, { ...extractPromptFor(kind, { detail: true }), useSelectedRefs: false });
+        const pick = applyPromptPickGenerationSettings(kind, { ...extractPromptFor(kind, { detail: true, sourceImageNodeId: selectedSourceImage?.id || '' }), useSelectedRefs: false });
+        if (kind === 'video' && selectedSourceImage?.id && !pick.sourceImageNodeId) {
+          pick.sourceImageNodeId = selectedSourceImage.id;
+        }
+        return pick;
       } finally {
         state.selectedNodeIds = previousSelection;
       }
@@ -14364,7 +15550,7 @@
       return reviewSelected({ userInstruction: request.instruction || '' });
     }
 
-    async function sendChat() {
+    async function sendChat(options = {}) {
       const text = $('chatInput').value.trim();
       if (!text) return;
       $('chatInput').value = '';
@@ -14372,11 +15558,13 @@
       detectModelMentions(text);
       const pureModelCommand = isPureModelCommand(text);
       const pendingIntent = activePendingControllerIntent();
-      if (state.selectedNodeIds.length >= LARGE_SELECTION_CONFIRMATION_COUNT && !shouldUseLargeSelection(text) && !pendingIntent) {
+      const skipLargeSelectionGuard = options.skipLargeSelectionGuard === true;
+      if (!skipLargeSelectionGuard && state.selectedNodeIds.length >= LARGE_SELECTION_CONFIRMATION_COUNT && !shouldUseLargeSelection(text) && !pendingIntent) {
         $('chatInput').value = text;
-        addMessage('system', `你选中了 ${state.selectedNodeIds.length} 个 Astra。为了避免主控读入太多内容，请确认是否要引用全部选中内容；如果需要，在消息里加“引用全部选中”。`);
+        saveLargeSelectionConfirmation(text, state.selectedNodeIds);
         return;
       }
+      clearLargeSelectionConfirmation(currentProject(), { render: false });
       addMessage('user', text);
       trackTelemetryControllerMessage(text);
       if (pureModelCommand) {
@@ -15718,9 +16906,10 @@
       return mediaModelConfig(model, kind).provider;
     }
 
-    function mediaModelRequestModel(model, kind, hasSourceImage = false) {
+    function mediaModelRequestModel(model, kind, hasSourceImage = false, hasSourceVideo = false) {
       const config = mediaModelConfig(model, kind);
       if (kind === 'video') {
+        if (hasSourceVideo && config.videoEditRequestModel) return config.videoEditRequestModel;
         if (hasSourceImage && config.requestModel) return config.requestModel;
         if (!hasSourceImage && config.textRequestModel) return config.textRequestModel;
       }
@@ -16194,6 +17383,7 @@
           sequence: promptPick.sequence || null,
           generation: resolvedExecution,
           meta: { candidateOfNodeId: official?.id || '' },
+          placement: 'avoid',
           x: outputPosition.x,
           y: outputPosition.y
         }, project);
@@ -16289,6 +17479,7 @@
           sequence: promptPick.sequence || { group_id: 'seq_main_video', kind: 'final_video_segments', index: nextSequenceIndex('genVideo') },
           generation: resolvedExecution,
           meta: { candidateOfNodeId: official?.id || '' },
+          placement: 'avoid',
           x: outputPosition.x,
           y: outputPosition.y
         }, project);
@@ -16335,7 +17526,9 @@
         if (promptPick.nodeId) {
           if (resolvedExecution.firstFrameNodeId) addAstraLink(resolvedExecution.firstFrameNodeId, promptPick.nodeId, { relation: 'input', inputRole: 'first_frame', actionRunId: run?.id, project });
           if (resolvedExecution.lastFrameNodeId) addAstraLink(resolvedExecution.lastFrameNodeId, promptPick.nodeId, { relation: 'input', inputRole: 'last_frame', actionRunId: run?.id, project });
+          if (resolvedExecution.editVideoNodeId) addAstraLink(resolvedExecution.editVideoNodeId, promptPick.nodeId, { relation: 'input', inputRole: 'video_edit', actionRunId: run?.id, project });
           resolvedExecution.referenceNodeIds.forEach(refId => addAstraLink(refId, promptPick.nodeId, { relation: 'input', inputRole: 'ref', actionRunId: run?.id, project }));
+          (resolvedExecution.referenceVideoNodeIds || []).forEach(refId => addAstraLink(refId, promptPick.nodeId, { relation: 'input', inputRole: 'reference_video', actionRunId: run?.id, project }));
         }
         if (official) addAstraLink(node.id, official.id, { relation: 'candidate_of', inputRole: 'none', visualStyle: 'dashed', actionRunId: run?.id, project });
         addActivity('video', '视频生成完成', 'ok', {}, project);
@@ -16360,7 +17553,7 @@
         return await videoGeneration(model, prompt, nodeId, resolvedExecution);
       } catch (endpointError) {
         const refs = videoReferenceNodesForExecution(resolvedExecution);
-        const referenceParts = (await Promise.all([refs.first, refs.last, ...refs.refs]
+        const referenceParts = (await Promise.all([refs.editVideo, refs.first, refs.last, ...refs.refs, ...refs.referenceVideos]
           .filter(Boolean)
           .map(mediaPromptContentPart))).flat();
         const messages = [{
@@ -16370,7 +17563,7 @@
             ...referenceParts
           ]
         }];
-        const content = await chatCompletion(mediaModelRequestModel(model, 'video', !!refs.first), messages, { maxTokens: 4096 });
+        const content = await chatCompletion(mediaModelRequestModel(model, 'video', !!refs.first, !!refs.editVideo), messages, { maxTokens: 4096 });
         const media = extractMedia(content, 'video');
         return { ...media, raw: content || `video endpoint failed first: ${endpointError.message}` };
       }
@@ -16393,24 +17586,28 @@
     async function buildVideoGenerationBody(model, prompt, resolvedExecution = null) {
       const mediaSettings = mediaSettingsForExecution(resolvedExecution);
       const references = videoReferenceNodesForExecution(resolvedExecution);
+      const editVideoUrl = await dataUrlForAsset(references.editVideo);
       const firstImageUrl = await dataUrlForAsset(references.first);
       const lastImageUrl = await dataUrlForAsset(references.last);
-      const referenceUrls = (await Promise.all(references.refs.map(dataUrlForAsset))).filter(Boolean);
-      const requestModel = mediaModelRequestModel(model, 'video', !!firstImageUrl);
+      const referenceImageUrls = (await Promise.all(references.refs.map(dataUrlForAsset))).filter(Boolean);
+      const referenceVideoUrls = (await Promise.all(references.referenceVideos.map(dataUrlForAsset))).filter(Boolean);
+      const requestModel = mediaModelRequestModel(model, 'video', !!firstImageUrl, !!editVideoUrl);
       const durationSeconds = videoDurationForMediaSettings(mediaSettings);
       const usesSoraVideoApi = isRgSeedanceSoraRequestModel(requestModel);
       const body = {
         model: requestModel,
         prompt,
-        aspect_ratio: mediaSettings.videoAspectRatio,
         resolution: mediaSettings.videoResolution
       };
+      if (!editVideoUrl || !usesSoraVideoApi) body.aspect_ratio = mediaSettings.videoAspectRatio;
       if (usesSoraVideoApi) body.seconds = String(durationSeconds);
       else {
         body.duration = durationSeconds;
         body.mode = resolvedExecution?.mode || 'text_to_video';
       }
-      if (firstImageUrl) {
+      if (editVideoUrl) {
+        body.video = editVideoUrl;
+      } else if (firstImageUrl) {
         body.image = firstImageUrl;
         if (!usesSoraVideoApi) {
           body.image_url = firstImageUrl;
@@ -16425,23 +17622,31 @@
           body.last_frame_image = lastImageUrl;
         }
       }
-      if (referenceUrls.length) {
-        body.reference_images = referenceUrls;
-        if (!usesSoraVideoApi) body.images = referenceUrls;
+      if (referenceImageUrls.length) {
+        body.reference_images = referenceImageUrls;
+        if (!usesSoraVideoApi) body.images = referenceImageUrls;
+      }
+      if (!editVideoUrl && referenceVideoUrls.length) {
+        body.reference_videos = referenceVideoUrls;
       }
       return body;
     }
 
     function videoReferenceNodesForExecution(resolvedExecution = null) {
-      const first = nodeById(resolvedExecution?.firstFrameNodeId)
-        || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/'))
-        || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/'))
+      const editVideo = nodeById(resolvedExecution?.editVideoNodeId) || null;
+      const allowImplicitFirstFrame = !resolvedExecution;
+      const first = editVideo ? null : nodeById(resolvedExecution?.firstFrameNodeId)
+        || (allowImplicitFirstFrame ? selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) : null)
+        || (allowImplicitFirstFrame ? currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) : null)
         || null;
-      const last = nodeById(resolvedExecution?.lastFrameNodeId) || null;
+      const last = editVideo ? null : nodeById(resolvedExecution?.lastFrameNodeId) || null;
       const refs = (resolvedExecution?.referenceNodeIds || [])
         .map(nodeById)
-        .filter(node => node && node.id !== first?.id && node.id !== last?.id);
-      return { first, last, refs };
+        .filter(node => node && isImageAstra(node) && node.id !== first?.id && node.id !== last?.id);
+      const referenceVideos = (resolvedExecution?.referenceVideoNodeIds || [])
+        .map(nodeById)
+        .filter(node => node && isVideoAstra(node) && node.id !== editVideo?.id);
+      return { first, last, refs, referenceVideos, editVideo };
     }
 
     async function apiJson(path, body) {
@@ -16847,11 +18052,12 @@
       return config.endpointModel || model || 'google/nano-banana-pro/text-to-image';
     }
 
-    function resolveWaveSpeedVideoModel(model, hasSourceImage) {
+    function resolveWaveSpeedVideoModel(model, hasSourceImage, hasSourceVideo = false) {
       const config = mediaModelConfig(model, 'video');
+      if (hasSourceVideo && config.editEndpointModel) return config.editEndpointModel;
       if (hasSourceImage && config.imageEndpointModel) return config.imageEndpointModel;
       if (!hasSourceImage && config.textEndpointModel) return config.textEndpointModel;
-      return config.endpointModel || model || (hasSourceImage ? 'bytedance/seedance-2.0/image-to-video' : 'bytedance/seedance-2.0/text-to-video');
+      return config.endpointModel || model || (hasSourceVideo ? 'bytedance/seedance-2.0/video-edit' : hasSourceImage ? 'bytedance/seedance-2.0/image-to-video' : 'bytedance/seedance-2.0/text-to-video');
     }
 
     function waveSpeedVideoDuration(resolvedExecution = null) {
@@ -16911,29 +18117,34 @@
     async function waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution = null) {
       requireWaveSpeedKey();
       const mediaSettings = mediaSettingsForExecution(resolvedExecution);
-      const sourceImage = nodeById(resolvedExecution?.firstFrameNodeId)
-        || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/'))
-        || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/'));
-      const lastImage = nodeById(resolvedExecution?.lastFrameNodeId);
-      const sourceImageUrl = await dataUrlForAsset(sourceImage);
-      const lastImageUrl = await dataUrlForAsset(lastImage);
-      const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl);
-      const audioInstruction = '无口播 无BGM 只有音效';
+      const references = videoReferenceNodesForExecution(resolvedExecution);
+      const editVideoUrl = await dataUrlForAsset(references.editVideo);
+      const sourceImageUrl = await dataUrlForAsset(references.first);
+      const lastImageUrl = await dataUrlForAsset(references.last);
+      const referenceImageUrls = (await Promise.all(references.refs.map(dataUrlForAsset))).filter(Boolean);
+      const referenceVideoUrls = (await Promise.all(references.referenceVideos.map(dataUrlForAsset))).filter(Boolean);
+      const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl, !!editVideoUrl);
+      const body = {
+        prompt: [prompt, '无口播 无BGM 只有音效'].filter(Boolean).join('\n'),
+        duration: waveSpeedVideoDuration(resolvedExecution),
+        resolution: mediaSettings.videoResolution,
+        generate_audio: true,
+        camera_fixed: false,
+        seed: -1,
+        ...(editVideoUrl ? { video: editVideoUrl } : {
+          aspect_ratio: mediaSettings.videoAspectRatio,
+          ...(sourceImageUrl ? { image: sourceImageUrl, image_url: sourceImageUrl } : {}),
+          ...(lastImageUrl ? { last_image: lastImageUrl } : {}),
+          ...(referenceVideoUrls.length ? { reference_videos: referenceVideoUrls } : {})
+        }),
+        ...(referenceImageUrls.length ? { reference_images: referenceImageUrls } : {})
+      };
+      if (editVideoUrl) body.aspect_ratio = mediaSettings.videoAspectRatio;
       return waveSpeedSubmitAndPoll({
         model: endpointModel,
         preferred: 'video',
         nodeId,
-        body: {
-          prompt: [prompt, audioInstruction].filter(Boolean).join('\n'),
-          aspect_ratio: mediaSettings.videoAspectRatio,
-          duration: waveSpeedVideoDuration(resolvedExecution),
-          resolution: mediaSettings.videoResolution,
-          generate_audio: true,
-          camera_fixed: false,
-          seed: -1,
-          ...(sourceImageUrl ? { image: sourceImageUrl, image_url: sourceImageUrl } : {}),
-          ...(lastImageUrl ? { last_image: lastImageUrl } : {})
-        }
+        body
       });
     }
 
@@ -17353,10 +18564,6 @@
     function promptWithReferenceBindings(basePrompt, resolvedExecution = null) {
       const entries = promptReferenceEntriesForExecution(resolvedExecution);
       if (!entries.length) return basePrompt;
-      const hasExplicitMentions = (resolvedExecution?.mentionBindings || []).length
-        || /@(image|video|music)_\d+\b|@(source_image(?:_\d+)?|first_frame|last_frame)\b/i.test(String(basePrompt || ''));
-      const hasSourceEdit = arrayFrom(resolvedExecution?.sourceImageNodeIds).length > 0;
-      if (!hasExplicitMentions && !hasSourceEdit) return basePrompt;
       const prompt = promptReferenceTextForModel(basePrompt, entries);
       const lines = entries.map(entry => {
         const node = entry.node;
@@ -17402,10 +18609,12 @@
       };
       pushEntry(nodeById(resolvedExecution.firstFrameNodeId), { alias: 'first_frame', mediaKind: 'image', inputRole: 'first_frame' });
       pushEntry(nodeById(resolvedExecution.lastFrameNodeId), { alias: 'last_frame', mediaKind: 'image', inputRole: 'last_frame' });
+      pushEntry(nodeById(resolvedExecution.editVideoNodeId), { alias: 'video_edit', mediaKind: 'video', inputRole: 'video_edit' });
       (resolvedExecution.sourceImageNodeIds || []).forEach((id, index) => {
         pushEntry(nodeById(id), { alias: index ? `source_image_${index + 1}` : 'source_image', mediaKind: 'image', inputRole: 'source_image' });
       });
       (resolvedExecution.referenceNodeIds || []).forEach(id => pushEntry(nodeById(id), { inputRole: 'ref' }));
+      (resolvedExecution.referenceVideoNodeIds || []).forEach(id => pushEntry(nodeById(id), { inputRole: 'reference_video' }));
       (resolvedExecution.mediaMentionNodeIds || []).forEach(id => pushEntry(nodeById(id), { attached: false }));
       return entries;
     }
@@ -17422,6 +18631,7 @@
       if (alias === 'first_frame') return '[First frame image]';
       if (alias === 'last_frame') return '[Last frame image]';
       if (alias === 'source_image') return '[Source image]';
+      if (alias === 'video_edit') return '[Video edit source]';
       if (String(alias || '').startsWith('source_image_')) return `[Source image ${String(alias).split('_').at(-1)}]`;
       const match = String(alias || '').match(/_(\d+)$/);
       const number = match ? Number(match[1]) : index;
@@ -17479,10 +18689,16 @@
     }
 
     function generatedMediaPositionForPrompt(promptNode, relatedNode = null, kind = 'image') {
+      const gap = kind === 'video' ? 96 : 84;
+      if (promptNode && relatedNode && relatedNode.id !== promptNode.id) {
+        return {
+          x: relatedNode.x + nodeWidth(relatedNode) + gap,
+          y: relatedNode.y
+        };
+      }
       const base = promptNode || relatedNode || null;
       if (!base) return { x: 80, y: 84 };
       if (!promptNode && relatedNode) return { x: relatedNode.x + 44, y: relatedNode.y + 44 };
-      const gap = kind === 'video' ? 96 : 84;
       return {
         x: base.x + nodeWidth(base) + gap,
         y: base.y
@@ -17492,6 +18708,7 @@
     function extractPromptFor(kind, options = {}) {
       const directType = kind === 'image' ? 'imagePrompt' : 'videoPrompt';
       const targetRole = kind === 'image' ? 'genImage' : 'genVideo';
+      const sourceImageHint = kind === 'video' && options.sourceImageNodeId ? nodeById(options.sourceImageNodeId) : null;
       const selectedTarget = selectedNodes().find(n => n.role === targetRole);
       const linkedPrompt = selectedTarget
         ? upstreamInputsFor(selectedTarget.id).find(item =>
@@ -17501,7 +18718,7 @@
         : null;
       if (linkedPrompt) {
         const linkedImage = kind === 'video'
-          ? linkedImageForRole(linkedPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'])
+          ? linkedImageForRole(linkedPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || sourceImageHint || linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'])
           : null;
         return promptPick(promptTextFromNode(linkedPrompt, { allowSummary: true }), options, {
           nodeId: linkedPrompt.id,
@@ -17516,7 +18733,7 @@
       if (directPrompt) {
         const downstreamTarget = downstreamTargetForPrompt(directPrompt.id, targetRole);
         const sourceImage = kind === 'video'
-          ? (linkedImageForRole(directPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')))
+          ? (linkedImageForRole(directPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || sourceImageHint || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')))
           : null;
         return promptPick(promptTextFromNode(directPrompt, { allowSummary: true }), options, {
           nodeId: directPrompt.id,
@@ -17610,13 +18827,238 @@
     }
 
     function resolveAstraMention(label, project = currentProject()) {
+      return resolveAstraMentionFromNodes(label, project?.nodes);
+    }
+
+    function resolveAstraMentionFromNodes(label, nodes = []) {
       const value = String(label || '').trim().toLowerCase();
-      if (!value || !project) return null;
-      return project.nodes.find(node => node.id.toLowerCase() === value)
-        || project.nodes.find(node => (node.userLabels || []).some(item => String(item).trim().toLowerCase() === value))
-        || project.nodes.find(node => (node.entityAliases || []).some(item => String(item.label || '').trim().toLowerCase() === value))
-        || project.nodes.find(node => String(node.title || '').trim().toLowerCase() === value)
+      const items = arrayFrom(nodes);
+      if (!value || !items.length) return null;
+      return items.find(node => String(node.id || '').toLowerCase() === value)
+        || items.find(node => (node.userLabels || []).some(item => String(item).trim().toLowerCase() === value))
+        || items.find(node => (node.entityAliases || []).some(item => String(item.label || '').trim().toLowerCase() === value))
+        || items.find(node => String(node.title || '').trim().toLowerCase() === value)
         || null;
+    }
+
+    function controllerMessageMentionContext(text, project = currentProject()) {
+      const sourceText = String(text || '');
+      const matches = [...sourceText.matchAll(/@([\w\u4e00-\u9fff-]{1,64})/g)];
+      const empty = { direct: [], groups: [], unresolved: [] };
+      if (!matches.length || !project) return empty;
+      const scopeNodes = controllerMentionScopeNodes(project);
+      const candidates = controllerMentionCandidates(project, { includeHiddenGroups: true, nodes: scopeNodes });
+      const candidateMap = new Map(candidates.map(item => [String(item.alias || '').toLowerCase(), item]));
+      const direct = [];
+      const groups = [];
+      const unresolved = [];
+      const seenDirect = new Set();
+      const seenGroups = new Set();
+      matches.forEach(match => {
+        const alias = String(match[1] || '').trim();
+        const key = alias.toLowerCase();
+        const candidate = candidateMap.get(key);
+        if (candidate?.group) {
+          if (!seenGroups.has(candidate.group)) {
+            seenGroups.add(candidate.group);
+            groups.push({
+              alias,
+              group: candidate.group,
+              title: candidate.title,
+              astraIds: arrayFrom(candidate.astraIds),
+              selector: { ids: arrayFrom(candidate.astraIds) },
+              count: arrayFrom(candidate.astraIds).length
+            });
+          }
+          return;
+        }
+        const node = candidate?.node || resolveAstraMentionFromNodes(alias, scopeNodes);
+        if (node?.id) {
+          if (!seenDirect.has(node.id)) {
+            seenDirect.add(node.id);
+            direct.push({
+              alias,
+              astraId: node.id,
+              title: node.title || '',
+              family: node.family || '',
+              role: node.role || '',
+              type: node.type || ''
+            });
+          }
+          return;
+        }
+        unresolved.push(alias);
+      });
+      return { direct, groups, unresolved };
+    }
+
+    function filteredControllerMentionCandidates(query = '', project = currentProject()) {
+      const needle = String(query || '').trim().toLowerCase();
+      const items = controllerMentionCandidates(project);
+      if (!needle) return items;
+      return items.filter(item => [
+        item.alias,
+        item.title,
+        item.kindLabel,
+        item.node?.id,
+        item.node?.title,
+        ...(item.node?.userLabels || [])
+      ].some(value => String(value || '').toLowerCase().includes(needle)));
+    }
+
+    function controllerMentionCandidates(project = currentProject(), options = {}) {
+      if (!project) return [];
+      const nodes = arrayFrom(options.nodes || controllerMentionScopeNodes(project))
+        .filter(controllerMentionableNode);
+      const groups = controllerMentionGroupCandidates(project, { ...options, nodes });
+      const counts = {};
+      const direct = nodes.map(node => {
+        const base = controllerMentionAliasBase(node);
+        counts[base] = (counts[base] || 0) + 1;
+        return {
+          alias: `${base}_${counts[base]}`,
+          node,
+          title: node.title || node.id,
+          kindLabel: controllerMentionKindLabel(node),
+          mediaKind: mediaMentionKind(node)
+        };
+      });
+      return [...(options.includeHiddenGroups ? groups : groups.filter(item => item.visible !== false)), ...direct];
+    }
+
+    function controllerMentionGroupCandidates(project = currentProject(), options = {}) {
+      const buckets = new Map();
+      arrayFrom(options.nodes || controllerMentionScopeNodes(project))
+        .filter(controllerMentionableNode)
+        .forEach(node => {
+          const slug = controllerMentionGroupSlug(node);
+          if (!slug) return;
+          if (!buckets.has(slug)) {
+            buckets.set(slug, {
+              slug,
+              noun: controllerMentionGroupNoun(node),
+              title: controllerMentionGroupTitle(node),
+              mediaKind: mediaMentionKind(node),
+              astraIds: []
+            });
+          }
+          buckets.get(slug).astraIds.push(node.id);
+        });
+      const groups = [...buckets.values()]
+        .filter(item => item.astraIds.length > 1)
+        .map(item => ({
+          alias: `所有${item.noun}`,
+          aliases: [`全部${item.noun}`, item.slug],
+          group: item.slug,
+          title: `所有${item.title}`,
+          kindLabel: `${item.astraIds.length} 个 ${item.title}`,
+          astraIds: item.astraIds,
+          mediaKind: item.mediaKind
+        }));
+      if (!options.includeHiddenGroups) return groups;
+      return groups.flatMap(item => [
+        item,
+        ...arrayFrom(item.aliases).map(alias => ({ ...item, alias, visible: false }))
+      ]);
+    }
+
+    function controllerMentionScopeNodes(project = currentProject()) {
+      if (!project) return [];
+      const nodes = arrayFrom(project.nodes);
+      const byId = new Map(nodes.map(node => [String(node.id || ''), node]));
+      const selectedIds = new Set(
+        arrayFrom(state.selectedNodeIds)
+          .map(id => String(id || ''))
+          .filter(id => byId.has(id))
+      );
+      if (!selectedIds.size) return [];
+      const scopedIds = new Set(selectedIds);
+      arrayFrom(project.links).forEach(link => {
+        const from = String(link.fromNodeId || link.from_astra_id || '');
+        const to = String(link.toNodeId || link.to_astra_id || '');
+        if (!from || !to) return;
+        if (selectedIds.has(from) && byId.has(to)) scopedIds.add(to);
+        if (selectedIds.has(to) && byId.has(from)) scopedIds.add(from);
+      });
+      return nodes.filter(node => scopedIds.has(String(node.id || '')));
+    }
+
+    function controllerMentionableNode(node) {
+      if (!node?.id) return false;
+      return node.family === 'Comet'
+        || node.family === 'Sol'
+        || node.family === 'Luna'
+        || node.family === 'Polaris'
+        || isMentionableMediaAstra(node);
+    }
+
+    function controllerMentionAliasBase(node) {
+      if (node.role === 'imagePrompt') return 'image_prompt';
+      if (node.role === 'videoPrompt') return 'video_prompt';
+      if (isImageAstra(node)) return 'image';
+      if (isVideoAstra(node)) return 'video';
+      if (node.role === 'shotScript') return 'shot_script';
+      if (node.role === 'creativeBrief') return 'brief';
+      if (node.role === 'styleLock') return 'style_lock';
+      if (node.role === 'videoLock') return 'video_lock';
+      return String(node.role || node.type || node.family || 'astra').replace(/[^\w\u4e00-\u9fff-]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase() || 'astra';
+    }
+
+    function controllerMentionGroupSlug(node) {
+      if (node.role === 'imagePrompt') return 'all_image_prompts';
+      if (node.role === 'videoPrompt') return 'all_video_prompts';
+      if (node.role === 'genImage') return 'all_generated_images';
+      if (node.role === 'refImage') return 'all_reference_images';
+      if (node.role === 'genVideo') return 'all_generated_videos';
+      if (node.role === 'refVideo') return 'all_reference_videos';
+      if (node.role === 'shotScript') return 'all_shot_scripts';
+      if (node.role === 'creativeBrief') return 'all_creative_briefs';
+      if (node.role === 'styleLock') return 'all_style_locks';
+      if (node.role === 'videoLock') return 'all_video_locks';
+      if (node.role === 'starFlowPlanner') return 'all_starflow_planners';
+      const base = controllerMentionAliasBase(node);
+      return base ? `all_${base}s` : '';
+    }
+
+    function controllerMentionGroupNoun(node) {
+      if (node.role === 'imagePrompt') return '图片prompt';
+      if (node.role === 'videoPrompt') return '视频prompt';
+      if (node.role === 'genImage') return '生成图片';
+      if (node.role === 'refImage') return '参考图片';
+      if (node.role === 'genVideo') return '生成视频';
+      if (node.role === 'refVideo') return '参考视频';
+      if (node.role === 'shotScript') return '镜头脚本';
+      if (node.role === 'creativeBrief') return '创意brief';
+      if (node.role === 'styleLock') return '风格锁';
+      if (node.role === 'videoLock') return '视频锁';
+      if (node.role === 'starFlowPlanner') return '星流规划器';
+      return String(node.role || node.type || node.family || 'astra').replace(/[^\w\u4e00-\u9fff-]+/g, '') || 'Astra';
+    }
+
+    function controllerMentionGroupTitle(node) {
+      if (node.role === 'imagePrompt') return '图片 Prompt';
+      if (node.role === 'videoPrompt') return '视频 Prompt';
+      if (node.role === 'genImage') return '生成图片';
+      if (node.role === 'refImage') return '参考图片';
+      if (node.role === 'genVideo') return '生成视频';
+      if (node.role === 'refVideo') return '参考视频';
+      if (node.role === 'shotScript') return '镜头脚本';
+      if (node.role === 'creativeBrief') return '创意 Brief';
+      if (node.role === 'styleLock') return '风格锁';
+      if (node.role === 'videoLock') return '视频锁';
+      if (node.role === 'starFlowPlanner') return '星流规划器';
+      return controllerMentionKindLabel(node);
+    }
+
+    function controllerMentionKindLabel(node) {
+      if (node.role === 'imagePrompt') return '图片 Prompt';
+      if (node.role === 'videoPrompt') return '视频 Prompt';
+      if (node.role === 'genImage') return '生成图片';
+      if (node.role === 'refImage') return '参考图片';
+      if (node.role === 'genVideo') return '生成视频';
+      if (node.role === 'refVideo') return '参考视频';
+      if (node.family === 'Polaris') return 'Polaris';
+      return `${node.family || 'Astra'}.${node.role || node.type || 'node'}`;
     }
 
     function promptReferenceCandidates(promptNodeId, project = currentProject()) {
@@ -17776,6 +19218,20 @@
       return null;
     }
 
+    function linkedVideoInputsForRoles(toNodeId, roles, requireAsset = true) {
+      return upstreamInputsFor(toNodeId)
+        .filter(item => roles.includes(item.inputRole) && isVideoAstra(item.node) && (!requireAsset || assetDisplayUrl(item.node)))
+        .map(item => item.node);
+    }
+
+    function firstLinkedVideoInputForRoles(toNodeIds, roles, requireAsset = true) {
+      for (const toNodeId of toNodeIds.filter(Boolean)) {
+        const node = linkedVideoInputsForRoles(toNodeId, roles, requireAsset)[0];
+        if (node) return node;
+      }
+      return null;
+    }
+
     function canFillGenerationTarget(node, role, options = {}) {
       const status = node?.status || 'placeholder';
       return !!node
@@ -17858,6 +19314,10 @@
       const model = operationModelValue(promptPick.model || currentProject().runtime.videoModel, 'video');
       const mediaSettings = mergeMediaSettings(starFlowMediaSettings(), promptPick.mediaSettings, 'video', model);
       const inputOwners = [promptNodeId, target?.id].filter(Boolean);
+      const editInput = firstLinkedVideoInputForRoles(inputOwners, ['video_edit'], false);
+      const linkedEditVideo = editInput && assetDisplayUrl(editInput) ? editInput : null;
+      const referenceVideoInputs = inputOwners.flatMap(ownerId => linkedVideoInputsForRoles(ownerId, ['reference_video'], false));
+      const linkedReferenceVideos = referenceVideoInputs.filter(node => assetDisplayUrl(node));
       const firstInput = firstLinkedImageInputForRoles(inputOwners, ['first_frame'], false);
       const lastInput = firstLinkedImageInputForRoles(inputOwners, ['last_frame'], false);
       const linkedFirst = firstInput && assetDisplayUrl(firstInput) ? firstInput : null;
@@ -17868,32 +19328,49 @@
         .map(nodeById)
         .filter(node => node && assetDisplayUrl(node));
       const mentionedImages = mentionNodes.filter(node => node.mime?.startsWith('image/'));
+      const mentionedVideos = mentionNodes.filter(node => node.mime?.startsWith('video/'));
+      const editMentionIds = new Set((promptPick.mentionBindings || [])
+        .filter(binding => binding.inputRole === 'video_edit')
+        .map(binding => binding.nodeId));
+      const editVideo = linkedEditVideo || mentionedVideos.find(node => editMentionIds.has(node.id)) || null;
       const fallbackImage = currentProject().nodes.findLast?.(node => assetDisplayUrl(node) && node.mime?.startsWith('image/'));
       const hasExplicitFrameInput = !!firstInput || !!lastInput;
-      const first = linkedFirst || (!hasExplicitFrameInput ? mentionedImages[0] || selectedImages[0] || (promptPick.sourceImageNodeId ? currentProject().nodes.find(node => node.id === promptPick.sourceImageNodeId) : null) || linkedRef || fallbackImage : null) || null;
-      const last = linkedLast || (!hasExplicitFrameInput && selectedImages.length >= 2 ? selectedImages[1] : null);
+      const pickedSourceImage = promptPick.sourceImageNodeId ? currentProject().nodes.find(node => node.id === promptPick.sourceImageNodeId) : null;
+      const first = editVideo ? null : linkedFirst || (!hasExplicitFrameInput ? mentionedImages[0] || pickedSourceImage || selectedImages[0] || linkedRef || fallbackImage : null) || null;
+      const last = editVideo ? null : linkedLast || (!hasExplicitFrameInput && selectedImages.length >= 2 ? selectedImages[1] : null);
       const linkedRefs = inputOwners
         .flatMap(ownerId => linkedImageInputsForRoles(ownerId, ['ref', 'style_ref', 'subject_ref']))
         .map(node => node.id);
       const mentionRefs = mentionedImages
         .map(node => node.id)
         .filter(id => id !== first?.id && id !== last?.id);
-      const mode = first && last ? 'image_to_video_first_last_frame' : first ? 'image_to_video' : 'text_to_video';
+      const mentionVideoRefs = mentionedVideos
+        .filter(node => node.id !== editVideo?.id)
+        .map(node => node.id);
+      const referenceVideoNodeIds = [...new Set([
+        ...mentionVideoRefs,
+        ...linkedReferenceVideos.map(node => node.id)
+      ].filter(id => id !== editVideo?.id))];
+      const mode = editVideo ? 'video_edit' : first && last ? 'image_to_video_first_last_frame' : first ? 'image_to_video' : 'text_to_video';
       return {
         mode,
         model,
         promptNodeId: promptPick.nodeId || '',
         firstFrameNodeId: first?.id || '',
         lastFrameNodeId: last?.id || '',
+        editVideoNodeId: editVideo?.id || '',
+        referenceVideoNodeIds,
         referenceNodeIds: [...new Set([
           ...mentionRefs,
           ...linkedRefs.filter(id => !mentionRefs.includes(id))
         ].filter(id => id !== first?.id && id !== last?.id))],
-        inputNodeIds: [...new Set([first?.id, last?.id, ...mentionRefs, ...linkedRefs].filter(Boolean))],
+        inputNodeIds: [...new Set([editVideo?.id, first?.id, last?.id, ...mentionRefs, ...linkedRefs, ...referenceVideoNodeIds].filter(Boolean))],
         mentionBindings: promptPick.mentionBindings || [],
         mediaMentionNodeIds: promptPick.mentionNodeIds || [],
         mediaSettings,
         missingInputRoles: [
+          editInput && !linkedEditVideo ? 'video_edit' : '',
+          referenceVideoInputs.some(node => !assetDisplayUrl(node)) ? 'reference_video' : '',
           firstInput && !linkedFirst ? 'first_frame' : '',
           lastInput && !linkedLast ? 'last_frame' : ''
         ].filter(Boolean)
@@ -18550,6 +20027,7 @@
           type: 'referenceVideoPrompt',
           family: 'Comet',
           role: 'referenceVideoPrompt',
+          placement: 'avoid',
           title: `${source.title} · 参考视频 Prompt ${index + 1}`,
           status: 'running',
           progressText: '正在反推参考 prompt',
@@ -18593,6 +20071,7 @@
           type: 'referenceImagePrompt',
           family: 'Comet',
           role: 'referenceImagePrompt',
+          placement: 'avoid',
           title: `${source.title} · 参考图 Prompt ${index + 1}`,
           status: 'running',
           progressText: '正在反推参考图 prompt',
@@ -18674,6 +20153,7 @@
           type: 'referenceImagePrompt',
           family: 'Comet',
           role: 'referenceImagePrompt',
+          placement: 'avoid',
           title: `${media.title} · 反推图片 Prompt`,
           content: '',
           x: media.x + nodeWidth(media) + 84,
@@ -18721,6 +20201,7 @@
           type: 'referenceVideoPrompt',
           family: 'Comet',
           role: 'referenceVideoPrompt',
+          placement: 'avoid',
           title: `${media.title} · 反推视频 Prompt`,
           content: '',
           x: media.x + nodeWidth(media) + 84,
@@ -19407,6 +20888,7 @@
     function setZoom(next, options = {}) {
       state.zoom = Math.min(1.8, Math.max(0.2, next));
       applyZoom();
+      scheduleAstraJumpLayerUpdate(currentProject(), { recompute: false });
       if (options.save === true) scheduleSave();
     }
 
@@ -20030,6 +21512,7 @@
       $('organizeSelectedBtn').onclick = organizeSelectedAstra;
       $('visualSchemeToggleBtn').onclick = toggleVisualScheme;
       $('feishuFeedbackBtn').onclick = openFeishuFeedback;
+      $('updateReminderDismissBtn').onclick = dismissUpdateReminder;
       $('settingsBtn').onclick = () => {
         syncSettingsUI();
         $('settingsModal').classList.add('open');
@@ -20098,8 +21581,15 @@
       };
       $('downloadBtn').onclick = downloadPackage;
       $('sendBtn').onclick = sendChat;
-      $('chatInput').oninput = renderSendAction;
-      $('chatInput').onkeydown = event => { if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) sendChat(); };
+      $('chatInput').oninput = () => {
+        renderSendAction();
+        updateControllerMentionMenuForChat($('chatInput'));
+      };
+      $('chatInput').onkeyup = () => updateControllerMentionMenuForChat($('chatInput'));
+      $('chatInput').onkeydown = event => {
+        if (handleControllerMentionKeydown(event, $('chatInput'))) return;
+        if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) sendChat();
+      };
       $('attachBtn').onclick = () => $('fileInput').click();
       $('fileInput').onchange = event => handleFiles([...event.target.files]);
       $('zoomOutBtn').onclick = () => setZoom(state.zoom - 0.1);
@@ -20159,6 +21649,9 @@
           addMessage('system', `剪贴板图片导入失败：${error.message}`);
         });
       });
+      window.addEventListener('resize', () => {
+        scheduleAstraJumpLayerUpdate(currentProject(), { recompute: false });
+      });
       ['pointerdown', 'keydown', 'input', 'wheel', 'paste', 'drop'].forEach(type => {
         window.addEventListener(type, noteBackupUserActivity, { capture: true, passive: true });
       });
@@ -20186,6 +21679,7 @@
       requestPersistentStorage();
       bindEvents();
       render();
+      scheduleAuralisUpdateChecks();
     }
 
     async function requestPersistentStorage() {
@@ -20216,6 +21710,7 @@
       prepareImportedProject,
       render,
       setZoom,
+      astraNavigationDebug,
       collectProjectContext,
       planStarFlow,
       activePendingControllerIntent,
@@ -20345,6 +21840,11 @@
       flushTelemetry,
       parseTelemetryFeedback,
       chatUsageFromResponse,
+      extractAuralisVersionFromHtml,
+      compareAuralisVersions,
+      shouldShowUpdateReminder,
+      checkForAuralisUpdate,
+      dismissUpdateReminder,
       AURALIS_VERSION,
       AURALIS_CHANGELOG
     };
