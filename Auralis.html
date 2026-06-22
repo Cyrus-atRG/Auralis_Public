@@ -1679,6 +1679,190 @@
       background: oklch(0.02 0.004 250);
     }
 
+    .annotation-editor-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 98;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: oklch(0.03 0.006 250 / 0.9);
+    }
+
+    .annotation-editor {
+      width: min(1320px, calc(100vw - 48px));
+      height: min(940px, calc(100vh - 48px));
+      border: 1px solid oklch(0.78 0.13 48 / 0.64);
+      border-top: 3px solid oklch(0.78 0.13 48);
+      border-bottom: 3px solid oklch(0.78 0.13 48);
+      border-radius: 14px;
+      background: oklch(0.04 0.006 250);
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+      overflow: hidden;
+      box-shadow: 0 0 28px oklch(0 0 0 / 0.55);
+    }
+
+    .annotation-toolbar {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      background: oklch(0.09 0.012 250);
+      overflow-x: auto;
+    }
+
+    .annotation-tool-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding-right: 8px;
+      border-right: 1px solid var(--line-soft);
+    }
+
+    .annotation-tool-group:last-child {
+      border-right: 0;
+      padding-right: 0;
+    }
+
+    .annotation-tool {
+      min-width: 54px;
+    }
+
+    .annotation-tool.active {
+      border-color: var(--primary);
+      color: var(--ink);
+      background: var(--primary-soft);
+    }
+
+    .annotation-toolbar label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .annotation-color-swatches {
+      display: grid;
+      grid-template-columns: repeat(5, 14px);
+      grid-auto-rows: 14px;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .annotation-color-swatch {
+      appearance: none;
+      display: block;
+      width: 14px;
+      height: 14px;
+      min-width: 14px;
+      min-height: 14px;
+      max-width: 14px;
+      max-height: 14px;
+      padding: 0;
+      border: 1px solid oklch(0.84 0.018 255 / 0.58);
+      border-radius: 2px;
+      background: var(--annotation-color);
+      box-shadow: inset 0 0 0 1px oklch(0 0 0 / 0.1);
+      cursor: pointer;
+      transform: none;
+      transition: border-color .12s ease, outline-color .12s ease;
+    }
+
+    .annotation-color-swatch:hover,
+    .annotation-color-swatch:focus-visible {
+      border-color: oklch(0.92 0.03 250);
+      background: var(--annotation-color);
+      outline: 2px solid oklch(0.73 0.115 205 / 0.42);
+      outline-offset: 1px;
+      transform: none;
+    }
+
+    .annotation-color-swatch.active {
+      border-color: oklch(0.96 0.02 92);
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+      box-shadow: none;
+    }
+
+    .annotation-toolbar input[type="range"] {
+      width: 128px;
+    }
+
+    .annotation-size-value {
+      min-width: 34px;
+      color: var(--silver);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .annotation-stage {
+      min-height: 0;
+      position: relative;
+      overflow: auto;
+      background:
+        linear-gradient(45deg, oklch(0.06 0.006 250) 25%, transparent 25%),
+        linear-gradient(-45deg, oklch(0.06 0.006 250) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, oklch(0.06 0.006 250) 75%),
+        linear-gradient(-45deg, transparent 75%, oklch(0.06 0.006 250) 75%),
+        oklch(0.025 0.004 250);
+      background-size: 28px 28px;
+      background-position: 0 0, 0 14px, 14px -14px, -14px 0;
+    }
+
+    .annotation-canvas-wrap {
+      min-width: 100%;
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+    }
+
+    .annotation-canvas-shell {
+      position: relative;
+      box-shadow: 0 0 0 1px oklch(0.84 0.018 255 / 0.22), 0 16px 34px oklch(0 0 0 / 0.45);
+      background: oklch(0.02 0.004 250);
+    }
+
+    .annotation-canvas-shell canvas {
+      display: block;
+      max-width: min(100%, calc(100vw - 92px));
+      max-height: calc(100vh - 194px);
+      width: auto;
+      height: auto;
+      touch-action: none;
+      cursor: none;
+    }
+
+    .annotation-cursor-preview {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 12px;
+      height: 12px;
+      border: 2px solid var(--annotation-cursor-color, #ff0000);
+      border-radius: 50%;
+      background: transparent;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: 0;
+      box-shadow: 0 0 0 1px oklch(1 0 0 / 0.9), 0 0 0 2px oklch(0.73 0.115 205 / 0.45);
+      transition: opacity 0.08s ease;
+    }
+
+    .annotation-cursor-preview.visible {
+      opacity: 1;
+    }
+
+    .annotation-status {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .frame-cut-backdrop {
       position: fixed;
       inset: 0;
@@ -2602,6 +2786,20 @@
       border-color: var(--primary);
     }
 
+    html[data-visual-scheme="caelum"] .annotation-color-swatch,
+    html[data-visual-scheme="caelum"] .annotation-color-swatch:hover,
+    html[data-visual-scheme="caelum"] .annotation-color-swatch:focus-visible {
+      background: var(--annotation-color);
+      border-color: oklch(0.36 0.018 250 / 0.62);
+      color: inherit;
+      transform: none;
+    }
+
+    html[data-visual-scheme="caelum"] .annotation-color-swatch.active {
+      border-color: oklch(0.18 0.024 250);
+      outline-color: var(--primary);
+    }
+
     html[data-visual-scheme="caelum"] input,
     html[data-visual-scheme="caelum"] textarea,
     html[data-visual-scheme="caelum"] select {
@@ -2991,20 +3189,45 @@
 
     html[data-visual-scheme="caelum"] .modal-backdrop,
     html[data-visual-scheme="caelum"] .media-viewer-backdrop,
+    html[data-visual-scheme="caelum"] .annotation-editor-backdrop,
     html[data-visual-scheme="caelum"] .frame-cut-backdrop {
       background: oklch(0.58 0.026 250 / 0.34);
     }
 
     html[data-visual-scheme="caelum"] .media-viewer,
+    html[data-visual-scheme="caelum"] .annotation-editor,
     html[data-visual-scheme="caelum"] .frame-cut-panel {
       background: oklch(0.99 0.004 250);
       box-shadow: 0 18px 44px oklch(0.28 0.025 250 / 0.22);
     }
 
     html[data-visual-scheme="caelum"] .media-viewer-head,
+    html[data-visual-scheme="caelum"] .annotation-toolbar,
     html[data-visual-scheme="caelum"] .frame-cut-head,
     html[data-visual-scheme="caelum"] .frame-cut-controls {
       background: oklch(0.965 0.01 250);
+    }
+
+    html[data-visual-scheme="caelum"] .annotation-editor {
+      border-color: oklch(0.62 0.14 55 / 0.36);
+      border-top-color: oklch(0.62 0.14 55 / 0.7);
+      border-bottom-color: oklch(0.62 0.14 55 / 0.7);
+    }
+
+    html[data-visual-scheme="caelum"] .annotation-stage {
+      background:
+        linear-gradient(45deg, oklch(0.91 0.008 250) 25%, transparent 25%),
+        linear-gradient(-45deg, oklch(0.91 0.008 250) 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, oklch(0.91 0.008 250) 75%),
+        linear-gradient(-45deg, transparent 75%, oklch(0.91 0.008 250) 75%),
+        oklch(0.965 0.006 250);
+      background-size: 28px 28px;
+      background-position: 0 0, 0 14px, 14px -14px, -14px 0;
+    }
+
+    html[data-visual-scheme="caelum"] .annotation-canvas-shell {
+      background: oklch(0.96 0.006 250);
+      box-shadow: 0 0 0 1px oklch(0.42 0.025 250 / 0.22), 0 16px 34px oklch(0.28 0.025 250 / 0.18);
     }
 
     html[data-visual-scheme="caelum"] .frame-cut-mode label {
@@ -3324,6 +3547,7 @@
   <div id="contextMenuRoot"></div>
   <div id="mentionMenuRoot"></div>
   <div id="mediaViewerRoot"></div>
+  <div id="annotationEditorRoot"></div>
   <div id="frameCutRoot"></div>
 
   <input class="hidden" id="fileInput" type="file" multiple accept="image/*,video/*,audio/*,.srt,.vtt,.ass,.ssa,.lrc,.json,.txt,.md">
@@ -5160,19 +5384,17 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.03';
+    const AURALIS_VERSION = 'Auralis v1.04';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '优化节点放置位置和跳转导航，避免多次拖动画布后找不到已有节点。',
-      '新增应用内版本更新提醒，方便用户及时收到更新提示。',
-      '现在可在对话框内@已引用的节点，同时描述多个不同类型内容时表述更精准。',
-      '扩展主控Agent的活动范围，现在可以多个参考类型并行生成。',
-      '新增大范围选择确认和过多并行操作确认，减少误操作风险。',
-      '视频并行批量生成逻辑优化。'
+      '新增图片画笔标注编辑能力，可直接在图片 Astra 上标注修改意图，并自动生成用于图像编辑的 editedImage 和修改 Prompt。',
+      '优化图片编辑 Prompt 的引用绑定，原图、标注图等多个图片输入会稳定区分，减少生图时引用错图的问题。',
+      '修复多 Aura/后台生成场景下，主控任务可能受当前打开 Aura 影响而把生成结果落到错误 Aura 的问题。',
+      '优化图片、视频生成任务的上下文隔离，提升并发生成和切换 Aura 时的稳定性。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -5225,6 +5447,7 @@
     const PLANNER_IMAGE_ASPECT_RATIOS = ['1:1', '16:9', '9:16'];
     const PLANNER_VIDEO_ASPECT_RATIOS = PLANNER_IMAGE_ASPECT_RATIOS;
     const PLANNER_IMAGE_RESOLUTIONS = ['1080', '2k', '4k'];
+    const ANNOTATION_COLORS = ['#ff0000', '#000000', '#ffffff', '#ff7a00', '#ffe600', '#00ff38', '#00e5ff', '#0066ff', '#8b00ff', '#ff00c8'];
     const IMAGE_MODEL_COMPACT_LABELS = Object.freeze({
       'rg-gpt-image-2': 'RG/GI2',
       'rg-nano-banana-2': 'RG/NB2',
@@ -5359,6 +5582,7 @@
       video_edit: '视频编辑',
       ref: '参考',
       source_image: '原图修改',
+      annotation: '标注',
       first_frame: '首帧',
       last_frame: '尾帧',
       style_ref: '风格',
@@ -5919,6 +6143,7 @@
       suppressPromptAutoTarget: false,
       inlineEditorNodeId: '',
       mediaViewerNodeId: '',
+      annotationEditor: null,
       frameCutNodeId: '',
       frameCutDraft: null,
       pendingLargeSelectionMessage: '',
@@ -5970,6 +6195,7 @@
     const $ = (id) => document.getElementById(id);
     const uid = (prefix = 'id') => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     let activeControllerOperationContext = null;
+    let activeControllerProjectContext = null;
     let telemetryFlushTimer = 0;
     let telemetryExitFlushStarted = false;
 
@@ -8053,6 +8279,7 @@
       renderContextMenu();
       renderMentionMenu();
       renderMediaViewer();
+      renderAnnotationEditor();
       renderFrameCutPanel();
       renderCanvasHistoryButtons();
       renderUpdateReminder();
@@ -8210,7 +8437,7 @@
         : (ready ? '公司 API' : '未配置 API');
     }
 
-    function setAgentStatus(kind, stage, text, detail = '', project = currentProject()) {
+    function setAgentStatus(kind, stage, text, detail = '', project = activeControllerProjectContext || currentProject()) {
       if (!project) return;
       project.agent = { kind, stage, text, detail };
       if (isProjectActive(project)) state.agent = { ...project.agent };
@@ -8366,6 +8593,7 @@
       renderContextMenu();
       renderMentionMenu();
       if (changedNodeIds.includes(state.mediaViewerNodeId)) renderMediaViewer();
+      if (state.annotationEditor && changedNodeIds.some(id => [state.annotationEditor.sourceNodeId, state.annotationEditor.annotationNodeId].includes(id))) renderAnnotationEditor();
       if (changedNodeIds.includes(state.frameCutNodeId) && !isActiveFrameCutPanelStable(project)) renderFrameCutPanel();
       applyZoom();
       scheduleCanvasGeometrySync(project);
@@ -9338,6 +9566,9 @@
       const groupAction = selectedCount > 1 && state.selectedNodeIds.includes(node.id)
         ? '<button type="button" data-menu-action="saveSelectionLibrary">收藏选中组</button>'
         : '';
+      const annotationAction = isImageAstra(node) && assetDisplayUrl(node) && !(selectedCount > 1 && state.selectedNodeIds.includes(node.id))
+        ? '<button type="button" data-menu-action="annotateImage">画笔标注</button>'
+        : '';
       const frameCutAction = isVideoAstra(node) && assetDisplayUrl(node)
         ? '<button type="button" data-menu-action="manualFrameCut">手动切帧</button>'
         : '';
@@ -9360,7 +9591,7 @@
       const duplicateAction = `<button type="button" data-menu-action="duplicateAstra">复制 Astra${targetCount > 1 ? ` (${targetCount})` : ''}</button>`;
       const disconnectInputAction = `<button type="button" data-menu-action="disconnectInputs">取消输入连接${inputLinkCount ? ` (${inputLinkCount})` : ''}</button>`;
       const disconnectOutputAction = `<button type="button" data-menu-action="disconnectOutputs">取消输出连接${outputLinkCount ? ` (${outputLinkCount})` : ''}</button>`;
-      const extraActionHeight = 34 + (retryAction ? 34 : 0) + (frameCutAction ? 34 : 0) + (reversePromptAction ? 34 : 0) + (generateImagesAction ? 34 : 0) + (generateVideosAction ? 34 : 0);
+      const extraActionHeight = 34 + (retryAction ? 34 : 0) + (annotationAction ? 34 : 0) + (frameCutAction ? 34 : 0) + (reversePromptAction ? 34 : 0) + (generateImagesAction ? 34 : 0) + (generateVideosAction ? 34 : 0);
       const { x, y } = clampContextMenuPoint(menu.x, menu.y, 196, 300 + extraActionHeight);
       return `<div class="context-menu" style="left:${x}px;top:${y}px" data-context-menu data-menu-type="astra" data-menu-id="${escapeHtml(node.id)}">
         <div class="context-menu-title">${escapeHtml(node.title)}</div>
@@ -9375,6 +9606,7 @@
         ${generateVideosAction}
         ${retryAction}
         ${groupAction}
+        ${annotationAction}
         ${frameCutAction}
         ${reversePromptAction}
       </div>`;
@@ -9625,6 +9857,7 @@
       if (action === 'saveSelectionLibrary') return saveSelectedNodesToLibrary();
       if (action === 'generateImages') return generateForContextSelection(id, 'image');
       if (action === 'generateVideos') return generateForContextSelection(id, 'video');
+      if (action === 'annotateImage') return startImageAnnotationFromContext(id);
       if (action === 'manualFrameCut') return openFrameCutPanel(id);
       if (action === 'deriveMediaPrompts') return derivePromptsForMediaSelection(id);
       if (action === 'selectConnectedAstra') return selectConnectedAstra(id);
@@ -9747,6 +9980,591 @@
       if (segmentVideo) attachSegmentPlayback(segmentVideo, Number(segmentVideo.dataset.segmentStart), Number(segmentVideo.dataset.segmentEnd), { autoplay: true, loop: true });
     }
 
+    function startImageAnnotationFromContext(id) {
+      const source = nodeById(id);
+      if (!source || !isImageAstra(source) || !assetDisplayUrl(source)) return render();
+      if (state.selectedNodeIds.length > 1 && state.selectedNodeIds.includes(id)) {
+        addActivity('astra', '画笔标注只支持单个图片 Astra。', 'fail');
+        return render();
+      }
+      const project = currentProject();
+      const point = findFreePosition(defaultAstraWidth({ type: 'image', role: 'genImage' }), 300, source.x + nodeWidth(source) + 84, source.y, { project });
+      const annotation = addNode({
+        type: 'image',
+        family: 'Sol',
+        role: 'genImage',
+        title: 'editedImage',
+        status: 'draft',
+        x: point.x,
+        y: point.y,
+        summary: `Annotation draft for ${source.title || source.id}`,
+        userLabels: ['editedImage'],
+        meta: {
+          annotationSourceNodeId: source.id,
+          annotationKind: 'paint_mark'
+        },
+        select: false
+      }, project);
+      addAstraLink(source.id, annotation.id, { relation: 'annotation', inputRole: 'annotation', visualStyle: 'dashed', actor: 'user', project });
+      scheduleSave();
+      state.selectedNodeIds = [source.id, annotation.id];
+      refreshProjectSurface(project, { nodeIds: [source.id, annotation.id] });
+      openImageAnnotationEditor(source.id, annotation.id);
+    }
+
+    async function openImageAnnotationEditor(sourceNodeId, annotationNodeId) {
+      const source = nodeById(sourceNodeId);
+      const annotation = nodeById(annotationNodeId);
+      if (!source || !annotation || !assetDisplayUrl(source)) return;
+      closeContextMenu({ render: false });
+      closeMediaViewer();
+      closeFrameCutPanel();
+      state.annotationEditor = {
+        sourceNodeId,
+        annotationNodeId,
+        imageUrl: '',
+        mode: 'brush',
+        color: ANNOTATION_COLORS[0],
+        size: 8,
+        status: 'loading',
+        error: '',
+        history: [],
+        redo: [],
+        drawing: null,
+        cursorClient: null,
+        sourceImageWidth: 0,
+        sourceImageHeight: 0,
+        saving: false,
+        canvasElement: null
+      };
+      renderAnnotationEditor();
+      try {
+        const imageUrl = await dataUrlForAsset(source) || assetDisplayUrl(source);
+        if (!state.annotationEditor || state.annotationEditor.sourceNodeId !== sourceNodeId) return;
+        state.annotationEditor.imageUrl = imageUrl;
+        state.annotationEditor.status = 'ready';
+        renderAnnotationEditor();
+      } catch (error) {
+        if (!state.annotationEditor || state.annotationEditor.sourceNodeId !== sourceNodeId) return;
+        state.annotationEditor.status = 'failed';
+        state.annotationEditor.error = error.message;
+        renderAnnotationEditor();
+      }
+    }
+
+    function closeAnnotationEditor(options = {}) {
+      const editor = state.annotationEditor;
+      state.annotationEditor = null;
+      const root = $('annotationEditorRoot');
+      if (root) root.innerHTML = '';
+      if (options.discardDraft !== false && discardUnfinishedAnnotationDraft(editor)) {
+        addActivity('astra', '已取消标注，移除空白 editedImage。', 'info');
+      }
+    }
+
+    function discardUnfinishedAnnotationDraft(editor) {
+      if (!editor?.annotationNodeId) return false;
+      const project = currentProject();
+      const annotation = nodeById(editor.annotationNodeId, project);
+      if (!project || !annotation) return false;
+      if (annotation.status !== 'draft' || nodeHasAsset(annotation) || annotation.meta?.annotationCompletedAt) return false;
+      if (annotation.meta?.annotationSourceNodeId !== editor.sourceNodeId || annotation.meta?.annotationKind !== 'paint_mark') return false;
+      const id = annotation.id;
+      project.nodes = (project.nodes || []).filter(node => node.id !== id);
+      project.links = (project.links || []).filter(link =>
+        (link.fromNodeId || link.from_astra_id) !== id
+        && (link.toNodeId || link.to_astra_id) !== id
+      );
+      state.selectedNodeIds = (state.selectedNodeIds || []).filter(nodeId => nodeId !== id);
+      project.updatedAt = new Date().toISOString();
+      scheduleSave();
+      refreshProjectSurface(project);
+      return true;
+    }
+
+    function renderAnnotationEditor() {
+      const root = $('annotationEditorRoot');
+      if (!root) return;
+      const editor = state.annotationEditor;
+      if (!editor) {
+        root.innerHTML = '';
+        return;
+      }
+      const source = nodeById(editor.sourceNodeId);
+      const annotation = nodeById(editor.annotationNodeId);
+      if (!source || !annotation) {
+        state.annotationEditor = null;
+        root.innerHTML = '';
+        return;
+      }
+      const disabled = editor.status !== 'ready' || editor.saving ? 'disabled' : '';
+      const size = Math.max(2, Math.min(80, Number(editor.size) || 8));
+      const statusText = editor.status === 'loading'
+        ? '正在载入原图...'
+        : editor.status === 'failed'
+          ? `载入失败：${editor.error || 'unknown error'}`
+          : '在原图上标出要修改的位置，完成后会生成 editedImage。';
+      root.innerHTML = `<div class="annotation-editor-backdrop" data-annotation-backdrop>
+        <section class="annotation-editor" role="dialog" aria-modal="true" aria-label="画笔标注">
+          <div class="media-viewer-head">
+            <div class="media-viewer-title">画笔标注 · ${escapeHtml(source.title || source.id)}</div>
+            <div class="media-viewer-actions">
+              <button class="primary-btn" type="button" data-annotation-finish ${disabled}>完成编辑</button>
+              <button class="icon-btn" type="button" data-annotation-close>×</button>
+            </div>
+          </div>
+          <div class="annotation-toolbar">
+            <div class="annotation-tool-group">
+              ${annotationToolButton('brush', '画笔', editor.mode)}
+              ${annotationToolButton('smear', '涂抹', editor.mode)}
+              ${annotationToolButton('rect', '方框', editor.mode)}
+              ${annotationToolButton('ellipse', '圆框', editor.mode)}
+            </div>
+            <div class="annotation-tool-group">
+              <label>颜色 ${renderAnnotationColorSwatches(editor.color)}</label>
+              <label>粗细 <input type="range" min="2" max="80" step="1" value="${size}" data-annotation-size></label>
+              <span class="annotation-size-value" data-annotation-size-value>${size}px</span>
+            </div>
+            <div class="annotation-tool-group">
+              <button class="small-btn" type="button" data-annotation-undo ${editor.history.length > 1 ? '' : 'disabled'}>撤销</button>
+              <button class="small-btn" type="button" data-annotation-redo ${editor.redo.length ? '' : 'disabled'}>恢复</button>
+            </div>
+            <span class="annotation-status">${escapeHtml(statusText)}</span>
+          </div>
+          <div class="annotation-stage">
+            <div class="annotation-canvas-wrap">
+              <div class="annotation-canvas-shell">
+                ${editor.imageUrl && editor.status !== 'failed' ? '<canvas data-annotation-canvas></canvas><div class="annotation-cursor-preview" data-annotation-cursor></div>' : `<div class="loading-shell">${escapeHtml(statusText)}</div>`}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>`;
+      bindAnnotationEditorControls(root);
+      if (editor.imageUrl && editor.status !== 'failed') setTimeout(initAnnotationCanvas, 0);
+    }
+
+    function annotationToolButton(mode, label, activeMode) {
+      return `<button class="small-btn annotation-tool ${mode === activeMode ? 'active' : ''}" type="button" data-annotation-tool="${escapeHtml(mode)}">${escapeHtml(label)}</button>`;
+    }
+
+    function renderAnnotationColorSwatches(activeColor) {
+      const active = normalizeAnnotationColor(activeColor);
+      return `<span class="annotation-color-swatches" role="radiogroup" aria-label="标注颜色">
+        ${ANNOTATION_COLORS.map(color => `<button class="annotation-color-swatch ${color === active ? 'active' : ''}" type="button" data-annotation-color="${escapeHtml(color)}" style="--annotation-color:${escapeHtml(color)}" aria-label="${escapeHtml(color)}" aria-checked="${color === active ? 'true' : 'false'}"></button>`).join('')}
+      </span>`;
+    }
+
+    function bindAnnotationEditorControls(root) {
+      root.querySelector('[data-annotation-close]')?.addEventListener('click', () => closeAnnotationEditor());
+      root.querySelector('[data-annotation-finish]')?.addEventListener('click', () => finishAnnotationEditor().catch(error => {
+        addActivity('astra', `标注保存失败：${error.message}`, 'fail');
+      }));
+      root.querySelectorAll('[data-annotation-tool]').forEach(button => {
+        button.addEventListener('click', () => setAnnotationTool(button.dataset.annotationTool));
+      });
+      root.querySelectorAll('[data-annotation-color]').forEach(button => {
+        button.addEventListener('click', () => setAnnotationColor(button.dataset.annotationColor));
+      });
+      root.querySelector('[data-annotation-size]')?.addEventListener('input', event => {
+        if (!state.annotationEditor) return;
+        state.annotationEditor.size = Math.max(2, Math.min(80, Number(event.target.value) || 8));
+        const label = root.querySelector('[data-annotation-size-value]');
+        if (label) label.textContent = `${state.annotationEditor.size}px`;
+        syncAnnotationCursorPreview();
+      });
+      root.querySelector('[data-annotation-undo]')?.addEventListener('click', undoAnnotationStroke);
+      root.querySelector('[data-annotation-redo]')?.addEventListener('click', redoAnnotationStroke);
+      root.querySelector('[data-annotation-backdrop]')?.addEventListener('pointerdown', event => {
+        if (event.target === event.currentTarget) event.stopPropagation();
+      });
+    }
+
+    function setAnnotationTool(mode) {
+      if (!state.annotationEditor || !['brush', 'smear', 'rect', 'ellipse'].includes(mode)) return;
+      state.annotationEditor.mode = mode;
+      const root = $('annotationEditorRoot');
+      root?.querySelectorAll('[data-annotation-tool]').forEach(button => {
+        button.classList.toggle('active', button.dataset.annotationTool === mode);
+      });
+      syncAnnotationCursorPreview();
+    }
+
+    function normalizeAnnotationColor(value) {
+      const color = String(value || '').toLowerCase();
+      return ANNOTATION_COLORS.includes(color) ? color : ANNOTATION_COLORS[0];
+    }
+
+    function setAnnotationColor(value) {
+      const editor = state.annotationEditor;
+      if (!editor) return;
+      editor.color = normalizeAnnotationColor(value);
+      const root = $('annotationEditorRoot');
+      root?.querySelectorAll('[data-annotation-color]').forEach(button => {
+        const active = button.dataset.annotationColor === editor.color;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-checked', active ? 'true' : 'false');
+      });
+      syncAnnotationCursorPreview();
+    }
+
+    async function initAnnotationCanvas() {
+      const editor = state.annotationEditor;
+      const canvas = $('annotationEditorRoot')?.querySelector('[data-annotation-canvas]');
+      if (!editor || !canvas || editor.canvasElement === canvas) return;
+      editor.canvasElement = canvas;
+      const image = await loadImageElement(editor.imageUrl);
+      if (!state.annotationEditor || state.annotationEditor.canvasElement !== canvas) return;
+      canvas.width = image.naturalWidth || image.width || 1024;
+      canvas.height = image.naturalHeight || image.height || 1024;
+      editor.sourceImageWidth = canvas.width;
+      editor.sourceImageHeight = canvas.height;
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (editor.history.length) {
+        await drawImageUrlToCanvas(canvas, editor.history.at(-1));
+      } else {
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        pushAnnotationHistory();
+      }
+      attachAnnotationCanvasEvents(canvas);
+    }
+
+    function attachAnnotationCanvasEvents(canvas) {
+      canvas.onpointerenter = event => showAnnotationCursorPreview(canvas, event);
+      canvas.onpointerleave = hideAnnotationCursorPreview;
+      canvas.onpointerdown = event => {
+        const editor = state.annotationEditor;
+        if (!editor || editor.status !== 'ready' || editor.saving) return;
+        event.preventDefault();
+        showAnnotationCursorPreview(canvas, event);
+        canvas.setPointerCapture?.(event.pointerId);
+        const point = annotationCanvasPoint(canvas, event);
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        editor.drawing = {
+          pointerId: event.pointerId,
+          start: point,
+          last: point,
+          baseImageData: ['rect', 'ellipse', 'smear'].includes(editor.mode) ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null,
+          smearLayer: editor.mode === 'smear' ? createAnnotationScratchCanvas(canvas) : null
+        };
+        if (editor.mode === 'brush') drawAnnotationLine(ctx, point, point, editor);
+        if (editor.mode === 'smear') drawAnnotationSmearStroke(ctx, editor.drawing, point, point, editor);
+      };
+      canvas.onpointermove = event => {
+        const editor = state.annotationEditor;
+        showAnnotationCursorPreview(canvas, event);
+        if (!editor?.drawing || editor.drawing.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        const point = annotationCanvasPoint(canvas, event);
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (editor.mode === 'brush') {
+          drawAnnotationLine(ctx, editor.drawing.last, point, editor);
+          editor.drawing.last = point;
+        } else if (editor.mode === 'smear') {
+          drawAnnotationSmearStroke(ctx, editor.drawing, editor.drawing.last, point, editor);
+          editor.drawing.last = point;
+        } else {
+          ctx.putImageData(editor.drawing.baseImageData, 0, 0);
+          drawAnnotationShape(ctx, editor.drawing.start, point, editor);
+        }
+      };
+      const finish = event => {
+        const editor = state.annotationEditor;
+        if (!editor?.drawing || editor.drawing.pointerId !== event.pointerId) return;
+        event.preventDefault();
+        editor.drawing = null;
+        pushAnnotationHistory();
+        syncAnnotationHistoryButtons();
+      };
+      canvas.onpointerup = finish;
+      canvas.onpointercancel = finish;
+      canvas.onlostpointercapture = event => {
+        const editor = state.annotationEditor;
+        if (editor?.drawing?.pointerId === event.pointerId) editor.drawing = null;
+      };
+    }
+
+    function annotationCanvasPoint(canvas, event) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - rect.left) * canvas.width / Math.max(1, rect.width),
+        y: (event.clientY - rect.top) * canvas.height / Math.max(1, rect.height)
+      };
+    }
+
+    function showAnnotationCursorPreview(canvas, event) {
+      const editor = state.annotationEditor;
+      if (!editor || !canvas || editor.status !== 'ready' || editor.saving) return;
+      editor.cursorClient = { x: event.clientX, y: event.clientY };
+      syncAnnotationCursorPreview();
+    }
+
+    function hideAnnotationCursorPreview() {
+      const cursor = $('annotationEditorRoot')?.querySelector('[data-annotation-cursor]');
+      if (cursor) cursor.classList.remove('visible');
+      if (state.annotationEditor) state.annotationEditor.cursorClient = null;
+    }
+
+    function syncAnnotationCursorPreview() {
+      const editor = state.annotationEditor;
+      const root = $('annotationEditorRoot');
+      const canvas = editor?.canvasElement;
+      const cursor = root?.querySelector('[data-annotation-cursor]');
+      if (!editor || !canvas || !cursor || !editor.cursorClient) return;
+      const rect = canvas.getBoundingClientRect();
+      const shellRect = canvas.parentElement.getBoundingClientRect();
+      const { x, y } = editor.cursorClient;
+      if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) {
+        cursor.classList.remove('visible');
+        return;
+      }
+      const displayWidth = annotationLineWidth(editor) * rect.width / Math.max(1, canvas.width);
+      const size = Math.max(editor.mode === 'brush' ? 6 : 12, Math.min(180, displayWidth));
+      const color = normalizeAnnotationColor(editor.color);
+      cursor.style.width = `${size}px`;
+      cursor.style.height = `${size}px`;
+      cursor.style.left = `${x - shellRect.left}px`;
+      cursor.style.top = `${y - shellRect.top}px`;
+      cursor.style.setProperty('--annotation-cursor-color', color);
+      cursor.style.background = editor.mode === 'brush' ? color : 'transparent';
+      cursor.style.borderWidth = editor.mode === 'brush' ? '1px' : '2px';
+      cursor.classList.add('visible');
+    }
+
+    function drawAnnotationLine(ctx, from, to, editor) {
+      drawAnnotationLineWithAlpha(ctx, from, to, editor, editor.mode === 'smear' ? 0.42 : 1);
+    }
+
+    function drawAnnotationLineWithAlpha(ctx, from, to, editor, alpha) {
+      const width = annotationLineWidth(editor);
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = normalizeAnnotationColor(editor.color);
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(from.x, from.y);
+      ctx.lineTo(to.x, to.y);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function createAnnotationScratchCanvas(canvas) {
+      const layer = document.createElement('canvas');
+      layer.width = canvas.width;
+      layer.height = canvas.height;
+      return layer;
+    }
+
+    function drawAnnotationSmearStroke(ctx, drawing, from, to, editor) {
+      if (!drawing?.baseImageData || !drawing.smearLayer) {
+        drawAnnotationLineWithAlpha(ctx, from, to, editor, 0.42);
+        return;
+      }
+      const layerCtx = drawing.smearLayer.getContext('2d', { willReadFrequently: true });
+      drawAnnotationLineWithAlpha(layerCtx, from, to, editor, 1);
+      ctx.putImageData(drawing.baseImageData, 0, 0);
+      ctx.save();
+      ctx.globalAlpha = 0.42;
+      ctx.drawImage(drawing.smearLayer, 0, 0);
+      ctx.restore();
+    }
+
+    function drawAnnotationShape(ctx, start, end, editor) {
+      const width = annotationLineWidth(editor);
+      const left = Math.min(start.x, end.x);
+      const top = Math.min(start.y, end.y);
+      const w = Math.abs(end.x - start.x);
+      const h = Math.abs(end.y - start.y);
+      ctx.save();
+      ctx.globalAlpha = 0.95;
+      ctx.strokeStyle = normalizeAnnotationColor(editor.color);
+      ctx.lineWidth = width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      if (editor.mode === 'ellipse') {
+        ctx.beginPath();
+        ctx.ellipse(left + w / 2, top + h / 2, Math.max(1, w / 2), Math.max(1, h / 2), 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        ctx.strokeRect(left, top, w, h);
+      }
+      ctx.restore();
+    }
+
+    function annotationLineWidth(editor = state.annotationEditor) {
+      const base = Math.max(2, Math.min(80, Number(editor?.size) || 8));
+      return editor?.mode === 'smear' ? Math.min(120, base * 3) : base;
+    }
+
+    function plannerImageAspectRatioForSize(width, height) {
+      const w = Number(width);
+      const h = Number(height);
+      if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return normalizePlannerImageAspectRatio('');
+      const ratio = w / h;
+      return [
+        { value: '1:1', ratio: 1 },
+        { value: '16:9', ratio: 16 / 9 },
+        { value: '9:16', ratio: 9 / 16 }
+      ].sort((a, b) => Math.abs(Math.log(ratio / a.ratio)) - Math.abs(Math.log(ratio / b.ratio)))[0].value;
+    }
+
+    function annotationSourceImageAspectRatio(source, annotation, editor = state.annotationEditor) {
+      const meta = annotation?.meta || {};
+      const width = editor?.sourceImageWidth || meta.sourceImageWidth || source?.meta?.imageWidth || source?.meta?.width;
+      const height = editor?.sourceImageHeight || meta.sourceImageHeight || source?.meta?.imageHeight || source?.meta?.height;
+      return normalizePlannerImageAspectRatio(meta.sourceImageAspectRatio || plannerImageAspectRatioForSize(width, height));
+    }
+
+    function pushAnnotationHistory() {
+      const editor = state.annotationEditor;
+      const canvas = editor?.canvasElement;
+      if (!editor || !canvas) return;
+      const snapshot = canvas.toDataURL('image/png');
+      if (editor.history.at(-1) === snapshot) return;
+      editor.history.push(snapshot);
+      if (editor.history.length > 50) editor.history.shift();
+      editor.redo = [];
+    }
+
+    async function undoAnnotationStroke() {
+      const editor = state.annotationEditor;
+      const canvas = editor?.canvasElement;
+      if (!editor || !canvas || editor.history.length <= 1) return;
+      const current = editor.history.pop();
+      editor.redo.push(current);
+      await drawImageUrlToCanvas(canvas, editor.history.at(-1));
+      syncAnnotationHistoryButtons();
+    }
+
+    async function redoAnnotationStroke() {
+      const editor = state.annotationEditor;
+      const canvas = editor?.canvasElement;
+      if (!editor || !canvas || !editor.redo.length) return;
+      const snapshot = editor.redo.pop();
+      editor.history.push(snapshot);
+      await drawImageUrlToCanvas(canvas, snapshot);
+      syncAnnotationHistoryButtons();
+    }
+
+    function syncAnnotationHistoryButtons() {
+      const root = $('annotationEditorRoot');
+      const editor = state.annotationEditor;
+      if (!root || !editor) return;
+      const undo = root.querySelector('[data-annotation-undo]');
+      const redo = root.querySelector('[data-annotation-redo]');
+      if (undo) undo.disabled = editor.history.length <= 1;
+      if (redo) redo.disabled = !editor.redo.length;
+    }
+
+    async function finishAnnotationEditor() {
+      const editor = state.annotationEditor;
+      const canvas = editor?.canvasElement;
+      if (!editor || !canvas || editor.saving) return;
+      const source = nodeById(editor.sourceNodeId);
+      const annotation = nodeById(editor.annotationNodeId);
+      if (!source || !annotation) return;
+      editor.saving = true;
+      const sourceImageWidth = Number(editor.sourceImageWidth || canvas.width) || 0;
+      const sourceImageHeight = Number(editor.sourceImageHeight || canvas.height) || 0;
+      const sourceImageAspectRatio = plannerImageAspectRatioForSize(sourceImageWidth, sourceImageHeight);
+      const dataUrl = canvas.toDataURL('image/png');
+      const updated = updateNode(annotation.id, {
+        assetUrl: dataUrl,
+        mime: 'image/png',
+        status: 'completed',
+        summary: `Annotated edit guide for ${source.title || source.id}`,
+        meta: {
+          ...(annotation.meta || {}),
+          annotationSourceNodeId: source.id,
+          annotationCompletedAt: new Date().toISOString(),
+          sourceImageWidth,
+          sourceImageHeight,
+          sourceImageAspectRatio,
+          fileName: 'editedImage.png'
+        }
+      });
+      const prompt = ensureAnnotationImagePrompt(source, updated || annotation);
+      closeAnnotationEditor({ discardDraft: false });
+      if (prompt) {
+        state.selectedNodeIds = [prompt.id];
+        refreshProjectSurface(currentProject(), { nodeIds: [source.id, annotation.id, prompt.id] });
+        startInlineEdit(prompt.id);
+      } else {
+        state.selectedNodeIds = [source.id, annotation.id];
+        refreshProjectSurface(currentProject(), { nodeIds: [source.id, annotation.id] });
+      }
+      addActivity('astra', '标注图已保存为 editedImage。', 'ok');
+    }
+
+    function ensureAnnotationImagePrompt(source, annotation) {
+      const project = currentProject();
+      if (!project || !source || !annotation) return null;
+      const existing = downstreamImagePromptsForAnnotation(annotation.id, project)[0];
+      if (existing) return null;
+      const point = findFreePosition(defaultAstraWidth({ type: 'imagePrompt', role: 'imagePrompt' }), 260, annotation.x + nodeWidth(annotation) + 84, annotation.y, { project });
+      const imageAspectRatio = annotationSourceImageAspectRatio(source, annotation);
+      const content = [
+        '@image_1 是干净的原图，@image_2 是标注版本，按标注进行如下图片修改：',
+        ''
+      ].join('\n');
+      const prompt = addNode({
+        type: 'imagePrompt',
+        family: 'Comet',
+        role: 'imagePrompt',
+        title: 'editedImage 修改 Prompt',
+        status: 'draft',
+        content,
+        summary: content,
+        x: point.x,
+        y: point.y,
+        generation: {
+          mediaSettings: { imageAspectRatio }
+        },
+        meta: {
+          annotationSourceNodeId: source.id,
+          annotationImageNodeId: annotation.id,
+          sourceImageAspectRatio: imageAspectRatio,
+          referenceMentionAliases: [
+            { alias: 'image_1', nodeId: source.id, mediaKind: 'image', inputRole: 'source_image', title: source.title || '' },
+            { alias: 'image_2', nodeId: annotation.id, mediaKind: 'image', inputRole: 'source_image', title: annotation.title || '' }
+          ]
+        },
+        select: false
+      }, project);
+      addAstraLink(source.id, prompt.id, { relation: 'input', inputRole: 'source_image', orderIndex: 1, actor: 'user', project });
+      addAstraLink(annotation.id, prompt.id, { relation: 'input', inputRole: 'source_image', orderIndex: 2, actor: 'user', project });
+      scheduleSave();
+      return prompt;
+    }
+
+    function downstreamImagePromptsForAnnotation(annotationNodeId, project = currentProject()) {
+      return (project?.links || [])
+        .filter(link => (link.fromNodeId || link.from_astra_id) === annotationNodeId)
+        .map(link => nodeById(link.toNodeId || link.to_astra_id, project))
+        .filter(node => node?.role === 'imagePrompt');
+    }
+
+    function loadImageElement(url) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error('image failed to load'));
+        if (!String(url || '').startsWith('data:') && !String(url || '').startsWith('blob:')) image.crossOrigin = 'anonymous';
+        image.src = url;
+      });
+    }
+
+    async function drawImageUrlToCanvas(canvas, url) {
+      const image = await loadImageElement(url);
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    }
+
     function openFrameCutPanel(id) {
       const node = nodeById(id);
       if (!node || !assetDisplayUrl(node) || !isVideoAstra(node)) return;
@@ -9755,6 +10573,7 @@
       frameCutDraftForNode(node);
       closeContextMenu();
       closeMediaViewer();
+      closeAnnotationEditor();
       renderFrameCutPanel();
     }
 
@@ -10503,9 +11322,9 @@
       return { kind: 'image', model, mediaSettings };
     }
 
-    function applyPromptPickGenerationSettings(kind, promptPick, overrides = {}) {
-      const promptNode = nodeById(promptPick?.nodeId);
-      const base = promptGenerationSettings(promptNode, kind);
+    function applyPromptPickGenerationSettings(kind, promptPick, overrides = {}, project = currentProject()) {
+      const promptNode = nodeById(promptPick?.nodeId, project);
+      const base = promptGenerationSettings(promptNode, kind, project);
       const model = operationModelValue(overrides.model || promptPick?.model || base.model, kind);
       const mediaSettings = mergeMediaSettings(base.mediaSettings, overrides.mediaSettings || promptPick?.mediaSettings, kind, model);
       return { ...promptPick, model, mediaSettings };
@@ -10536,10 +11355,10 @@
       };
     }
 
-    function mediaSettingsForExecution(resolvedExecution = null) {
-      const fallback = starFlowMediaSettings();
+    function mediaSettingsForExecution(resolvedExecution = null, project = currentProject()) {
+      const fallback = starFlowMediaSettings(project);
       const provided = resolvedExecution?.mediaSettings || {};
-      const videoModel = resolvedExecution?.model || currentProject()?.runtime?.videoModel || state.settings.videoModel;
+      const videoModel = resolvedExecution?.model || project?.runtime?.videoModel || state.settings.videoModel;
       return {
         plannerNodeId: provided.plannerNodeId || fallback.plannerNodeId,
         productionMode: provided.productionMode || fallback.productionMode,
@@ -11181,7 +12000,7 @@
     }
 
     function findFreePosition(width, height, preferredX = 80, preferredY = 84, options = {}) {
-      const project = options.project || currentProject();
+      const project = options.project || activeControllerProjectContext || currentProject();
       const margin = ASTRA_PLACEMENT_MARGIN;
       const stepX = Math.max(356, width + margin);
       const stepY = Math.max(230, height + margin);
@@ -11610,9 +12429,9 @@
       renderFlow();
     }
 
-    function selectedNodes() {
-      const project = currentProject();
-      return project.nodes.filter(n => state.selectedNodeIds.includes(n.id));
+    function selectedNodes(project = currentProject(), selectedNodeIds = state.selectedNodeIds) {
+      const selected = new Set(arrayFrom(selectedNodeIds).map(String));
+      return (project?.nodes || []).filter(n => selected.has(String(n.id)));
     }
 
     function saveNodeToLibrary(id) {
@@ -12348,6 +13167,16 @@
       }
     }
 
+    async function withControllerProjectContext(project, fn) {
+      const previous = activeControllerProjectContext;
+      activeControllerProjectContext = project || previous;
+      try {
+        return await fn();
+      } finally {
+        activeControllerProjectContext = previous;
+      }
+    }
+
     function addAstraLink(fromNodeId, toNodeId, options = {}) {
       const project = options.project || (currentProject()?.nodes?.some(node => node.id === fromNodeId || node.id === toNodeId) ? currentProject() : null) || projectContainingNode(fromNodeId) || projectContainingNode(toNodeId);
       if (!project || !fromNodeId || !toNodeId || fromNodeId === toNodeId) return null;
@@ -12426,11 +13255,10 @@
       };
     }
 
-    async function runImageStageBatches(nodes, overrides = {}) {
-      const project = projectContainingNode(nodes[0]?.id) || currentProject();
+    async function runImageStageBatches(nodes, overrides = {}, project = projectContainingNode(nodes[0]?.id) || currentProject()) {
       const pendingIds = new Set(nodes.map(node => node.id));
       const startedIds = new Set();
-      const promptPickByNodeId = new Map(nodes.map(node => [node.id, applyPromptPickGenerationSettings('image', promptPickForTarget('image', node.id), overrides)]));
+      const promptPickByNodeId = new Map(nodes.map(node => [node.id, applyPromptPickGenerationSettings('image', promptPickForTarget('image', node.id, project), overrides, project)]));
       const dependencyIdsByNodeId = new Map(nodes.map(node => [node.id, imageDependencyIds(node, project)]));
       updateApiStatus('busy');
       setAgentStatus('busy', 'image', '批量生成图片中', `正在并发生成 ${nodes.length} 个 Sol`, project);
@@ -12442,13 +13270,13 @@
         const batch = ready.length ? ready : [nodeById([...pendingIds][0], project)].filter(Boolean);
         const promptPicks = batch.map(node => {
           startedIds.add(node.id);
-          return promptPickByNodeId.get(node.id) || applyPromptPickGenerationSettings('image', promptPickForTarget('image', node.id), overrides);
+          return promptPickByNodeId.get(node.id) || applyPromptPickGenerationSettings('image', promptPickForTarget('image', node.id, project), overrides, project);
         });
         batch.forEach(node => {
           updateNode(node.id, { status: 'running', progressText: `正在调用 ${project.runtime.imageModel}` }, project);
         });
         if (isProjectActive(project)) render();
-        await Promise.all(promptPicks.map(pick => generateImageFromPromptPick(pick, { manageAgentStatus: false, allowRunningTarget: true })));
+        await Promise.all(promptPicks.map(pick => generateImageFromPromptPick(pick, { manageAgentStatus: false, allowRunningTarget: true, project })));
         const failed = batch.find(node => {
           const fresh = nodeById(node.id, project);
           return !fresh || fresh.status !== 'completed' || !assetDisplayUrl(fresh);
@@ -12465,11 +13293,11 @@
       if (project?.agent?.kind === 'busy') settleAgentStatus(project);
     }
 
-    function promptPickForTarget(kind, targetNodeId) {
+    function promptPickForTarget(kind, targetNodeId, project = projectContainingNode(targetNodeId) || currentProject()) {
       const previousSelection = [...state.selectedNodeIds];
       state.selectedNodeIds = [targetNodeId];
       try {
-        return applyPromptPickGenerationSettings(kind, { ...extractPromptFor(kind, { detail: true }), useSelectedRefs: false });
+        return applyPromptPickGenerationSettings(kind, { ...extractPromptFor(kind, { detail: true, project, selectedNodeIds: [targetNodeId] }), useSelectedRefs: false }, {}, project);
       } finally {
         state.selectedNodeIds = previousSelection;
       }
@@ -12740,19 +13568,25 @@
     }
 
     function addMessage(role, content, options = {}) {
-      const project = currentProject();
+      const project = options.project || activeControllerProjectContext || currentProject();
+      if (!project) return;
       const message = { role, content, at: nowText() };
       if (options.largeSelectionConfirmation) message.largeSelectionConfirmation = options.largeSelectionConfirmation;
       if (options.pendingControllerConfirmation) message.pendingControllerConfirmation = options.pendingControllerConfirmation;
       project.messages.push(message);
       scheduleSave();
-      renderMessages();
-      renderFlow();
+      if (isProjectActive(project)) {
+        renderMessages();
+        renderFlow();
+      } else {
+        markProjectHasNewContent(project);
+        renderProjects();
+      }
     }
 
     function addAgentMessage(content, options = {}) {
       const prepared = prepareAgentChatContent(content, options);
-      addMessage(prepared.role, prepared.content);
+      addMessage(prepared.role, prepared.content, options);
       return prepared;
     }
 
@@ -12907,8 +13741,7 @@
       scheduleSave();
     }
 
-    function savePendingControllerIntent(intent) {
-      const project = currentProject();
+    function savePendingControllerIntent(intent, project = currentProject()) {
       if (!project || !intent?.action) return null;
       project.pendingControllerIntent = {
         id: intent.id || uid('pending'),
@@ -12921,18 +13754,18 @@
       return project.pendingControllerIntent;
     }
 
-    async function runPendingControllerIntent(intent, userText = '') {
+    async function runPendingControllerIntent(intent, userText = '', project = currentProject()) {
       if (!intent) return null;
       if (intent.action === 'controllerOperationPlan') {
         const plan = intent.operationPlan;
-        clearPendingControllerIntent();
+        clearPendingControllerIntent(project);
         if (!plan?.ops?.length) {
           addMessage('system', '待确认的画布操作已经失效，请重新说明要处理的 Astra 和动作。');
           return null;
         }
-        return executeControllerOperationPlan(plan, { confirmed: true });
+        return executeControllerOperationPlan(plan, { confirmed: true, project });
       }
-      clearPendingControllerIntent();
+      clearPendingControllerIntent(project);
       addMessage('system', '这个待确认操作暂时不能自动执行。请重新说明要处理的 Astra 和动作。');
       return null;
     }
@@ -12950,8 +13783,8 @@
       addMessage('system', '已取消本次操作。');
     }
 
-    function buildReferenceText() {
-      const nodes = selectedNodes();
+    function buildReferenceText(project = currentProject(), selectedNodeIds = state.selectedNodeIds) {
+      const nodes = selectedNodes(project, selectedNodeIds);
       if (!nodes.length) return '';
       return nodes.map(n => [
         `# ${n.title}`,
@@ -12971,10 +13804,10 @@
       ].filter(Boolean).join('\n')).join('\n\n');
     }
 
-    function buildControllerPayload(userText) {
-      const project = currentProject();
-      const selected = selectedNodes().map(controllerNodeSummary);
-      const controllerFoundation = buildControllerFoundationPayload(project);
+    function buildControllerPayload(userText, project = currentProject(), options = {}) {
+      const selectedNodeIds = options.selectedNodeIds || state.selectedNodeIds;
+      const selected = selectedNodes(project, selectedNodeIds).map(controllerNodeSummary);
+      const controllerFoundation = buildControllerFoundationPayload(project, { selectedNodeIds });
       const recentMessages = (project?.messages || [])
         .filter(message => message.role !== 'system')
         .slice(-8)
@@ -12989,16 +13822,16 @@
       }));
       return {
         user_message: userText,
-        message_mentions: controllerMessageMentionContext(userText, project),
-        pending_intent: activePendingControllerIntent() || null,
+        message_mentions: controllerMessageMentionContext(userText, project, { selectedNodeIds }),
+        pending_intent: activePendingControllerIntent(project) || null,
         selected_astra: selected,
-        selected_count: state.selectedNodeIds.length,
+        selected_count: selectedNodeIds.length,
         controller_capabilities: controllerCapabilitySummary(),
         canvas_graph: controllerFoundation.canvasGraph,
         target_context: controllerFoundation.targetContext,
         operation_contract: controllerFoundation.operationContract,
         creative_mvi: creativeMviStatus(controllerCreativeMviText(userText, project)),
-        context_pack: collectProjectContext(),
+        context_pack: collectProjectContext(project, { selectedNodeIds }),
         recent_messages: recentMessages,
         recent_events: recentEvents
       };
@@ -13032,13 +13865,13 @@
       };
     }
 
-    function buildControllerFoundationPayload(project = currentProject()) {
+    function buildControllerFoundationPayload(project = currentProject(), options = {}) {
       const foundation = window.AuralisFoundation;
       if (!foundation?.buildCanvasGraph) {
         return { canvasGraph: null, operationContract: null };
       }
       const graph = foundation.buildCanvasGraph(project, {
-        selectedNodeIds: state.selectedNodeIds
+        selectedNodeIds: options.selectedNodeIds || state.selectedNodeIds
       });
       return {
         canvasGraph: foundation.controllerSnapshotForPrompt(graph),
@@ -13049,44 +13882,44 @@
       };
     }
 
-    function buildCanvasGraph(project = currentProject()) {
+    function buildCanvasGraph(project = currentProject(), options = {}) {
       const foundation = window.AuralisFoundation;
       if (!foundation?.buildCanvasGraph) return null;
       return foundation.buildCanvasGraph(project, {
-        selectedNodeIds: state.selectedNodeIds
+        selectedNodeIds: options.selectedNodeIds || state.selectedNodeIds
       });
     }
 
-    function validateControllerOperationPlan(plan, project = currentProject()) {
+    function validateControllerOperationPlan(plan, project = currentProject(), options = {}) {
       const foundation = window.AuralisFoundation;
-      const graph = buildCanvasGraph(project);
+      const graph = buildCanvasGraph(project, options);
       if (!foundation?.validateOperationPlan || !graph) {
         return { ok: false, plan: null, issues: [{ severity: 'error', message: 'Controller foundation is not loaded.' }] };
       }
       return foundation.validateOperationPlan(graph, plan);
     }
 
-    async function planControllerOperations(userText, hints = {}) {
+    async function planControllerOperations(userText, hints = {}, project = currentProject(), options = {}) {
       const payload = {
         user_message: userText,
         hints,
-        ...buildControllerPayload(userText)
+        ...buildControllerPayload(userText, project, options)
       };
       const prompt = renderPromptPreset('controller.operationPlanner', {
         plannerPayload: JSON.stringify(payload, null, 2)
       });
-      const content = await chatCompletion(currentProject().runtime.llmModel, [{ role: 'user', content: prompt }], {
+      const content = await chatCompletion(project.runtime.llmModel, [{ role: 'user', content: prompt }], {
         maxTokens: 2600,
         temperature: 0.1,
         telemetry: 'controller'
       });
       const parsed = parseStructuredJsonObject(content);
       if (!parsed || typeof parsed !== 'object') return { ok: false, plan: null, issues: [{ severity: 'error', message: 'Operation planner did not return JSON.' }] };
-      return validateControllerOperationPlan(repairControllerOperationPlan(parsed, userText));
+      return validateControllerOperationPlan(repairControllerOperationPlan(parsed, userText, project, options), project, options);
     }
 
-    function repairControllerOperationPlan(planInput, userText, project = currentProject()) {
-      const withImageReferences = repairControllerImageReferencePlan(planInput, userText, project);
+    function repairControllerOperationPlan(planInput, userText, project = currentProject(), options = {}) {
+      const withImageReferences = repairControllerImageReferencePlan(planInput, userText, project, options);
       return repairControllerMediaVariantCountPlan(withImageReferences, userText, project);
     }
 
@@ -13165,7 +13998,7 @@
       return /\u4e32\u884c|\u4f9d\u6b21|\u4e00\u4e2a\u4e00\u4e2a|\u4e00\u500b\u4e00\u500b|\u4e00\u6761\u4e00\u6761|\u4e00\u689d\u4e00\u689d|\bserial\b|\bsequential\b|\bone by one\b/i.test(String(text || ''));
     }
 
-    function repairControllerImageReferencePlan(planInput, userText, project = currentProject()) {
+    function repairControllerImageReferencePlan(planInput, userText, project = currentProject(), options = {}) {
       const foundation = window.AuralisFoundation;
       const plan = foundation?.normalizeOperationPlan ? foundation.normalizeOperationPlan(planInput) : planInput;
       const ops = arrayFrom(plan?.ops);
@@ -13173,7 +14006,7 @@
       const imageGenerateOps = ops.filter(isImageGenerateOperation);
       if (!createPromptOps.length || !imageGenerateOps.length) return planInput;
 
-      const selectedImageIds = selectedImageInputNodesForControllerPlan(project).map(node => node.id);
+      const selectedImageIds = selectedImageInputNodesForControllerPlan(project, options.selectedNodeIds).map(node => node.id);
       if (!selectedImageIds.length) return planInput;
 
       const inputRole = imageInputRoleFromControllerPlan(ops) || 'ref';
@@ -13273,8 +14106,8 @@
       return '';
     }
 
-    function selectedImageInputNodesForControllerPlan(project = currentProject()) {
-      const ids = new Set(arrayFrom(state.selectedNodeIds).map(String));
+    function selectedImageInputNodesForControllerPlan(project = currentProject(), selectedNodeIds = state.selectedNodeIds) {
+      const ids = new Set(arrayFrom(selectedNodeIds).map(String));
       return arrayFrom(project?.nodes)
         .filter(node => ids.has(String(node.id || '')) && controllerNodeCanFeedImagePrompt(node));
     }
@@ -13323,16 +14156,16 @@
       return '这次画布操作计划没有通过校验。请再明确目标和要做的动作。';
     }
 
-    async function classifyControllerIntent(userText, hints = {}) {
+    async function classifyControllerIntent(userText, hints = {}, project = currentProject(), options = {}) {
       const payload = {
         user_message: userText,
         hints,
-        ...buildControllerPayload(userText)
+        ...buildControllerPayload(userText, project, options)
       };
       const prompt = renderPromptPreset('controller.intentClassifier', {
         controllerPayload: JSON.stringify(payload, null, 2)
       });
-      const content = await chatCompletion(currentProject().runtime.llmModel, [{ role: 'user', content: prompt }], {
+      const content = await chatCompletion(project.runtime.llmModel, [{ role: 'user', content: prompt }], {
         maxTokens: 900,
         temperature: 0.05,
         telemetry: 'controller'
@@ -13370,7 +14203,7 @@
     }
 
     function shouldAttemptControllerOperations(text, localContext = {}) {
-      if (activePendingControllerIntent()) return false;
+      if (activePendingControllerIntent(localContext.project || currentProject())) return false;
       if (asksForInternalImplementationInfo(text)) return false;
       if (localContext.intentClassification) {
         return controllerIntentAllowsOperations(localContext.intentClassification);
@@ -13379,98 +14212,111 @@
     }
 
     async function tryRunControllerOperations(text, localContext = {}) {
-      if (activePendingControllerIntent()) return false;
+      const project = localContext.project || currentProject();
+      const selectedNodeIds = localContext.selectedNodeIds || state.selectedNodeIds;
+      if (activePendingControllerIntent(project)) return false;
       if (asksForInternalImplementationInfo(text)) return false;
+      const previousControllerProjectContext = activeControllerProjectContext;
+      activeControllerProjectContext = project;
       let attemptedPlanner = false;
       try {
         updateApiStatus('busy');
-        setAgentStatus('busy', 'intent', '理解指令中', `正在调用 ${currentProject().runtime.llmModel}`);
+        setAgentStatus('busy', 'intent', '理解指令中', `正在调用 ${project.runtime.llmModel}`, project);
         let intentClassification = localContext.intentClassification;
         if (intentClassification === undefined) {
           try {
-            intentClassification = await classifyControllerIntent(text);
+            intentClassification = await classifyControllerIntent(text, {}, project, { selectedNodeIds });
           } catch (error) {
             console.warn('Controller intent classifier failed; skipping operation planner.', error);
             intentClassification = null;
           }
         }
         if (!shouldAttemptControllerOperations(text, { ...localContext, intentClassification })) {
-          savePendingCreativeCanvasPlanIfReady(text, intentClassification);
+          savePendingCreativeCanvasPlanIfReady(text, intentClassification, project);
           return false;
         }
-        setAgentStatus('busy', 'ops', '规划画布操作中', `正在调用 ${currentProject().runtime.llmModel}`);
+        setAgentStatus('busy', 'ops', '规划画布操作中', `正在调用 ${project.runtime.llmModel}`, project);
         attemptedPlanner = true;
         const planned = await planControllerOperations(text, {
           intentClassification
-        });
+        }, project, { selectedNodeIds });
         if (!planned.ok) {
-          addMessage('agent', controllerOperationPlanningFailureMessage(planned));
+          addMessage('agent', controllerOperationPlanningFailureMessage(planned), { project });
           return true;
         }
         if (planned.plan?.requiresConfirmation) {
-          addMessage('system', planned.plan.summary || '还需要确认目标或范围。');
+          addMessage('system', planned.plan.summary || '还需要确认目标或范围。', { project });
           return true;
         }
         if (!planned.plan?.ops?.length) {
-          addMessage('system', '这次没有生成可执行画布动作，所以画布没有改变。');
+          addMessage('system', '这次没有生成可执行画布动作，所以画布没有改变。', { project });
           return true;
         }
-        const result = await executeControllerOperationPlan(planned.plan);
+        const result = await executeControllerOperationPlan(planned.plan, { project });
         if (result?.requiresConfirmation) return true;
         return true;
       } catch (error) {
         console.warn('Controller ops planner failed.', error);
         if (attemptedPlanner) {
-          addMessage('system', `画布操作规划失败：${error.message}`);
+          addMessage('system', `画布操作规划失败：${error.message}`, { project });
           return true;
         }
         return false;
       } finally {
+        activeControllerProjectContext = previousControllerProjectContext;
         updateApiStatus();
-        if (state.agent.kind === 'busy') settleAgentStatus();
+        if (project?.agent?.kind === 'busy') settleAgentStatus(project);
       }
     }
 
     async function handlePendingControllerReply(text) {
-      const pending = activePendingControllerIntent();
+      const project = activeControllerProjectContext || currentProject();
+      const pending = activePendingControllerIntent(project);
       if (!pending) return false;
+      const previousControllerProjectContext = activeControllerProjectContext;
+      activeControllerProjectContext = project;
       try {
         updateApiStatus('busy');
-        setAgentStatus('busy', 'intent', '确认操作中', `正在调用 ${currentProject().runtime.llmModel}`);
-        const classification = await classifyControllerIntent(text, { pendingIntentId: pending.id });
+        setAgentStatus('busy', 'intent', '确认操作中', `正在调用 ${project.runtime.llmModel}`, project);
+        const classification = await classifyControllerIntent(text, { pendingIntentId: pending.id }, project);
         if (classification?.intent !== 'confirmation') return false;
         if (classification.pendingAction === 'confirm') {
-          await runPendingControllerIntent(pending, text);
+          await runPendingControllerIntent(pending, text, project);
           return true;
         }
         if (classification.pendingAction === 'cancel') {
-          clearPendingControllerIntent();
-          addMessage('system', classification.userVisibleSummary || '已取消上一个待确认操作。');
+          clearPendingControllerIntent(project);
+          addMessage('system', classification.userVisibleSummary || '已取消上一个待确认操作。', { project });
           return true;
         }
         if (classification.pendingAction === 'revise') {
-          clearPendingControllerIntent();
-          addMessage('agent', classification.userVisibleSummary || classification.question || '我先取消上一个待确认操作。请直接说新的目标和改法，我会重新规划。');
+          clearPendingControllerIntent(project);
+          addMessage('agent', classification.userVisibleSummary || classification.question || '我先取消上一个待确认操作。请直接说新的目标和改法，我会重新规划。', { project });
           return true;
         }
-        addMessage('agent', classification.question || classification.userVisibleSummary || '我不确定你是否要执行这个待确认操作，请明确说确认、取消，或说明要怎么改。');
+        addMessage('agent', classification.question || classification.userVisibleSummary || '我不确定你是否要执行这个待确认操作，请明确说确认、取消，或说明要怎么改。', { project });
         return true;
       } catch (error) {
         console.warn('Pending controller confirmation failed.', error);
-        addMessage('agent', '我没确认是否执行这个待确认操作。请明确说确认、取消，或说明要怎么改。');
+        addMessage('agent', '我没确认是否执行这个待确认操作。请明确说确认、取消，或说明要怎么改。', { project });
         return true;
       } finally {
+        activeControllerProjectContext = previousControllerProjectContext;
         updateApiStatus();
-        if (state.agent.kind === 'busy') settleAgentStatus();
+        if (project?.agent?.kind === 'busy') settleAgentStatus(project);
       }
     }
 
     async function executeControllerOperationPlan(plan, options = {}) {
-      const project = currentProject();
-      const validation = validateControllerOperationPlan(plan, project);
+      const project = options.project || currentProject();
+      if (options.projectContextBound !== true) {
+        return withControllerProjectContext(project, () => executeControllerOperationPlan(plan, { ...options, project, projectContextBound: true }));
+      }
+      const selectedNodeIds = options.selectedNodeIds || state.selectedNodeIds;
+      const validation = validateControllerOperationPlan(plan, project, { selectedNodeIds });
       if (!validation.ok) {
         const message = validation.issues.map(issue => issue.message).filter(Boolean).join('；') || '操作计划无法执行。';
-        if (options.silent !== true) addMessage('system', message);
+        if (options.silent !== true) addMessage('system', message, { project });
         return { ok: false, applied: [], issues: validation.issues };
       }
       const confirmation = controllerOperationConfirmation(validation.plan, project);
@@ -13481,9 +14327,10 @@
           summary: confirmation.summary,
           operationPlan: validation.plan,
           sourceText: validation.plan.summary || ''
-        });
+        }, project);
         if (options.silent !== true) {
           addMessage('system', confirmation.summary, {
+            project,
             pendingControllerConfirmation: { type: 'controllerOperationPlan', id: pending?.id || '' }
           });
         }
@@ -13534,7 +14381,7 @@
         }
         scheduleSave();
         refreshControllerOperationPlanSurface(applied, before, project);
-        if (options.silent !== true && validation.plan.summary && shouldReportOperationPlanSummary(validation.plan)) addMessage('system', validation.plan.summary);
+        if (options.silent !== true && validation.plan.summary && shouldReportOperationPlanSummary(validation.plan)) addMessage('system', validation.plan.summary, { project });
         return { ok: true, batchId, planId, applied, issues: [] };
       } catch (error) {
         project.nodes = before.nodes;
@@ -13544,7 +14391,7 @@
         project.events = before.events;
         project.actionSequences = before.actionSequences;
         refreshProjectSurface(project);
-        if (options.silent !== true) addMessage('system', `操作计划已回滚：${error.message}`);
+        if (options.silent !== true) addMessage('system', `操作计划已回滚：${error.message}`, { project });
         return { ok: false, applied, issues: [{ severity: 'error', message: error.message }] };
       }
     }
@@ -14370,10 +15217,10 @@
           && targets.length > 1
           && targets.every(node => node.role === 'genImage');
         const results = canUseImageStageBatch
-          ? await generateImageTargetsWithStageBatches(targets, overrides)
+          ? await generateImageTargetsWithStageBatches(targets, overrides, project)
           : concurrency === 'parallel'
-          ? await Promise.all(mediaGenerationJobsForTargets(kind, targets, overrides).map(job => runMediaGenerationJob(kind, job)))
-          : await runGenerationJobsSerial(kind, mediaGenerationJobsForTargets(kind, targets, overrides));
+          ? await Promise.all(mediaGenerationJobsForTargets(kind, targets, overrides, project).map(job => runMediaGenerationJob(kind, job, project)))
+          : await runGenerationJobsSerial(kind, mediaGenerationJobsForTargets(kind, targets, overrides, project), project);
         const resultNodes = generationOperationResultNodes(results, targets, op, kind, project, fillableTargetIds);
         if (resultNodes.length < targets.length) throw new Error(`${op.id} generated ${resultNodes.length} of ${targets.length} ${kind} Astra.`);
         const failed = resultNodes.find(node => !node || node.status !== 'completed' || !assetDisplayUrl(node));
@@ -14403,10 +15250,10 @@
           const overrides = { model, mediaSettings };
           const createVariantRun = () => ({
             fillableTargetIds: fillableGenerationTargetIds(targets, expectedRole),
-            jobs: mediaGenerationJobsForTargets(kind, targets, overrides)
+            jobs: mediaGenerationJobsForTargets(kind, targets, overrides, project)
           });
           const runVariant = async variantRun => {
-            const results = await Promise.all(variantRun.jobs.map(job => runMediaGenerationJob(kind, job)));
+            const results = await Promise.all(variantRun.jobs.map(job => runMediaGenerationJob(kind, job, project)));
             const resultNodes = generationOperationResultNodes(results, targets, op, kind, project, variantRun.fillableTargetIds);
             if (resultNodes.length < targets.length) throw new Error(`${op.id} generated ${resultNodes.length} of ${targets.length} ${kind} Astra.`);
             const failed = resultNodes.find(node => !node || node.status !== 'completed' || !assetDisplayUrl(node));
@@ -14520,44 +15367,45 @@
       return !!node && (isPromptAstraForKind(node, kind) || node.role === (kind === 'image' ? 'genImage' : 'genVideo'));
     }
 
-    async function generateImageTargetsWithStageBatches(targets, overrides = {}) {
-      queueStarFlowStageNodes(targets, 'image');
-      await runImageStageBatches(targets, overrides);
-      const results = targets.map(target => nodeById(target.id)).filter(Boolean);
+    async function generateImageTargetsWithStageBatches(targets, overrides = {}, project = projectContainingNode(targets[0]?.id) || currentProject()) {
+      queueStarFlowStageNodes(targets, 'image', project);
+      await runImageStageBatches(targets, overrides, project);
+      const results = targets.map(target => nodeById(target.id, project)).filter(Boolean);
       if (results.length !== targets.length) throw new Error('Batch image generation target disappeared before completion.');
       return results;
     }
 
-    async function runGenerationTargetsSerial(kind, targets, overrides = {}) {
-      return runGenerationJobsSerial(kind, mediaGenerationJobsForTargets(kind, targets, overrides));
+    async function runGenerationTargetsSerial(kind, targets, overrides = {}, project = projectContainingNode(targets[0]?.id) || currentProject()) {
+      return runGenerationJobsSerial(kind, mediaGenerationJobsForTargets(kind, targets, overrides, project), project);
     }
 
-    async function runGenerationJobsSerial(kind, jobs) {
+    async function runGenerationJobsSerial(kind, jobs, project = currentProject()) {
       const results = [];
       for (const job of jobs) {
-        results.push(await runMediaGenerationJob(kind, job));
+        results.push(await runMediaGenerationJob(kind, job, project));
       }
       return results;
     }
 
-    function mediaGenerationJobsForTargets(kind, targets, overrides = {}) {
+    function mediaGenerationJobsForTargets(kind, targets, overrides = {}, project = currentProject()) {
       return arrayFrom(targets).map(target => ({
         target,
-        pick: applyPromptPickGenerationSettings(kind, promptPickForGenerationNode(kind, target), overrides)
+        pick: applyPromptPickGenerationSettings(kind, promptPickForGenerationNode(kind, target, project), overrides, project)
       }));
     }
 
-    function runMediaGenerationJob(kind, job) {
+    function runMediaGenerationJob(kind, job, project = currentProject()) {
       return kind === 'image'
-        ? generateImageFromPromptPick(job.pick, { manageAgentStatus: false })
-        : generateVideoFromPromptPick(job.pick, { manageAgentStatus: false });
+        ? generateImageFromPromptPick(job.pick, { manageAgentStatus: false, project })
+        : generateVideoFromPromptPick(job.pick, { manageAgentStatus: false, project });
     }
 
     function generateMediaForOperationTarget(kind, target, overrides = {}) {
+      const project = projectContainingNode(target?.id) || currentProject();
       return runMediaGenerationJob(kind, {
         target,
-        pick: applyPromptPickGenerationSettings(kind, promptPickForGenerationNode(kind, target), overrides)
-      });
+        pick: applyPromptPickGenerationSettings(kind, promptPickForGenerationNode(kind, target, project), overrides, project)
+      }, project);
     }
 
     function createControllerAstraFromOperation(op, project = currentProject()) {
@@ -15418,7 +16266,7 @@
       const seen = new Set();
       const deduped = [];
       for (const node of nodes || []) {
-        const pick = promptPickForGenerationNode(kind, node);
+        const pick = promptPickForGenerationNode(kind, node, projectContainingNode(node?.id) || currentProject());
         const key = [
           kind,
           pick.nodeId || node.id,
@@ -15432,14 +16280,14 @@
       return deduped;
     }
 
-    function promptPickForGenerationNode(kind, node) {
+    function promptPickForGenerationNode(kind, node, project = projectContainingNode(node?.id) || currentProject()) {
       const previousSelection = [...state.selectedNodeIds];
       const selectedSourceImage = kind === 'video'
-        ? selectedNodes().find(item => nodeHasAsset(item) && item.mime?.startsWith('image/'))
+        ? selectedNodes(project).find(item => nodeHasAsset(item) && item.mime?.startsWith('image/'))
         : null;
       state.selectedNodeIds = [node.id];
       try {
-        const pick = applyPromptPickGenerationSettings(kind, { ...extractPromptFor(kind, { detail: true, sourceImageNodeId: selectedSourceImage?.id || '' }), useSelectedRefs: false });
+        const pick = applyPromptPickGenerationSettings(kind, { ...extractPromptFor(kind, { detail: true, sourceImageNodeId: selectedSourceImage?.id || '', project, selectedNodeIds: [node.id] }), useSelectedRefs: false }, {}, project);
         if (kind === 'video' && selectedSourceImage?.id && !pick.sourceImageNodeId) {
           pick.sourceImageNodeId = selectedSourceImage.id;
         }
@@ -15451,10 +16299,11 @@
 
     function generationTargetReadiness(kind, node) {
       if (!isGenerationOperationTarget(node, kind)) return { node, usable: false, reason: 'unsupported' };
-      const promptPick = promptPickForGenerationNode(kind, node);
+      const project = projectContainingNode(node?.id) || currentProject();
+      const promptPick = promptPickForGenerationNode(kind, node, project);
       if (!promptPick?.text) return { node, usable: false, reason: 'missing_prompt' };
       if (kind === 'video') {
-        const resolved = resolveVideoExecution(promptPick);
+        const resolved = resolveVideoExecution(promptPick, project, [node.id]);
         if (resolved.missingInputRoles?.length) {
           const labels = resolved.missingInputRoles.map(role => INPUT_ROLE_LABELS[role] || role).join('、');
           return {
@@ -15553,57 +16402,62 @@
     async function sendChat(options = {}) {
       const text = $('chatInput').value.trim();
       if (!text) return;
+      const project = currentProject();
+      const selectedNodeIds = [...state.selectedNodeIds];
       $('chatInput').value = '';
-      const runtimeBefore = { ...currentProject().runtime };
-      detectModelMentions(text);
+      const runtimeBefore = { ...project.runtime };
+      detectModelMentions(text, project);
       const pureModelCommand = isPureModelCommand(text);
-      const pendingIntent = activePendingControllerIntent();
+      const pendingIntent = activePendingControllerIntent(project);
       const skipLargeSelectionGuard = options.skipLargeSelectionGuard === true;
-      if (!skipLargeSelectionGuard && state.selectedNodeIds.length >= LARGE_SELECTION_CONFIRMATION_COUNT && !shouldUseLargeSelection(text) && !pendingIntent) {
+      if (!skipLargeSelectionGuard && selectedNodeIds.length >= LARGE_SELECTION_CONFIRMATION_COUNT && !shouldUseLargeSelection(text) && !pendingIntent) {
         $('chatInput').value = text;
-        saveLargeSelectionConfirmation(text, state.selectedNodeIds);
+        saveLargeSelectionConfirmation(text, selectedNodeIds, project);
         return;
       }
-      clearLargeSelectionConfirmation(currentProject(), { render: false });
-      addMessage('user', text);
+      clearLargeSelectionConfirmation(project, { render: false });
+      addMessage('user', text, { project });
       trackTelemetryControllerMessage(text);
       if (pureModelCommand) {
-        const runtimeMessage = describeRuntimeChange(runtimeBefore, currentProject().runtime);
-        addActivity('settings', runtimeMessage, 'ok');
-        addMessage('system', runtimeMessage);
+        const runtimeMessage = describeRuntimeChange(runtimeBefore, project.runtime);
+        addActivity('settings', runtimeMessage, 'ok', {}, project);
+        addMessage('system', runtimeMessage, { project });
         return;
       }
       if (asksForInternalImplementationInfo(text)) {
-        addMessage('agent', INTERNAL_INFO_REDIRECT);
+        addMessage('agent', INTERNAL_INFO_REDIRECT, { project });
         return;
       }
       if (await handlePendingControllerReply(text)) {
         return;
       }
-      if (await tryRunControllerOperations(text)) {
+      if (await tryRunControllerOperations(text, { project, selectedNodeIds })) {
         return;
       }
-      const ref = buildReferenceText();
+      const ref = buildReferenceText(project, selectedNodeIds);
       const messages = [
         { role: 'system', content: workflowSystemPrompt() },
-        ...currentProject().messages.filter(m => m.role !== 'system').slice(-8).map(m => ({ role: m.role === 'agent' ? 'assistant' : 'user', content: m.content })),
+        ...project.messages.filter(m => m.role !== 'system').slice(-8).map(m => ({ role: m.role === 'agent' ? 'assistant' : 'user', content: m.content })),
         { role: 'user', content: ref ? `用户消息：${text}\n\n画布引用：\n${ref}` : text }
       ];
+      const previousControllerProjectContext = activeControllerProjectContext;
+      activeControllerProjectContext = project;
       try {
         updateApiStatus('busy');
-        setAgentStatus('busy', 'chat', 'LLM 思考中', `正在调用 ${currentProject().runtime.llmModel}`);
-        const content = await chatCompletion(currentProject().runtime.llmModel, messages, { telemetry: 'controller' });
+        setAgentStatus('busy', 'chat', 'LLM 思考中', `正在调用 ${project.runtime.llmModel}`, project);
+        const content = await chatCompletion(project.runtime.llmModel, messages, { telemetry: 'controller' });
         if (content && content.trim()) {
-          addAgentMessage(content, { userText: text });
+          addAgentMessage(content, { userText: text, project });
         } else {
-          addMessage('system', '模型没有返回正文。可以重试，或换一个主 LLM。');
+          addMessage('system', '模型没有返回正文。可以重试，或换一个主 LLM。', { project });
         }
       } catch (error) {
-        setAgentStatus('fail', 'chat', '对话请求失败', error.message);
-        addMessage('system', `请求失败：${error.message}`);
+        setAgentStatus('fail', 'chat', '对话请求失败', error.message, project);
+        addMessage('system', `请求失败：${error.message}`, { project });
       } finally {
+        activeControllerProjectContext = previousControllerProjectContext;
         updateApiStatus();
-        if (state.agent.kind === 'busy') settleAgentStatus();
+        if (project?.agent?.kind === 'busy') settleAgentStatus(project);
       }
     }
 
@@ -16774,8 +17628,7 @@
       });
     }
 
-    function detectModelMentions(text) {
-      const project = currentProject();
+    function detectModelMentions(text, project = currentProject()) {
       for (const model of [...LLM_MODELS, ...LOCAL_CODEX_MODELS, ...IMAGE_MODELS, ...VIDEO_MODELS, ...MUSIC_MODELS]) {
         if (!text.includes(model)) continue;
         if ([...LLM_MODELS, ...LOCAL_CODEX_MODELS].includes(model)) project.runtime.llmModel = model;
@@ -17349,23 +18202,24 @@
     }
 
     async function generateImage() {
-      const promptPick = applyPromptPickGenerationSettings('image', extractPromptFor('image', { detail: true }));
+      const project = currentProject();
+      const promptPick = applyPromptPickGenerationSettings('image', extractPromptFor('image', { detail: true, project }), {}, project);
       return generateImageFromPromptPick(promptPick, { manageAgentStatus: true });
     }
 
     async function generateImageFromPromptPick(promptPick, options = {}) {
-      const project = projectContainingNode(promptPick.targetNodeId) || projectContainingNode(promptPick.nodeId) || currentProject();
+      const project = options.project || projectContainingNode(promptPick.targetNodeId) || projectContainingNode(promptPick.nodeId) || currentProject();
       const prompt = promptPick.text;
-      if (!prompt) return addMessage('system', '请先生成或选择 Prompt Astra。');
+      if (!prompt) return addMessage('system', '请先生成或选择 Prompt Astra。', { project });
       const model = operationModelValue(promptPick.model || project.runtime.imageModel, 'image');
       const targetNode = promptPick.targetNodeId ? nodeById(promptPick.targetNodeId, project) : null;
       const canFillTarget = canFillGenerationTarget(targetNode, 'genImage', options);
       const official = !canFillTarget && isOfficialGenerationForPrompt(targetNode, 'genImage', promptPick, { includePending: true })
         ? targetNode
-        : findOfficialForPrompt('genImage', promptPick, { includePending: true });
+        : findOfficialForPrompt('genImage', promptPick, { includePending: true }, project);
       const assetState = official ? 'candidate' : 'official';
-      const resolvedExecution = resolveImageExecution(promptPick);
-      const executionPrompt = promptWithReferenceBindings(prompt, resolvedExecution);
+      const resolvedExecution = resolveImageExecution(promptPick, project, options.selectedNodeIds);
+      const executionPrompt = promptWithReferenceBindings(prompt, resolvedExecution, project);
       const run = createActionRun('generateImages', [promptPick.nodeId, ...resolvedExecution.inputNodeIds].filter(Boolean), [], 'astra_control', project);
       const promptNode = nodeById(promptPick.nodeId, project);
       const outputPosition = generatedMediaPositionForPrompt(promptNode, official || targetNode, 'image');
@@ -17410,7 +18264,7 @@
           updateApiStatus('busy');
           setAgentStatus('busy', 'image', '生成图片中', `正在调用 ${model}，等待图片返回`, project);
         }
-        const media = await generateImageAsset(model, executionPrompt, resolvedExecution, node.id);
+        const media = await generateImageAsset(model, executionPrompt, resolvedExecution, node.id, project);
         if (!media.url) throw new Error(`模型未返回可识别的图片 URL 或 data URI。${mediaResponseShapeHint(media.raw)}`);
         const cached = await cacheMediaAsset(node.id, media.url, media.mime || 'image/png');
         updateNode(node.id, {
@@ -17441,26 +18295,27 @@
     }
 
     async function generateVideo(options = {}) {
-      const promptPick = applyPromptPickGenerationSettings('video', extractPromptFor('video', { detail: true }));
+      const project = currentProject();
+      const promptPick = applyPromptPickGenerationSettings('video', extractPromptFor('video', { detail: true, project }), {}, project);
       return generateVideoFromPromptPick(promptPick, { manageAgentStatus: true, ...options });
     }
 
     async function generateVideoFromPromptPick(promptPick, options = {}) {
-      const project = projectContainingNode(promptPick.targetNodeId) || projectContainingNode(promptPick.nodeId) || currentProject();
+      const project = options.project || projectContainingNode(promptPick.targetNodeId) || projectContainingNode(promptPick.nodeId) || currentProject();
       const prompt = promptPick.text;
-      if (!prompt) return addMessage('system', '请先生成或选择 Prompt/图片 Astra。');
+      if (!prompt) return addMessage('system', '请先生成或选择 Prompt/图片 Astra。', { project });
       const model = operationModelValue(promptPick.model || project.runtime.videoModel, 'video');
       const targetNode = promptPick.targetNodeId ? nodeById(promptPick.targetNodeId, project) : null;
       const canFillTarget = canFillGenerationTarget(targetNode, 'genVideo', options);
       const official = !canFillTarget && isOfficialGenerationForPrompt(targetNode, 'genVideo', promptPick, { includePending: true })
         ? targetNode
-        : findOfficialForPrompt('genVideo', promptPick, { includePending: true });
+        : findOfficialForPrompt('genVideo', promptPick, { includePending: true }, project);
       const assetState = official ? 'candidate' : 'official';
-      const resolvedExecution = resolveVideoExecution(promptPick);
-      const executionPrompt = promptWithReferenceBindings(prompt, resolvedExecution);
+      const resolvedExecution = resolveVideoExecution(promptPick, project, options.selectedNodeIds);
+      const executionPrompt = promptWithReferenceBindings(prompt, resolvedExecution, project);
       if (resolvedExecution.missingInputRoles?.length) {
         const labels = resolvedExecution.missingInputRoles.map(role => INPUT_ROLE_LABELS[role] || role).join('、');
-        return addMessage('system', `这个 Luna 已经连接了 ${labels}，但对应 Sol 还没有图片。请先生成或连接这些图片，再运行视频。`);
+        return addMessage('system', `这个 Luna 已经连接了 ${labels}，但对应 Sol 还没有图片。请先生成或连接这些图片，再运行视频。`, { project });
       }
       const run = createActionRun('generateVideos', [promptPick.nodeId, ...resolvedExecution.inputNodeIds].filter(Boolean), [], 'astra_control', project);
       const promptNode = nodeById(promptPick.nodeId, project);
@@ -17476,7 +18331,7 @@
           model,
           progressText: `正在调用 ${model}`,
           assetState,
-          sequence: promptPick.sequence || { group_id: 'seq_main_video', kind: 'final_video_segments', index: nextSequenceIndex('genVideo') },
+          sequence: promptPick.sequence || { group_id: 'seq_main_video', kind: 'final_video_segments', index: nextSequenceIndex('genVideo', project) },
           generation: resolvedExecution,
           meta: { candidateOfNodeId: official?.id || '' },
           placement: 'avoid',
@@ -17492,7 +18347,7 @@
           model,
           progressText: `正在调用 ${model}`,
           assetState: node.assetState || 'official',
-          sequence: promptPick.sequence || node.sequence || { group_id: 'seq_main_video', kind: 'final_video_segments', index: nextSequenceIndex('genVideo') },
+          sequence: promptPick.sequence || node.sequence || { group_id: 'seq_main_video', kind: 'final_video_segments', index: nextSequenceIndex('genVideo', project) },
           generation: resolvedExecution,
           meta: { ...(node.meta || {}), candidateOfNodeId: '' }
         }, project);
@@ -17502,7 +18357,7 @@
           updateApiStatus('busy');
           setAgentStatus('busy', 'video', '生成视频中', `正在调用 ${model}，等待视频返回`, project);
         }
-        const media = await generateVideoAsset(model, executionPrompt, node.id, resolvedExecution);
+        const media = await generateVideoAsset(model, executionPrompt, node.id, resolvedExecution, project);
         if (!media.url) throw new Error('模型未返回可识别的视频 URL 或 data URI。');
         const cached = await cacheMediaAsset(node.id, media.url, media.mime || 'video/mp4');
         updateNode(node.id, {
@@ -17547,19 +18402,19 @@
       }
     }
 
-    async function generateVideoAsset(model, prompt, nodeId, resolvedExecution = null) {
-      if (shouldUseWaveSpeedMedia(model, 'video')) return waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution);
+    async function generateVideoAsset(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
+      if (shouldUseWaveSpeedMedia(model, 'video')) return waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution, project);
       try {
-        return await videoGeneration(model, prompt, nodeId, resolvedExecution);
+        return await videoGeneration(model, prompt, nodeId, resolvedExecution, project);
       } catch (endpointError) {
-        const refs = videoReferenceNodesForExecution(resolvedExecution);
+        const refs = videoReferenceNodesForExecution(resolvedExecution, project);
         const referenceParts = (await Promise.all([refs.editVideo, refs.first, refs.last, ...refs.refs, ...refs.referenceVideos]
           .filter(Boolean)
           .map(mediaPromptContentPart))).flat();
         const messages = [{
           role: 'user',
           content: [
-            { type: 'text', text: buildVideoPrompt(prompt, mediaSettingsForExecution(resolvedExecution)) },
+            { type: 'text', text: buildVideoPrompt(prompt, mediaSettingsForExecution(resolvedExecution, project), project) },
             ...referenceParts
           ]
         }];
@@ -17569,8 +18424,8 @@
       }
     }
 
-    async function videoGeneration(model, prompt, nodeId, resolvedExecution = null) {
-      const body = await buildVideoGenerationBody(model, prompt, resolvedExecution);
+    async function videoGeneration(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
+      const body = await buildVideoGenerationBody(model, prompt, resolvedExecution, project);
       const usesSoraVideoApi = isRgSeedanceSoraRequestModel(body.model);
       const response = await apiJson(usesSoraVideoApi ? '/videos' : '/video/generations', body);
       const media = mediaFromGenerationResponse(response, 'video');
@@ -17583,9 +18438,9 @@
       } : {});
     }
 
-    async function buildVideoGenerationBody(model, prompt, resolvedExecution = null) {
-      const mediaSettings = mediaSettingsForExecution(resolvedExecution);
-      const references = videoReferenceNodesForExecution(resolvedExecution);
+    async function buildVideoGenerationBody(model, prompt, resolvedExecution = null, project = currentProject()) {
+      const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
+      const references = videoReferenceNodesForExecution(resolvedExecution, project);
       const editVideoUrl = await dataUrlForAsset(references.editVideo);
       const firstImageUrl = await dataUrlForAsset(references.first);
       const lastImageUrl = await dataUrlForAsset(references.last);
@@ -17632,19 +18487,19 @@
       return body;
     }
 
-    function videoReferenceNodesForExecution(resolvedExecution = null) {
-      const editVideo = nodeById(resolvedExecution?.editVideoNodeId) || null;
+    function videoReferenceNodesForExecution(resolvedExecution = null, project = currentProject()) {
+      const editVideo = nodeById(resolvedExecution?.editVideoNodeId, project) || null;
       const allowImplicitFirstFrame = !resolvedExecution;
-      const first = editVideo ? null : nodeById(resolvedExecution?.firstFrameNodeId)
-        || (allowImplicitFirstFrame ? selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) : null)
-        || (allowImplicitFirstFrame ? currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) : null)
+      const first = editVideo ? null : nodeById(resolvedExecution?.firstFrameNodeId, project)
+        || (allowImplicitFirstFrame ? selectedNodes(project).find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) : null)
+        || (allowImplicitFirstFrame ? project.nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) : null)
         || null;
-      const last = editVideo ? null : nodeById(resolvedExecution?.lastFrameNodeId) || null;
+      const last = editVideo ? null : nodeById(resolvedExecution?.lastFrameNodeId, project) || null;
       const refs = (resolvedExecution?.referenceNodeIds || [])
-        .map(nodeById)
+        .map(id => nodeById(id, project))
         .filter(node => node && isImageAstra(node) && node.id !== first?.id && node.id !== last?.id);
       const referenceVideos = (resolvedExecution?.referenceVideoNodeIds || [])
-        .map(nodeById)
+        .map(id => nodeById(id, project))
         .filter(node => node && isVideoAstra(node) && node.id !== editVideo?.id);
       return { first, last, refs, referenceVideos, editVideo };
     }
@@ -18034,15 +18889,15 @@
       return imageInputNodeIdsForExecution(resolvedExecution).length > 0;
     }
 
-    function imageInputUrlsForExecution(resolvedExecution = null) {
+    function imageInputUrlsForExecution(resolvedExecution = null, project = currentProject()) {
       return imageInputNodeIdsForExecution(resolvedExecution)
-        .map(id => assetRequestUrl(nodeById(id)))
+        .map(id => assetRequestUrl(nodeById(id, project)))
         .filter(Boolean);
     }
 
-    async function imageInputDataUrlsForExecution(resolvedExecution = null) {
+    async function imageInputDataUrlsForExecution(resolvedExecution = null, project = currentProject()) {
       return (await Promise.all(imageInputNodeIdsForExecution(resolvedExecution)
-        .map(id => dataUrlForAsset(nodeById(id)))))
+        .map(id => dataUrlForAsset(nodeById(id, project)))))
         .filter(Boolean);
     }
 
@@ -18060,8 +18915,8 @@
       return config.endpointModel || model || (hasSourceVideo ? 'bytedance/seedance-2.0/video-edit' : hasSourceImage ? 'bytedance/seedance-2.0/image-to-video' : 'bytedance/seedance-2.0/text-to-video');
     }
 
-    function waveSpeedVideoDuration(resolvedExecution = null) {
-      return videoDurationForMediaSettings(mediaSettingsForExecution(resolvedExecution));
+    function waveSpeedVideoDuration(resolvedExecution = null, project = currentProject()) {
+      return videoDurationForMediaSettings(mediaSettingsForExecution(resolvedExecution, project));
     }
 
     function waveSpeedImageResolution(value) {
@@ -18070,10 +18925,10 @@
       return normalized;
     }
 
-    async function buildWaveSpeedImageBody(model, prompt, resolvedExecution = null) {
+    async function buildWaveSpeedImageBody(model, prompt, resolvedExecution = null, project = currentProject()) {
       const config = mediaModelConfig(model, 'image');
-      const mediaSettings = mediaSettingsForExecution(resolvedExecution);
-      const referenceImages = await imageInputDataUrlsForExecution(resolvedExecution);
+      const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
+      const referenceImages = await imageInputDataUrlsForExecution(resolvedExecution, project);
       const usesEditEndpoint = hasImageInputsForExecution(resolvedExecution) && !!config.editEndpointModel;
       if (config.bodyKind === 'midjourney') {
         return {
@@ -18103,21 +18958,21 @@
       };
     }
 
-    async function waveSpeedImageGeneration(model, prompt, resolvedExecution = null, nodeId = '') {
+    async function waveSpeedImageGeneration(model, prompt, resolvedExecution = null, nodeId = '', project = currentProject()) {
       requireWaveSpeedKey();
       const endpointModel = resolveWaveSpeedImageModel(model, resolvedExecution);
       return waveSpeedSubmitAndPoll({
         model: endpointModel,
         preferred: 'image',
         nodeId,
-        body: await buildWaveSpeedImageBody(model, prompt, resolvedExecution)
+        body: await buildWaveSpeedImageBody(model, prompt, resolvedExecution, project)
       });
     }
 
-    async function waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution = null) {
+    async function waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
       requireWaveSpeedKey();
-      const mediaSettings = mediaSettingsForExecution(resolvedExecution);
-      const references = videoReferenceNodesForExecution(resolvedExecution);
+      const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
+      const references = videoReferenceNodesForExecution(resolvedExecution, project);
       const editVideoUrl = await dataUrlForAsset(references.editVideo);
       const sourceImageUrl = await dataUrlForAsset(references.first);
       const lastImageUrl = await dataUrlForAsset(references.last);
@@ -18126,7 +18981,7 @@
       const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl, !!editVideoUrl);
       const body = {
         prompt: [prompt, '无口播 无BGM 只有音效'].filter(Boolean).join('\n'),
-        duration: waveSpeedVideoDuration(resolvedExecution),
+        duration: waveSpeedVideoDuration(resolvedExecution, project),
         resolution: mediaSettings.videoResolution,
         generate_audio: true,
         camera_fixed: false,
@@ -18238,23 +19093,23 @@
       return json;
     }
 
-    async function generateImageAsset(model, prompt, resolvedExecution = null, nodeId = '') {
-      if (shouldUseWaveSpeedMedia(model, 'image')) return waveSpeedImageGeneration(model, prompt, resolvedExecution, nodeId);
+    async function generateImageAsset(model, prompt, resolvedExecution = null, nodeId = '', project = currentProject()) {
+      if (shouldUseWaveSpeedMedia(model, 'image')) return waveSpeedImageGeneration(model, prompt, resolvedExecution, nodeId, project);
       if (imageInputNodeIdsForExecution(resolvedExecution).length && supportsExplicitImageEdit(model)) {
-        try { return await imageEditGeneration(model, prompt, true, resolvedExecution); }
+        try { return await imageEditGeneration(model, prompt, true, resolvedExecution, project); }
         catch (firstError) {
-          try { return await imageEditGeneration(model, prompt, false, resolvedExecution); }
+          try { return await imageEditGeneration(model, prompt, false, resolvedExecution, project); }
           catch (_) { throw firstError; }
         }
       }
       if (mediaModelConfig(model, 'image').endpoint === 'images') {
-        try { return await imageGeneration(model, prompt, true, resolvedExecution); }
+        try { return await imageGeneration(model, prompt, true, resolvedExecution, project); }
         catch (firstError) {
-          try { return await imageGeneration(model, prompt, false, resolvedExecution); }
+          try { return await imageGeneration(model, prompt, false, resolvedExecution, project); }
           catch (_) { throw firstError; }
         }
       }
-      return chatImageGeneration(model, prompt, resolvedExecution);
+      return chatImageGeneration(model, prompt, resolvedExecution, project);
     }
 
     async function cacheBlobAsset(blob, fallbackMime = '', options = {}) {
@@ -18442,9 +19297,9 @@
       return compact;
     }
 
-    async function imageGeneration(model, prompt, withSize, resolvedExecution = null) {
+    async function imageGeneration(model, prompt, withSize, resolvedExecution = null, project = currentProject()) {
       requireApiKey();
-      const body = await buildImageGenerationBody(model, prompt, withSize, resolvedExecution);
+      const body = await buildImageGenerationBody(model, prompt, withSize, resolvedExecution, project);
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}/images/generations`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${state.settings.apiKey}`, 'Content-Type': 'application/json' },
@@ -18455,20 +19310,20 @@
       return imageResponseMedia(json);
     }
 
-    async function buildImageGenerationBody(model, prompt, withSize, resolvedExecution = null) {
+    async function buildImageGenerationBody(model, prompt, withSize, resolvedExecution = null, project = currentProject()) {
       const config = mediaModelConfig(model, 'image');
       const body = { model: mediaModelRequestModel(model, 'image'), prompt, n: 1 };
-      const imageUrls = await imageInputDataUrlsForExecution(resolvedExecution);
+      const imageUrls = await imageInputDataUrlsForExecution(resolvedExecution, project);
       if (config.referenceImages && imageUrls.length) body.images = imageUrls;
       if (withSize) {
-        const mediaSettings = mediaSettingsForExecution(resolvedExecution);
+        const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
         body.size = sizeForAspect(mediaSettings.imageAspectRatio, mediaSettings.imageResolution);
       }
       return body;
     }
 
-    async function buildImageEditBody(model, prompt, withSize, resolvedExecution = null) {
-      const images = (await imageInputDataUrlsForExecution(resolvedExecution)).map(url => ({ image_url: url }));
+    async function buildImageEditBody(model, prompt, withSize, resolvedExecution = null, project = currentProject()) {
+      const images = (await imageInputDataUrlsForExecution(resolvedExecution, project)).map(url => ({ image_url: url }));
       if (!images.length) throw new Error('原图修改需要先连接一张原图。');
       const body = {
         model: mediaModelRequestModel(model, 'image'),
@@ -18478,14 +19333,14 @@
         output_format: 'png'
       };
       if (withSize) {
-        const mediaSettings = mediaSettingsForExecution(resolvedExecution);
+        const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
         body.size = sizeForAspect(mediaSettings.imageAspectRatio, mediaSettings.imageResolution);
       }
       return body;
     }
 
-    async function buildImageEditFormData(model, prompt, withSize, resolvedExecution = null) {
-      const body = await buildImageEditBody(model, prompt, withSize, resolvedExecution);
+    async function buildImageEditFormData(model, prompt, withSize, resolvedExecution = null, project = currentProject()) {
+      const body = await buildImageEditBody(model, prompt, withSize, resolvedExecution, project);
       const form = new FormData();
       form.append('model', body.model);
       form.append('prompt', body.prompt);
@@ -18509,12 +19364,12 @@
       return 'png';
     }
 
-    async function imageEditGeneration(model, prompt, withSize, resolvedExecution = null) {
+    async function imageEditGeneration(model, prompt, withSize, resolvedExecution = null, project = currentProject()) {
       requireApiKey();
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}/images/edits`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${state.settings.apiKey}` },
-        body: await buildImageEditFormData(model, prompt, withSize, resolvedExecution)
+        body: await buildImageEditFormData(model, prompt, withSize, resolvedExecution, project)
       });
       if (!response.ok) throw new Error(await responseErrorText(response));
       const json = await response.json();
@@ -18528,15 +19383,15 @@
       return {};
     }
 
-    async function chatImageGeneration(model, prompt, resolvedExecution = null) {
+    async function chatImageGeneration(model, prompt, resolvedExecution = null, project = currentProject()) {
       const refs = imageInputNodeIdsForExecution(resolvedExecution)
-        .map(nodeById)
+        .map(id => nodeById(id, project))
         .filter(Boolean);
-      const mediaSettings = mediaSettingsForExecution(resolvedExecution);
+      const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
       const mediaParts = (await Promise.all(refs.map(mediaPromptContentPart))).flat();
       const detail = await companyChatCompletion(mediaModelRequestModel(model, 'image'), [{
         role: 'user',
-        content: [{ type: 'text', text: buildImagePrompt(prompt, mediaSettings) }, ...mediaParts]
+        content: [{ type: 'text', text: buildImagePrompt(prompt, mediaSettings, project) }, ...mediaParts]
       }], { maxTokens: 4096, timeoutMs: IMAGE_GENERATION_TIMEOUT_MS, returnDetail: true });
       const media = extractMedia(detail, 'image');
       return {
@@ -18545,24 +19400,24 @@
       };
     }
 
-    function visualLockText() {
-      const locks = (currentProject()?.nodes || [])
+    function visualLockText(project = currentProject()) {
+      const locks = (project?.nodes || [])
         .filter(node => ['styleLock', 'videoLock', 'customPolaris'].includes(node.role) && (node.content || node.summary))
         .slice(-4)
         .map(node => `# ${node.title}\nastra=${node.family}.${node.role}\n${truncateText(node.content || node.summary || '', 900)}`);
       return locks.join('\n\n');
     }
 
-    function buildImagePrompt(basePrompt, mediaSettings = null) {
-      return renderPromptPreset('wrappers.imageChatGeneration', { basePrompt, mediaSettings, styleLock: visualLockText() });
+    function buildImagePrompt(basePrompt, mediaSettings = null, project = currentProject()) {
+      return renderPromptPreset('wrappers.imageChatGeneration', { basePrompt, mediaSettings, styleLock: visualLockText(project) });
     }
 
-    function buildVideoPrompt(basePrompt, mediaSettings = null) {
-      return renderPromptPreset('wrappers.videoChatGeneration', { basePrompt, mediaSettings, styleLock: visualLockText() });
+    function buildVideoPrompt(basePrompt, mediaSettings = null, project = currentProject()) {
+      return renderPromptPreset('wrappers.videoChatGeneration', { basePrompt, mediaSettings, styleLock: visualLockText(project) });
     }
 
-    function promptWithReferenceBindings(basePrompt, resolvedExecution = null) {
-      const entries = promptReferenceEntriesForExecution(resolvedExecution);
+    function promptWithReferenceBindings(basePrompt, resolvedExecution = null, project = currentProject()) {
+      const entries = promptReferenceEntriesForExecution(resolvedExecution, project);
       if (!entries.length) return basePrompt;
       const prompt = promptReferenceTextForModel(basePrompt, entries);
       const lines = entries.map(entry => {
@@ -18580,7 +19435,7 @@
       ].join('\n');
     }
 
-    function promptReferenceEntriesForExecution(resolvedExecution = null) {
+    function promptReferenceEntriesForExecution(resolvedExecution = null, project = currentProject()) {
       if (!resolvedExecution) return [];
       const entries = [];
       const usedNodeIds = new Set();
@@ -18594,7 +19449,7 @@
         const mediaKind = options.mediaKind || mediaMentionKind(node);
         if (!node || !mediaKind || usedNodeIds.has(node.id)) return;
         const binding = bindingByNodeId.get(node.id);
-        const alias = options.alias || binding?.alias || nextReferenceAlias(mediaKind, counts, usedAliases);
+        const alias = binding?.alias || options.alias || nextReferenceAlias(mediaKind, counts, usedAliases);
         usedAliases.add(alias);
         entries.push({
           node,
@@ -18607,15 +19462,15 @@
         });
         usedNodeIds.add(node.id);
       };
-      pushEntry(nodeById(resolvedExecution.firstFrameNodeId), { alias: 'first_frame', mediaKind: 'image', inputRole: 'first_frame' });
-      pushEntry(nodeById(resolvedExecution.lastFrameNodeId), { alias: 'last_frame', mediaKind: 'image', inputRole: 'last_frame' });
-      pushEntry(nodeById(resolvedExecution.editVideoNodeId), { alias: 'video_edit', mediaKind: 'video', inputRole: 'video_edit' });
+      pushEntry(nodeById(resolvedExecution.firstFrameNodeId, project), { alias: 'first_frame', mediaKind: 'image', inputRole: 'first_frame' });
+      pushEntry(nodeById(resolvedExecution.lastFrameNodeId, project), { alias: 'last_frame', mediaKind: 'image', inputRole: 'last_frame' });
+      pushEntry(nodeById(resolvedExecution.editVideoNodeId, project), { alias: 'video_edit', mediaKind: 'video', inputRole: 'video_edit' });
       (resolvedExecution.sourceImageNodeIds || []).forEach((id, index) => {
-        pushEntry(nodeById(id), { alias: index ? `source_image_${index + 1}` : 'source_image', mediaKind: 'image', inputRole: 'source_image' });
+        pushEntry(nodeById(id, project), { alias: index ? `source_image_${index + 1}` : 'source_image', mediaKind: 'image', inputRole: 'source_image' });
       });
-      (resolvedExecution.referenceNodeIds || []).forEach(id => pushEntry(nodeById(id), { inputRole: 'ref' }));
-      (resolvedExecution.referenceVideoNodeIds || []).forEach(id => pushEntry(nodeById(id), { inputRole: 'reference_video' }));
-      (resolvedExecution.mediaMentionNodeIds || []).forEach(id => pushEntry(nodeById(id), { attached: false }));
+      (resolvedExecution.referenceNodeIds || []).forEach(id => pushEntry(nodeById(id, project), { inputRole: 'ref' }));
+      (resolvedExecution.referenceVideoNodeIds || []).forEach(id => pushEntry(nodeById(id, project), { inputRole: 'reference_video' }));
+      (resolvedExecution.mediaMentionNodeIds || []).forEach(id => pushEntry(nodeById(id, project), { attached: false }));
       return entries;
     }
 
@@ -18667,15 +19522,14 @@
       return node.meta?.promptPlaceholder || (node.status === 'placeholder' && (node.family === 'Comet' || node.type === 'imagePrompt' || node.type === 'videoPrompt' || node.type === 'prompt'));
     }
 
-    function downstreamTargetForPrompt(promptNodeId, targetRole) {
-      const project = currentProject();
+    function downstreamTargetForPrompt(promptNodeId, targetRole, project = currentProject()) {
       if (!project || !promptNodeId) return null;
       const targets = (project.links || [])
         .filter(link =>
           (link.fromNodeId || link.from_astra_id) === promptNodeId
           && ['prompt', 'context'].includes(link.inputRole || link.input_role || 'prompt')
         )
-        .map(link => nodeById(link.toNodeId || link.to_astra_id))
+        .map(link => nodeById(link.toNodeId || link.to_astra_id, project))
         .filter(node => node?.role === targetRole);
       return targets.find(node => !assetDisplayUrl(node) && node.status !== 'completed') || targets[0] || null;
     }
@@ -18706,19 +19560,21 @@
     }
 
     function extractPromptFor(kind, options = {}) {
+      const project = options.project || currentProject();
+      const selected = selectedNodes(project, options.selectedNodeIds);
       const directType = kind === 'image' ? 'imagePrompt' : 'videoPrompt';
       const targetRole = kind === 'image' ? 'genImage' : 'genVideo';
-      const sourceImageHint = kind === 'video' && options.sourceImageNodeId ? nodeById(options.sourceImageNodeId) : null;
-      const selectedTarget = selectedNodes().find(n => n.role === targetRole);
+      const sourceImageHint = kind === 'video' && options.sourceImageNodeId ? nodeById(options.sourceImageNodeId, project) : null;
+      const selectedTarget = selected.find(n => n.role === targetRole);
       const linkedPrompt = selectedTarget
-        ? upstreamInputsFor(selectedTarget.id).find(item =>
+        ? upstreamInputsFor(selectedTarget.id, project).find(item =>
           ['prompt', 'context'].includes(item.inputRole)
           && (item.node.type === directType || item.node.type === 'prompt' || item.node.family === 'Comet' || item.node.family === 'Polaris')
         )?.node
         : null;
       if (linkedPrompt) {
         const linkedImage = kind === 'video'
-          ? linkedImageForRole(linkedPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || sourceImageHint || linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'])
+          ? linkedImageForRole(linkedPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) || sourceImageHint || linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project)
           : null;
         return promptPick(promptTextFromNode(linkedPrompt, { allowSummary: true }), options, {
           nodeId: linkedPrompt.id,
@@ -18728,12 +19584,12 @@
           targetNodeId: selectedTarget.id
         });
       }
-      const directPrompt = selectedNodes().find(n => isPromptAstraForKind(n, kind))
-        || currentProject().nodes.filter(n => isPromptAstraForKind(n, kind) && n.status === 'completed').at(-1);
+      const directPrompt = selected.find(n => isPromptAstraForKind(n, kind))
+        || project.nodes.filter(n => isPromptAstraForKind(n, kind) && n.status === 'completed').at(-1);
       if (directPrompt) {
-        const downstreamTarget = downstreamTargetForPrompt(directPrompt.id, targetRole);
+        const downstreamTarget = downstreamTargetForPrompt(directPrompt.id, targetRole, project);
         const sourceImage = kind === 'video'
-          ? (linkedImageForRole(directPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) || sourceImageHint || selectedNodes().find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref']) : null) || currentProject().nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')))
+          ? (linkedImageForRole(directPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) || sourceImageHint || selected.find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) : null) || project.nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')))
           : null;
         return promptPick(promptTextFromNode(directPrompt, { allowSummary: true }), options, {
           nodeId: directPrompt.id,
@@ -18744,9 +19600,9 @@
         });
       }
 
-      const promptNode = selectedNodes().find(n => n.type === 'prompt')
-        || currentProject().nodes.filter(n => n.type === 'prompt' && n.status === 'completed').at(-1)
-        || currentProject().nodes.filter(n => n.type === 'prompt').at(-1);
+      const promptNode = selected.find(n => n.type === 'prompt')
+        || project.nodes.filter(n => n.type === 'prompt' && n.status === 'completed').at(-1)
+        || project.nodes.filter(n => n.type === 'prompt').at(-1);
       if (!promptNode) return promptPick('', options);
 
       const text = promptTextFromNode(promptNode, { allowSummary: true });
@@ -18769,7 +19625,7 @@
     function promptPick(text, options, meta = {}) {
       const value = String(text || '').trim();
       if (!options.detail) return value;
-      const mentions = resolvePromptMentionReferences(value, meta.nodeId || '');
+      const mentions = resolvePromptMentionReferences(value, meta.nodeId || '', { project: options.project });
       return { text: mentions.text, mentionNodeIds: mentions.nodeIds, mentionBindings: mentions.bindings, ...meta };
     }
 
@@ -18779,7 +19635,7 @@
 
     function resolvePromptMentionReferences(text, promptNodeId = '', options = {}) {
       const sourceText = String(text || '');
-      const project = currentProject();
+      const project = options.project || currentProject();
       const matches = [...sourceText.matchAll(/@([\w\u4e00-\u9fff-]{1,64})/g)];
       if (!matches.length || !project) return { text: sourceText, nodeIds: [], bindings: [] };
       const candidates = promptReferenceCandidates(promptNodeId, project);
@@ -18841,12 +19697,12 @@
         || null;
     }
 
-    function controllerMessageMentionContext(text, project = currentProject()) {
+    function controllerMessageMentionContext(text, project = currentProject(), options = {}) {
       const sourceText = String(text || '');
       const matches = [...sourceText.matchAll(/@([\w\u4e00-\u9fff-]{1,64})/g)];
       const empty = { direct: [], groups: [], unresolved: [] };
       if (!matches.length || !project) return empty;
-      const scopeNodes = controllerMentionScopeNodes(project);
+      const scopeNodes = controllerMentionScopeNodes(project, options.selectedNodeIds);
       const candidates = controllerMentionCandidates(project, { includeHiddenGroups: true, nodes: scopeNodes });
       const candidateMap = new Map(candidates.map(item => [String(item.alias || '').toLowerCase(), item]));
       const direct = [];
@@ -18962,12 +19818,12 @@
       ]);
     }
 
-    function controllerMentionScopeNodes(project = currentProject()) {
+    function controllerMentionScopeNodes(project = currentProject(), selectedNodeIds = state.selectedNodeIds) {
       if (!project) return [];
       const nodes = arrayFrom(project.nodes);
       const byId = new Map(nodes.map(node => [String(node.id || ''), node]));
       const selectedIds = new Set(
-        arrayFrom(state.selectedNodeIds)
+        arrayFrom(selectedNodeIds)
           .map(id => String(id || ''))
           .filter(id => byId.has(id))
       );
@@ -19075,8 +19931,9 @@
             : item.inputRole === 'last_frame'
               ? 'last_frame'
               : item.inputRole === 'source_image'
-                ? 'source_image'
+                ? `source_image${counts.image ? `_${counts.image + 1}` : ''}`
                 : '';
+          if (item.inputRole === 'source_image') counts.image += 1;
           const alias = roleAlias || `${mediaKind}_${++counts[mediaKind]}`;
           return {
             node: item.node,
@@ -19119,7 +19976,12 @@
 
     function canonicalPromptReferenceAlias({ node, mediaKind, inputRole, originalAlias, counts, canonicalByNode }) {
       const lower = String(originalAlias || '').toLowerCase();
-      if (inputRole === 'source_image' || lower === 'source_image') return 'source_image';
+      if (inputRole === 'source_image') {
+        if (/^image_\d+$/i.test(String(originalAlias || ''))) return originalAlias;
+        if (/^source_image_\d+$/i.test(String(originalAlias || ''))) return originalAlias;
+        return 'source_image';
+      }
+      if (lower === 'source_image') return 'source_image';
       if (inputRole === 'first_frame' || lower === 'first_frame') return 'first_frame';
       if (inputRole === 'last_frame' || lower === 'last_frame') return 'last_frame';
       const key = `${mediaKind}:${node.id}`;
@@ -19190,43 +20052,43 @@
         .filter(item => item.node);
     }
 
-    function linkedNodeForRole(toNodeId, roles, predicate = () => true) {
-      return upstreamInputsFor(toNodeId)
+    function linkedNodeForRole(toNodeId, roles, predicate = () => true, project = currentProject()) {
+      return upstreamInputsFor(toNodeId, project)
         .find(item => roles.includes(item.inputRole) && predicate(item.node))
         ?.node || null;
     }
 
-    function linkedImageForRole(toNodeId, roles) {
-      return linkedNodeForRole(toNodeId, roles, node => isImageAstra(node) && !!assetDisplayUrl(node));
+    function linkedImageForRole(toNodeId, roles, project = currentProject()) {
+      return linkedNodeForRole(toNodeId, roles, node => isImageAstra(node) && !!assetDisplayUrl(node), project);
     }
 
-    function linkedImageInputForRole(toNodeId, roles) {
-      return linkedNodeForRole(toNodeId, roles, node => isImageAstra(node));
+    function linkedImageInputForRole(toNodeId, roles, project = currentProject()) {
+      return linkedNodeForRole(toNodeId, roles, node => isImageAstra(node), project);
     }
 
-    function linkedImageInputsForRoles(toNodeId, roles, requireAsset = true) {
-      return upstreamInputsFor(toNodeId)
+    function linkedImageInputsForRoles(toNodeId, roles, requireAsset = true, project = currentProject()) {
+      return upstreamInputsFor(toNodeId, project)
         .filter(item => roles.includes(item.inputRole) && isImageAstra(item.node) && (!requireAsset || assetDisplayUrl(item.node)))
         .map(item => item.node);
     }
 
-    function firstLinkedImageInputForRoles(toNodeIds, roles, requireAsset = true) {
+    function firstLinkedImageInputForRoles(toNodeIds, roles, requireAsset = true, project = currentProject()) {
       for (const toNodeId of toNodeIds.filter(Boolean)) {
-        const node = linkedImageInputsForRoles(toNodeId, roles, requireAsset)[0];
+        const node = linkedImageInputsForRoles(toNodeId, roles, requireAsset, project)[0];
         if (node) return node;
       }
       return null;
     }
 
-    function linkedVideoInputsForRoles(toNodeId, roles, requireAsset = true) {
-      return upstreamInputsFor(toNodeId)
+    function linkedVideoInputsForRoles(toNodeId, roles, requireAsset = true, project = currentProject()) {
+      return upstreamInputsFor(toNodeId, project)
         .filter(item => roles.includes(item.inputRole) && isVideoAstra(item.node) && (!requireAsset || assetDisplayUrl(item.node)))
         .map(item => item.node);
     }
 
-    function firstLinkedVideoInputForRoles(toNodeIds, roles, requireAsset = true) {
+    function firstLinkedVideoInputForRoles(toNodeIds, roles, requireAsset = true, project = currentProject()) {
       for (const toNodeId of toNodeIds.filter(Boolean)) {
-        const node = linkedVideoInputsForRoles(toNodeId, roles, requireAsset)[0];
+        const node = linkedVideoInputsForRoles(toNodeId, roles, requireAsset, project)[0];
         if (node) return node;
       }
       return null;
@@ -19250,8 +20112,8 @@
         && (!promptPick.promptKey || !promptKey || promptKey === promptPick.promptKey);
     }
 
-    function findOfficialForPrompt(role, promptPick, options = {}) {
-      return currentProject().nodes.find(node =>
+    function findOfficialForPrompt(role, promptPick, options = {}, project = currentProject()) {
+      return project.nodes.find(node =>
         node.role === role
         && generationAssetState(node) === 'official'
         && (options.includePending ? node.status !== 'failed' : node.status === 'completed')
@@ -19265,27 +20127,28 @@
       return assetDisplayUrl(node) && node.status === 'completed' ? 'official' : '';
     }
 
-    function resolveImageExecution(promptPick) {
-      const target = nodeById(promptPick.targetNodeId) || selectedNodes().find(node => node.role === 'genImage') || null;
+    function resolveImageExecution(promptPick, project = currentProject(), selectedNodeIds = state.selectedNodeIds) {
+      const selected = selectedNodes(project, selectedNodeIds);
+      const target = nodeById(promptPick.targetNodeId, project) || selected.find(node => node.role === 'genImage') || null;
       const promptNodeId = promptPick.nodeId || '';
-      const model = operationModelValue(promptPick.model || currentProject().runtime.imageModel, 'image');
-      const mediaSettings = mergeMediaSettings(starFlowMediaSettings(), promptPick.mediaSettings, 'image', model);
+      const model = operationModelValue(promptPick.model || project.runtime.imageModel, 'image');
+      const mediaSettings = mergeMediaSettings(starFlowMediaSettings(project), promptPick.mediaSettings, 'image', model);
       const linkedSources = [
-        ...linkedImageInputsForRoles(promptNodeId, ['source_image']),
-        ...(target ? linkedImageInputsForRoles(target.id, ['source_image']) : [])
+        ...linkedImageInputsForRoles(promptNodeId, ['source_image'], true, project),
+        ...(target ? linkedImageInputsForRoles(target.id, ['source_image'], true, project) : [])
       ].map(node => node.id);
       const linkedRefs = [
-        ...linkedImageInputsForRoles(promptNodeId, ['ref', 'style_ref', 'subject_ref']),
-        ...(target ? linkedImageInputsForRoles(target.id, ['ref', 'style_ref', 'subject_ref']) : [])
+        ...linkedImageInputsForRoles(promptNodeId, ['ref', 'style_ref', 'subject_ref'], true, project),
+        ...(target ? linkedImageInputsForRoles(target.id, ['ref', 'style_ref', 'subject_ref'], true, project) : [])
       ].map(node => node.id);
       const sourceImageNodeIds = [...new Set(linkedSources)];
       const selectedRefs = promptPick.useSelectedRefs === false
         ? []
-        : selectedNodes()
+        : selected
           .filter(node => node.id !== target?.id && isImageAstra(node) && assetDisplayUrl(node))
-          .map(node => node.id);
+        .map(node => node.id);
       const mentionRefs = (promptPick.mentionNodeIds || [])
-        .map(nodeById)
+        .map(id => nodeById(id, project))
         .filter(node => node && node.id !== target?.id && isImageAstra(node) && assetDisplayUrl(node))
         .map(node => node.id);
       const referenceNodeIds = [...new Set([
@@ -19308,24 +20171,25 @@
       };
     }
 
-    function resolveVideoExecution(promptPick) {
-      const target = nodeById(promptPick.targetNodeId) || selectedNodes().find(node => node.role === 'genVideo') || null;
+    function resolveVideoExecution(promptPick, project = currentProject(), selectedNodeIds = state.selectedNodeIds) {
+      const selected = selectedNodes(project, selectedNodeIds);
+      const target = nodeById(promptPick.targetNodeId, project) || selected.find(node => node.role === 'genVideo') || null;
       const promptNodeId = promptPick.nodeId || '';
-      const model = operationModelValue(promptPick.model || currentProject().runtime.videoModel, 'video');
-      const mediaSettings = mergeMediaSettings(starFlowMediaSettings(), promptPick.mediaSettings, 'video', model);
+      const model = operationModelValue(promptPick.model || project.runtime.videoModel, 'video');
+      const mediaSettings = mergeMediaSettings(starFlowMediaSettings(project), promptPick.mediaSettings, 'video', model);
       const inputOwners = [promptNodeId, target?.id].filter(Boolean);
-      const editInput = firstLinkedVideoInputForRoles(inputOwners, ['video_edit'], false);
+      const editInput = firstLinkedVideoInputForRoles(inputOwners, ['video_edit'], false, project);
       const linkedEditVideo = editInput && assetDisplayUrl(editInput) ? editInput : null;
-      const referenceVideoInputs = inputOwners.flatMap(ownerId => linkedVideoInputsForRoles(ownerId, ['reference_video'], false));
+      const referenceVideoInputs = inputOwners.flatMap(ownerId => linkedVideoInputsForRoles(ownerId, ['reference_video'], false, project));
       const linkedReferenceVideos = referenceVideoInputs.filter(node => assetDisplayUrl(node));
-      const firstInput = firstLinkedImageInputForRoles(inputOwners, ['first_frame'], false);
-      const lastInput = firstLinkedImageInputForRoles(inputOwners, ['last_frame'], false);
+      const firstInput = firstLinkedImageInputForRoles(inputOwners, ['first_frame'], false, project);
+      const lastInput = firstLinkedImageInputForRoles(inputOwners, ['last_frame'], false, project);
       const linkedFirst = firstInput && assetDisplayUrl(firstInput) ? firstInput : null;
       const linkedLast = lastInput && assetDisplayUrl(lastInput) ? lastInput : null;
-      const linkedRef = firstLinkedImageInputForRoles(inputOwners, ['ref', 'style_ref', 'subject_ref']);
-      const selectedImages = selectedNodes().filter(node => assetDisplayUrl(node) && node.mime?.startsWith('image/'));
+      const linkedRef = firstLinkedImageInputForRoles(inputOwners, ['ref', 'style_ref', 'subject_ref'], true, project);
+      const selectedImages = selected.filter(node => assetDisplayUrl(node) && node.mime?.startsWith('image/'));
       const mentionNodes = (promptPick.mentionNodeIds || [])
-        .map(nodeById)
+        .map(id => nodeById(id, project))
         .filter(node => node && assetDisplayUrl(node));
       const mentionedImages = mentionNodes.filter(node => node.mime?.startsWith('image/'));
       const mentionedVideos = mentionNodes.filter(node => node.mime?.startsWith('video/'));
@@ -19333,13 +20197,13 @@
         .filter(binding => binding.inputRole === 'video_edit')
         .map(binding => binding.nodeId));
       const editVideo = linkedEditVideo || mentionedVideos.find(node => editMentionIds.has(node.id)) || null;
-      const fallbackImage = currentProject().nodes.findLast?.(node => assetDisplayUrl(node) && node.mime?.startsWith('image/'));
+      const fallbackImage = project.nodes.findLast?.(node => assetDisplayUrl(node) && node.mime?.startsWith('image/'));
       const hasExplicitFrameInput = !!firstInput || !!lastInput;
-      const pickedSourceImage = promptPick.sourceImageNodeId ? currentProject().nodes.find(node => node.id === promptPick.sourceImageNodeId) : null;
+      const pickedSourceImage = promptPick.sourceImageNodeId ? project.nodes.find(node => node.id === promptPick.sourceImageNodeId) : null;
       const first = editVideo ? null : linkedFirst || (!hasExplicitFrameInput ? mentionedImages[0] || pickedSourceImage || selectedImages[0] || linkedRef || fallbackImage : null) || null;
       const last = editVideo ? null : linkedLast || (!hasExplicitFrameInput && selectedImages.length >= 2 ? selectedImages[1] : null);
       const linkedRefs = inputOwners
-        .flatMap(ownerId => linkedImageInputsForRoles(ownerId, ['ref', 'style_ref', 'subject_ref']))
+        .flatMap(ownerId => linkedImageInputsForRoles(ownerId, ['ref', 'style_ref', 'subject_ref'], true, project))
         .map(node => node.id);
       const mentionRefs = mentionedImages
         .map(node => node.id)
@@ -19377,8 +20241,8 @@
       };
     }
 
-    function nextSequenceIndex(role) {
-      const values = currentProject().nodes
+    function nextSequenceIndex(role, project = currentProject()) {
+      const values = project.nodes
         .filter(node => node.role === role && node.sequence?.index)
         .map(node => Number(node.sequence.index) || 0);
       return values.length ? Math.max(...values) + 1 : 1;
@@ -19411,9 +20275,8 @@
       return String(text || '').match(new RegExp(`"${escaped}"\\s*:\\s*"((?:\\\\.|[^"\\\\]){10,8000})"`, 'i'));
     }
 
-    function collectProjectContext() {
-      const project = currentProject();
-      const selected = new Set(state.selectedNodeIds);
+    function collectProjectContext(project = currentProject(), options = {}) {
+      const selected = new Set(options.selectedNodeIds || state.selectedNodeIds);
       const polarisNodes = globalPolarisContextNodes(project);
       const polarisIds = new Set(polarisNodes.map(node => node.id));
       const textNodes = project.nodes.filter(node => !nodeHasAsset(node) && !polarisIds.has(node.id));
@@ -21349,6 +22212,7 @@
 
     function isTextInputTarget(target) {
       if ($('settingsModal')?.classList.contains('open') || $('editorPanel')?.classList.contains('open')) return true;
+      if (state.annotationEditor) return true;
       if (!target) return false;
       return !!target.closest?.('input, textarea, select, [contenteditable="true"], .editor-panel.open');
     }
@@ -21616,6 +22480,20 @@
         closeContextMenu();
       });
       window.addEventListener('keydown', event => {
+        if (state.annotationEditor && (event.ctrlKey || event.metaKey)) {
+          const key = String(event.key || '').toLowerCase();
+          if (key === 'z') {
+            event.preventDefault();
+            if (event.shiftKey) redoAnnotationStroke();
+            else undoAnnotationStroke();
+            return;
+          }
+          if (key === 'y') {
+            event.preventDefault();
+            redoAnnotationStroke();
+            return;
+          }
+        }
         if ((event.ctrlKey || event.metaKey) && !isTextInputTarget(event.target)) {
           const key = String(event.key || '').toLowerCase();
           if (key === 'z') {
@@ -21632,6 +22510,7 @@
         }
         if (event.key === 'Escape') {
           closeMediaViewer();
+          closeAnnotationEditor();
           closeFrameCutPanel();
           closePromptMentionMenu();
           cancelInlineEditor();
@@ -21788,6 +22667,11 @@
       createAstraFromMenu,
       canvasEdges,
       mediaDownloadFileName,
+      startImageAnnotationFromContext,
+      closeAnnotationEditor,
+      finishAnnotationEditor,
+      ensureAnnotationImagePrompt,
+      downstreamImagePromptsForAnnotation,
       sortExportNodes,
       collectPackageMediaFiles,
       packageAssetPath,
