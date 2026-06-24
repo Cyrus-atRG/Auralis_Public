@@ -1875,9 +1875,10 @@
 
     .frame-cut-panel {
       width: min(1180px, calc(100vw - 48px));
+      height: min(920px, calc(100vh - 48px));
       max-height: calc(100vh - 48px);
       display: grid;
-      grid-template-rows: auto minmax(320px, 1fr) auto;
+      grid-template-rows: auto minmax(0, 1fr) auto;
       overflow: hidden;
       border: 1px solid oklch(0.76 0.072 282 / 0.62);
       border-radius: 14px;
@@ -1909,20 +1910,25 @@
       display: grid;
       place-items: center;
       padding: 14px;
+      overflow: hidden;
       background: oklch(0.02 0.004 250);
     }
 
     .frame-cut-stage video {
-      width: auto;
-      height: auto;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
       max-width: 100%;
-      max-height: calc(100vh - 260px);
+      max-height: 100%;
       display: block;
       object-fit: contain;
       background: oklch(0.015 0.004 250);
     }
 
     .frame-cut-controls {
+      position: relative;
+      z-index: 1;
       display: grid;
       gap: 10px;
       padding: 12px;
@@ -2795,22 +2801,26 @@
     }
 
     .backup-status {
+      --backup-status-bg: oklch(0.11 0.016 250 / 0.72);
+      --backup-status-border: var(--line);
+      --backup-status-ink: var(--ink);
+      --backup-status-muted: var(--muted);
       display: grid;
       gap: 4px;
       padding: 10px;
-      border: 1px solid var(--line);
+      border: 1px solid var(--backup-status-border);
       border-radius: 10px;
-      background: oklch(0.11 0.016 250 / 0.72);
+      background: var(--backup-status-bg);
     }
 
     .backup-status strong {
-      color: var(--ink);
+      color: var(--backup-status-ink);
       font-size: 12px;
       font-weight: 760;
     }
 
     .backup-status span {
-      color: var(--muted);
+      color: var(--backup-status-muted);
       font-size: 12px;
       line-height: 1.4;
     }
@@ -3178,6 +3188,13 @@
     html[data-visual-scheme="caelum"] .theme-segmented,
     html[data-visual-scheme="caelum"] .settings-section {
       background: oklch(0.972 0.008 250 / 0.9);
+    }
+
+    html[data-visual-scheme="caelum"] .backup-status {
+      --backup-status-bg: oklch(0.945 0.014 242 / 0.92);
+      --backup-status-border: oklch(0.78 0.024 250);
+      --backup-status-ink: oklch(0.21 0.032 250);
+      --backup-status-muted: oklch(0.43 0.028 250);
     }
 
     html[data-visual-scheme="caelum"] .theme-option {
@@ -5499,18 +5516,17 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.05';
+    const AURALIS_VERSION = 'Auralis v1.06';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 I see 视觉理解模式，手动开启后，可在对话中 @ 引用图片、视频、Prompt 等节点，强制主控先理解视觉内容，再执行后续画布操作。（使用场景举例：同时引用原图、反推prompt、反推prompt生成图片，开启I See模式先进行视觉理解，查看原图和生图差异，再调整反推prompt，使反推prompt更加精准。）',
-      '优化参考图 Prompt / 参考视频 Prompt 的主控支持，减少不同 Prompt 类型之间的操作差异。',
-      '修正主控执行画布操作时的进度消息顺序，避免任务完成后才出现“正在执行”类提示。',
-      '按 RG/BaseAI 最新契约调整媒体生成请求：修正 Seedance 视频参数结构，并补充 Gemini / Nano Banana 图片模型的比例与尺寸配置。',
-      '修复流程诊断中媒体分析模型 token 预算不足、返回格式约束不足导致误报问题。'
+      '新增手动切帧“单帧提取”模式，可从视频任意时间点直接提取一张或多张参考图片 Astra，方便后续视频使用首帧制作。',
+      '优化主控操作失败后的回滚逻辑：媒体生成失败会保留当前画布和失败节点，方便直接重试；结构性操作失败时只回滚本次操作影响范围，避免误删同时进行或手动新增的节点。',
+      '优化图片反推 Prompt 的画风还原要求，提升对画风细节、构图和生成模型可读性的描述质量。',
+      '修复浅色主题下备份状态信息块背景和文字对比不足的问题。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -5881,6 +5897,14 @@
         outputs: ['Comet.referenceImagePrompt', 'Comet.referenceVideoPrompt'],
         writePolicy: 'create_reference_prompts'
       },
+      manualFrameCut: {
+        label: '手动切帧',
+        runner: 'local_state',
+        canSequence: false,
+        inputs: ['Luna.refVideo'],
+        outputs: ['Sol.refImage', 'Luna.refVideoSegment', 'Polaris.starFlowPlanner', 'Comet.referenceVideoPrompt'],
+        writePolicy: 'create_reference_cut'
+      },
       deriveReferenceImagePrompts: {
         label: '反推图片 Prompt',
         promptId: 'actions.deriveReferenceImagePrompt',
@@ -6142,7 +6166,7 @@
           '你是图片 prompt 反推器。请根据附件图片，输出可直接用于生图模型的中文 prompt。',
           '只输出合法 JSON object，不要 Markdown，不要解释文字，不要代码围栏。',
           'JSON 字段必须是：image_prompt, visual_notes, negative_prompt。',
-          '必须简短：image_prompt 不超过 220 个中文字符；visual_notes 不超过 80 个中文字符；negative_prompt 不超过 80 个中文字符。',
+          '画风还原优先，需要细致拆解并描述画风，不允许仅一句话带过画风部分。整体image_prompt 不超过 400 个中文字符，其中negative_prompt 不超过 80 个中文字符。prompt需要使用自然语言，结构清晰，使生图模型易读。',
           'image_prompt 只描述单帧画面里对生成有用的信息：主体、环境、构图、镜头、光线、画风、清晰可见对象、UI 或玩法反馈。',
           '忽略图片中的口播字幕和营销文案字幕，不要把字幕内容当作画面动作、角色关系或剧情依据；只有当字幕、Logo、资源栏本身是可见 UI 元素时，才简短说明。',
           '不要写“参考图片”“如图”“保持一致”“参考上文”。',
@@ -10702,20 +10726,30 @@
       renderFrameCutPanel();
     }
 
+    function normalizeFrameCutMode(mode) {
+      if (mode === 'single_frame') return 'single_frame';
+      if (mode === 'first_last') return 'first_last';
+      return 'first_frame';
+    }
+
+    function frameCutRequiredPointCount(mode) {
+      return normalizeFrameCutMode(mode) === 'single_frame' ? 1 : 2;
+    }
+
     function frameCutDraftForNode(node) {
       const nodeId = node?.id || '';
       if (!nodeId) return { nodeId: '', cutTimes: [], mode: 'first_frame' };
       const fallback = {
         nodeId,
         cutTimes: uniqueSortedTimes(node.meta?.referenceCut?.cutPoints || []),
-        mode: node.meta?.referenceCut?.mode === 'first_last' ? 'first_last' : 'first_frame'
+        mode: normalizeFrameCutMode(node.meta?.referenceCut?.mode)
       };
       if (!state.frameCutDraft || state.frameCutDraft.nodeId !== nodeId) {
         state.frameCutDraft = fallback;
         return state.frameCutDraft;
       }
       state.frameCutDraft.cutTimes = uniqueSortedTimes(state.frameCutDraft.cutTimes || fallback.cutTimes);
-      state.frameCutDraft.mode = state.frameCutDraft.mode === 'first_last' ? 'first_last' : 'first_frame';
+      state.frameCutDraft.mode = normalizeFrameCutMode(state.frameCutDraft.mode);
       return state.frameCutDraft;
     }
 
@@ -10726,7 +10760,7 @@
         : { nodeId: state.frameCutNodeId, cutTimes: [], mode: 'first_frame' };
       state.frameCutDraft = { ...current, ...patch };
       state.frameCutDraft.cutTimes = uniqueSortedTimes(state.frameCutDraft.cutTimes || []);
-      state.frameCutDraft.mode = state.frameCutDraft.mode === 'first_last' ? 'first_last' : 'first_frame';
+      state.frameCutDraft.mode = normalizeFrameCutMode(state.frameCutDraft.mode);
       return state.frameCutDraft;
     }
 
@@ -10753,7 +10787,7 @@
       }
       const draft = frameCutDraftForNode(node);
       const existing = draft.cutTimes;
-      const mode = draft.mode;
+      const mode = normalizeFrameCutMode(draft.mode);
       root.innerHTML = `<div class="frame-cut-backdrop" data-frame-cut-backdrop>
         <section class="frame-cut-panel" data-frame-cut-panel>
           <div class="frame-cut-head">
@@ -10777,12 +10811,13 @@
             </div>
             <div class="frame-cut-mode">
               <span>模式</span>
-              <label><input type="radio" name="frameCutMode" value="first_frame" ${mode === 'first_last' ? '' : 'checked'}> 仅首帧</label>
+              <label><input type="radio" name="frameCutMode" value="first_frame" ${mode === 'first_frame' ? 'checked' : ''}> 仅首帧</label>
               <label><input type="radio" name="frameCutMode" value="first_last" ${mode === 'first_last' ? 'checked' : ''}> 首尾帧相连</label>
+              <label><input type="radio" name="frameCutMode" value="single_frame" ${mode === 'single_frame' ? 'checked' : ''}> 单帧提取</label>
             </div>
             <div class="frame-cut-points" data-frame-points></div>
             <div class="frame-cut-actions">
-              <button class="primary-btn" type="button" data-frame-create>生成参考拆解</button>
+              <button class="primary-btn" type="button" data-frame-create>${mode === 'single_frame' ? '提取帧图片' : '生成参考拆解'}</button>
               <span class="frame-cut-result" data-frame-result></span>
             </div>
           </div>
@@ -10801,6 +10836,14 @@
       const result = root.querySelector('[data-frame-result]');
       const createButton = root.querySelector('[data-frame-create]');
       let cutTimes = uniqueSortedTimes(initialCutTimes);
+      const selectedMode = () => normalizeFrameCutMode(root.querySelector('input[name="frameCutMode"]:checked')?.value || 'first_frame');
+      const cutPointHint = () => selectedMode() === 'single_frame'
+        ? '至少记录一个时间点，可一次提取多张单帧图片。'
+        : '至少记录两个切点，才能生成参考片段。';
+      const updateModeUi = () => {
+        if (createButton) createButton.textContent = selectedMode() === 'single_frame' ? '提取帧图片' : '生成参考拆解';
+        renderPoints();
+      };
       const updateReadout = () => {
         const duration = Number.isFinite(video.duration) ? video.duration : 0;
         const time = Number.isFinite(video.currentTime) ? video.currentTime : 0;
@@ -10813,7 +10856,7 @@
       const renderPoints = () => {
         pointsRoot.innerHTML = cutTimes.length
           ? cutTimes.map((time, index) => `<span class="frame-cut-chip">${escapeHtml(formatTimePrecise(time))}<button type="button" data-frame-remove="${index}" aria-label="移除切点">×</button></span>`).join('')
-          : '<span class="frame-cut-result">至少记录两个切点，才能生成参考片段。</span>';
+          : `<span class="frame-cut-result">${escapeHtml(cutPointHint())}</span>`;
       };
       video.addEventListener('loadedmetadata', () => {
         updateReadout();
@@ -10853,20 +10896,25 @@
         renderPoints();
       };
       root.querySelectorAll('input[name="frameCutMode"]').forEach(input => {
-        input.onchange = () => updateFrameCutDraft({ mode: input.value });
+        input.onchange = () => {
+          updateFrameCutDraft({ mode: input.value });
+          result.textContent = '';
+          updateModeUi();
+        };
       });
       createButton.onclick = async () => {
-        if (cutTimes.length < 2) {
-          result.textContent = '至少需要两个切点。';
+        const mode = selectedMode();
+        const requiredPointCount = frameCutRequiredPointCount(mode);
+        if (cutTimes.length < requiredPointCount) {
+          result.textContent = mode === 'single_frame' ? '至少需要一个时间点。' : '至少需要两个切点。';
           return;
         }
-        const mode = root.querySelector('input[name="frameCutMode"]:checked')?.value || 'first_frame';
         updateFrameCutDraft({ cutTimes, mode });
         try {
           createButton.disabled = true;
           result.textContent = '正在截取关键帧...';
           const frameDataUrls = await captureFrameDataUrlsFromVideo(video, cutTimes);
-          result.textContent = '正在创建 Astra 并反推 prompt...';
+          result.textContent = mode === 'single_frame' ? '正在创建单帧图片 Astra...' : '正在创建 Astra 并反推 prompt...';
           state.frameCutNodeId = '';
           state.frameCutDraft = null;
           renderFrameCutPanel();
@@ -11527,6 +11575,7 @@
     }
 
     function referenceModeLabel(mode) {
+      if (mode === 'single_frame') return '单帧提取';
       return mode === 'first_last' ? '首尾帧相连' : '仅首帧';
     }
 
@@ -13195,6 +13244,9 @@
     function recordEvent(type, details = {}, project = currentProject()) {
       if (!project) return null;
       if (!Array.isArray(project.events)) project.events = [];
+      const activeContext = shouldEventInheritControllerOperationContext(type, details)
+        ? activeControllerOperationContext || {}
+        : {};
       const event = {
         id: uid('event'),
         type,
@@ -13204,7 +13256,10 @@
         actionIds: details.actionIds || details.action_ids || [],
         actionRunId: details.actionRunId || '',
         actionRunIds: details.actionRunIds || details.action_run_ids || [],
-        actionBatchId: details.actionBatchId || details.action_batch_id || '',
+        actionBatchId: details.actionBatchId || details.action_batch_id || activeContext.batchId || '',
+        controllerPlanId: details.controllerPlanId || details.controller_plan_id || activeContext.planId || '',
+        controllerOperationId: details.controllerOperationId || details.controller_operation_id || activeContext.opId || '',
+        controllerOperationName: details.controllerOperationName || details.controller_operation_name || activeContext.op || '',
         actionSequenceId: details.actionSequenceId || '',
         summary: details.summary || '',
         createdAt: new Date().toISOString()
@@ -13213,6 +13268,15 @@
       project.events = project.events.slice(-200);
       if (type === 'astra_created') trackTelemetryAstraCreated(event);
       return event;
+    }
+
+    function shouldEventInheritControllerOperationContext(type, details = {}) {
+      const actor = String(details.actor || '').trim();
+      if (['controller', 'controller_ops', 'action_runner'].includes(actor)) return true;
+      const eventType = String(type || '').trim();
+      if (eventType.startsWith('controller_op_') || eventType.startsWith('controller_operation_')) return true;
+      if (details.actionRunId || arrayFrom(details.actionRunIds || details.action_run_ids).length) return true;
+      return !!details.actionSequenceId;
     }
 
     function createActionRun(actionId, inputNodeIds = [], outputTargets = [], triggerType = 'astra_control', project = currentProject()) {
@@ -14507,8 +14571,11 @@
       const batchId = options.batchId || uid('batch');
       const planId = options.planId || uid('controller_plan');
       const resultsByOpId = {};
+      let activeOperation = null;
+      let pendingOperationResult = null;
       try {
         for (const op of validation.plan.ops) {
+          activeOperation = op;
           const result = await withControllerOperationContext({
             batchId,
             planId,
@@ -14517,11 +14584,14 @@
             resultsByOpId
           }, async () => {
             const operationResult = await executeControllerOperation(op, project);
+            pendingOperationResult = operationResult;
             verifyControllerOperationResult(op, operationResult, project);
             return operationResult;
           });
           applied.push(result);
           if (op.id) resultsByOpId[op.id] = result;
+          activeOperation = null;
+          pendingOperationResult = null;
         }
         recordControllerOperationPlanEvent(validation.plan, applied, project, { batchId, planId });
         project.updatedAt = new Date().toISOString();
@@ -14537,20 +14607,310 @@
         }
         return { ok: true, batchId, planId, applied, issues: [] };
       } catch (error) {
-        project.nodes = before.nodes;
-        project.links = before.links;
-        project.messages = before.messages;
-        project.actionRuns = before.actionRuns;
-        project.events = before.events;
-        project.actionSequences = before.actionSequences;
+        const rolledBack = shouldRollbackFailedControllerOperation(activeOperation, validation.plan);
+        let rollbackScope = 'none';
+        if (rolledBack) {
+          const rollback = restoreScopedControllerOperationRollback(before, project, {
+            batchId,
+            planId,
+            applied,
+            activeOperation,
+            pendingOperationResult
+          });
+          rollbackScope = rollback.scope;
+        } else {
+          project.updatedAt = new Date().toISOString();
+          scheduleSave();
+        }
         refreshProjectSurface(project);
-        if (options.silent !== true) addMessage('system', `操作计划已回滚：${error.message}`, { project });
-        return { ok: false, applied, issues: [{ severity: 'error', message: error.message }] };
+        if (options.silent !== true) {
+          const prefix = rolledBack ? '操作计划已回滚' : '操作计划失败，已保留当前画布';
+          addMessage('system', `${prefix}：${error.message}`, { project });
+        }
+        return { ok: false, batchId, planId, applied, rolledBack, rollbackScope, issues: [{ severity: 'error', message: error.message, rolledBack, rollbackScope }] };
       }
     }
 
     function shouldRecordCanvasUndoForOperationPlan(plan) {
       return (plan?.ops || []).some(op => controllerOperationPolicy(op.op).undo === 'canvas');
+    }
+
+    function shouldRollbackFailedControllerOperation(op, plan) {
+      if (op?.op) return controllerOperationPolicy(op.op).undo === 'canvas';
+      return shouldRecordCanvasUndoForOperationPlan(plan);
+    }
+
+    function restoreScopedControllerOperationRollback(before = {}, project = currentProject(), context = {}) {
+      if (!project) return { scope: 'scoped', removedNodeIds: [], restoredNodeIds: [] };
+      const ownership = controllerOperationRollbackOwnership(before, project, context);
+      const beforeNodes = cloneCanvasValue(before.nodes || []);
+      const currentNodes = arrayFrom(project.nodes);
+      const beforeNodeById = new Map(beforeNodes.map(node => [node.id, node]));
+      const currentNodeById = new Map(currentNodes.map(node => [node.id, node]));
+      const nextNodes = [];
+      const nextNodeIds = new Set();
+      const removedNodeIds = [];
+      const restoredNodeIds = [];
+
+      beforeNodes.forEach(beforeNode => {
+        if (!beforeNode?.id) return;
+        const currentNode = currentNodeById.get(beforeNode.id);
+        const shouldRestore = ownership.nodeIds.has(beforeNode.id);
+        if (currentNode) {
+          const nextNode = shouldRestore ? cloneCanvasValue(beforeNode) : currentNode;
+          normalizeNode(nextNode);
+          nextNodes.push(nextNode);
+          nextNodeIds.add(nextNode.id);
+          if (shouldRestore) restoredNodeIds.push(nextNode.id);
+          return;
+        }
+        if (shouldRestore) {
+          const restoredNode = cloneCanvasValue(beforeNode);
+          normalizeNode(restoredNode);
+          nextNodes.push(restoredNode);
+          nextNodeIds.add(restoredNode.id);
+          restoredNodeIds.push(restoredNode.id);
+        }
+      });
+
+      currentNodes.forEach(node => {
+        if (!node?.id || beforeNodeById.has(node.id)) return;
+        if (isControllerRollbackOwnedNode(node, ownership) && !shouldPreserveGeneratedMediaForUndo(node)) {
+          removedNodeIds.push(node.id);
+          return;
+        }
+        normalizeNode(node);
+        nextNodes.push(node);
+        nextNodeIds.add(node.id);
+      });
+
+      project.nodes = nextNodes;
+      project.links = restoreScopedControllerRollbackLinks(before.links || [], project.links || [], nextNodeIds, ownership);
+      project.actionRuns = restoreScopedControllerAppendOnlyItems(before.actionRuns || [], project.actionRuns || [], item => isControllerRollbackOwnedActionRun(item, ownership), 80);
+      project.events = restoreScopedControllerAppendOnlyItems(before.events || [], project.events || [], item => isControllerRollbackOwnedEvent(item, ownership), 200);
+      project.actionSequences = restoreScopedControllerKeyedItems(before.actionSequences || [], project.actionSequences || [], item => isControllerRollbackOwnedActionSequence(item, ownership), 40);
+      state.selectedNodeIds = uniqueIds(state.selectedNodeIds || []).filter(id => nextNodeIds.has(id));
+      cleanupControllerRollbackTransientState(nextNodeIds);
+      project.updatedAt = new Date().toISOString();
+      scheduleSave();
+      return { scope: 'scoped', removedNodeIds, restoredNodeIds };
+    }
+
+    function controllerOperationRollbackOwnership(before = {}, project = currentProject(), context = {}) {
+      const ownership = {
+        batchId: String(context.batchId || ''),
+        planId: String(context.planId || ''),
+        nodeIds: new Set(),
+        linkIds: new Set(),
+        actionRunIds: new Set(),
+        actionSequenceIds: new Set()
+      };
+      const rollbackResults = [
+        ...arrayFrom(context.applied),
+        context.pendingOperationResult
+      ].filter(result => result && controllerRollbackUsesCanvasUndo(result.op || context.activeOperation?.op));
+      rollbackResults.forEach(result => addControllerRollbackResultOwnership(ownership, result));
+
+      arrayFrom(project?.actionRuns).forEach(run => {
+        if (controllerRollbackRunBelongsToContext(run, ownership)) ownership.actionRunIds.add(run.id);
+      });
+      arrayFrom(project?.actionRuns).forEach(run => {
+        if (!ownership.actionRunIds.has(run?.id) || run.status !== 'completed') return;
+        if (!controllerRollbackUsesCanvasUndo(run.controllerOperationName)) return;
+        addControllerRollbackResultOwnership(ownership, run.result || {});
+        arrayFrom(run.outputTargets).forEach(target => addControllerRollbackIds(ownership.nodeIds, [target?.astraId]));
+      });
+      arrayFrom(project?.events).forEach(event => {
+        if (!controllerRollbackEventBelongsToContext(event, ownership)) return;
+        if (!controllerRollbackUsesCanvasUndo(event.controllerOperationName)) return;
+        addControllerRollbackIds(ownership.linkIds, event.linkIds);
+        if (controllerRollbackEventAstraIdsAreOwned(event)) addControllerRollbackIds(ownership.nodeIds, event.astraIds);
+        addControllerRollbackIds(ownership.actionSequenceIds, [event.actionSequenceId]);
+      });
+      arrayFrom(project?.actionSequences).forEach(sequence => {
+        if (arrayFrom(sequence?.actionRunIds).some(id => ownership.actionRunIds.has(id))) {
+          addControllerRollbackIds(ownership.actionSequenceIds, [sequence.id]);
+        }
+      });
+      return ownership;
+    }
+
+    function addControllerRollbackResultOwnership(ownership, result = {}) {
+      addControllerRollbackIds(ownership.nodeIds, [
+        result.id,
+        ...arrayFrom(result.astraIds),
+        ...arrayFrom(result.result?.astraIds)
+      ]);
+      addControllerRollbackIds(ownership.linkIds, [
+        ...arrayFrom(result.linkIds),
+        ...arrayFrom(result.result?.linkIds)
+      ]);
+    }
+
+    function addControllerRollbackIds(targetSet, ids = []) {
+      arrayFrom(ids).map(id => String(id || '').trim()).filter(Boolean).forEach(id => targetSet.add(id));
+    }
+
+    function controllerRollbackUsesCanvasUndo(opName) {
+      const name = String(opName || '').trim();
+      if (!name) return true;
+      return controllerOperationPolicy(name).undo === 'canvas';
+    }
+
+    function controllerRollbackRunBelongsToContext(run, ownership) {
+      if (!run?.id) return false;
+      if (ownership.batchId && run.controllerBatchId === ownership.batchId) return true;
+      if (ownership.planId && run.controllerPlanId === ownership.planId) return true;
+      return false;
+    }
+
+    function controllerRollbackEventBelongsToContext(event, ownership) {
+      if (!event?.id) return false;
+      if (ownership.batchId && event.actionBatchId === ownership.batchId) return true;
+      if (ownership.planId && event.controllerPlanId === ownership.planId) return true;
+      if (event.actionRunId && ownership.actionRunIds.has(event.actionRunId)) return true;
+      return arrayFrom(event.actionRunIds).some(id => ownership.actionRunIds.has(id));
+    }
+
+    function controllerRollbackEventAstraIdsAreOwned(event) {
+      return new Set([
+        'astra_created',
+        'controller_op_create_astra',
+        'controller_op_duplicate_astra',
+        'controller_op_delete_astra',
+        'controller_op_label_astra',
+        'controller_op_layout_astra',
+        'action_completed',
+        'action_sequence_planned'
+      ]).has(event?.type);
+    }
+
+    function isControllerRollbackOwnedNode(node, ownership) {
+      if (!node?.id) return false;
+      if (ownership.nodeIds.has(node.id)) return true;
+      const meta = node.meta || {};
+      const generation = node.generation || {};
+      const ids = [
+        node.actionRunId,
+        meta.actionRunId,
+        meta.createdByActionRunId,
+        generation.actionRunId
+      ];
+      if (ids.some(id => ownership.actionRunIds.has(id))) return true;
+      if (ownership.batchId && [node.controllerBatchId, meta.controllerBatchId, generation.controllerBatchId].includes(ownership.batchId)) return true;
+      return ownership.planId && [node.controllerPlanId, meta.controllerPlanId, generation.controllerPlanId].includes(ownership.planId);
+    }
+
+    function isControllerRollbackOwnedLink(link, ownership) {
+      if (!link) return false;
+      if (link.id && ownership.linkIds.has(link.id)) return true;
+      const meta = link.meta || {};
+      const ids = [link.createdByActionRunId, link.actionRunId, meta.actionRunId, meta.createdByActionRunId];
+      if (ids.some(id => ownership.actionRunIds.has(id))) return true;
+      if (ownership.batchId && [link.controllerBatchId, meta.controllerBatchId].includes(ownership.batchId)) return true;
+      return ownership.planId && [link.controllerPlanId, meta.controllerPlanId].includes(ownership.planId);
+    }
+
+    function restoreScopedControllerRollbackLinks(beforeLinks = [], currentLinks = [], nodeIds = new Set(), ownership) {
+      const beforeByKey = new Map(arrayFrom(beforeLinks).map(link => [canvasLinkKey(link), link]));
+      const currentByKey = new Map(arrayFrom(currentLinks).map(link => [canvasLinkKey(link), link]));
+      const currentById = new Map(arrayFrom(currentLinks).filter(link => link?.id).map(link => [link.id, link]));
+      const nextLinks = [];
+      const seen = new Set();
+      const pushLink = link => {
+        if (!link) return;
+        const from = link.fromNodeId || link.from_astra_id;
+        const to = link.toNodeId || link.to_astra_id;
+        if (!nodeIds.has(from) || !nodeIds.has(to)) return;
+        const key = canvasLinkKey(link);
+        if (seen.has(key)) return;
+        nextLinks.push(link);
+        seen.add(key);
+      };
+      arrayFrom(beforeLinks).forEach(beforeLink => {
+        const key = canvasLinkKey(beforeLink);
+        const currentLink = currentByKey.get(key) || (beforeLink?.id ? currentById.get(beforeLink.id) : null);
+        const owned = isControllerRollbackOwnedLink(beforeLink, ownership)
+          || controllerRollbackLinkTouchesOwnedNode(beforeLink, ownership)
+          || (currentLink && isControllerRollbackOwnedLink(currentLink, ownership));
+        if (currentLink && !owned) pushLink(currentLink);
+        else if (owned) pushLink(cloneCanvasValue(beforeLink));
+      });
+      arrayFrom(currentLinks).forEach(currentLink => {
+        const key = canvasLinkKey(currentLink);
+        if (seen.has(key) || beforeByKey.has(key)) return;
+        if (isControllerRollbackOwnedLink(currentLink, ownership)) return;
+        pushLink(currentLink);
+      });
+      return nextLinks;
+    }
+
+    function controllerRollbackLinkTouchesOwnedNode(link, ownership) {
+      if (!link) return false;
+      const from = link.fromNodeId || link.from_astra_id;
+      const to = link.toNodeId || link.to_astra_id;
+      return ownership.nodeIds.has(from) || ownership.nodeIds.has(to);
+    }
+
+    function restoreScopedControllerAppendOnlyItems(beforeItems = [], currentItems = [], isOwned, limit = 0) {
+      const beforeIds = new Set(arrayFrom(beforeItems).map(item => item?.id).filter(Boolean));
+      const nextItems = cloneCanvasValue(beforeItems || []);
+      arrayFrom(currentItems).forEach(item => {
+        if (!item?.id || beforeIds.has(item.id) || isOwned(item)) return;
+        nextItems.push(item);
+      });
+      return limit ? nextItems.slice(-limit) : nextItems;
+    }
+
+    function restoreScopedControllerKeyedItems(beforeItems = [], currentItems = [], isOwned, limit = 0) {
+      const currentById = new Map(arrayFrom(currentItems).filter(item => item?.id).map(item => [item.id, item]));
+      const beforeById = new Map(arrayFrom(beforeItems).filter(item => item?.id).map(item => [item.id, item]));
+      const nextItems = [];
+      const seen = new Set();
+      arrayFrom(beforeItems).forEach(beforeItem => {
+        if (!beforeItem?.id) return;
+        const currentItem = currentById.get(beforeItem.id);
+        const item = currentItem && !isOwned(currentItem) ? currentItem : cloneCanvasValue(beforeItem);
+        nextItems.push(item);
+        seen.add(beforeItem.id);
+      });
+      arrayFrom(currentItems).forEach(currentItem => {
+        if (!currentItem?.id || seen.has(currentItem.id) || beforeById.has(currentItem.id) || isOwned(currentItem)) return;
+        nextItems.push(currentItem);
+      });
+      return limit ? nextItems.slice(-limit) : nextItems;
+    }
+
+    function isControllerRollbackOwnedActionRun(run, ownership) {
+      return controllerRollbackRunBelongsToContext(run, ownership) || ownership.actionRunIds.has(run?.id);
+    }
+
+    function isControllerRollbackOwnedEvent(event, ownership) {
+      return controllerRollbackEventBelongsToContext(event, ownership);
+    }
+
+    function isControllerRollbackOwnedActionSequence(sequence, ownership) {
+      if (!sequence?.id) return false;
+      if (ownership.actionSequenceIds.has(sequence.id)) return true;
+      return arrayFrom(sequence.actionRunIds).some(id => ownership.actionRunIds.has(id));
+    }
+
+    function cleanupControllerRollbackTransientState(nodeIds) {
+      const hasNode = id => !id || nodeIds.has(id);
+      if (!hasNode(state.pendingLink?.fromNodeId) || !hasNode(state.pendingLink?.targetNodeId)) state.pendingLink = null;
+      if (!hasNode(state.linkRoleMenu?.fromNodeId) || !hasNode(state.linkRoleMenu?.toNodeId)) state.linkRoleMenu = null;
+      if (!hasNode(state.mentionMenu?.nodeId)) state.mentionMenu = null;
+      if (!hasNode(state.inlineEditorNodeId)) {
+        state.inlineEditorNodeId = '';
+        closePromptMentionMenu({ render: false });
+      }
+      if (!hasNode(state.editorNodeId)) closeEditor();
+      if (!hasNode(state.sequenceRunner?.currentNodeId) && state.sequenceRunner) {
+        state.sequenceRunner.stopRequested = true;
+        state.sequenceRunner.currentNodeId = '';
+      }
+      state.contextMenu = null;
+      state.selectionBox = null;
     }
 
     function controllerOperationPolicy(opName) {
@@ -21164,11 +21524,12 @@
       const source = nodeById(videoNodeId, project);
       if (!project || !source || !isVideoAstra(source) || !assetDisplayUrl(source)) throw new Error('请选择一个有视频素材的 Luna。');
       const cutPoints = uniqueSortedTimes(options.cutPoints || []);
-      if (cutPoints.length < 2) throw new Error('至少需要两个切点。');
-      const mode = options.mode === 'first_last' ? 'first_last' : 'first_frame';
+      const mode = normalizeFrameCutMode(options.mode);
+      const requiredPointCount = frameCutRequiredPointCount(mode);
+      if (cutPoints.length < requiredPointCount) throw new Error(mode === 'single_frame' ? '至少需要一个时间点。' : '至少需要两个切点。');
       const segmentTimes = segmentTimesFromCutPoints(cutPoints, 0.2);
       const frameDataUrls = Array.isArray(options.frameDataUrls) ? options.frameDataUrls : [];
-      const run = createActionRun('deriveReferenceVideoPrompts', [source.id], [], 'astra_control', project);
+      const run = createActionRun(mode === 'single_frame' ? 'manualFrameCut' : 'deriveReferenceVideoPrompts', [source.id], [], 'astra_control', project);
       const baseX = source.x + nodeWidth(source) + 84;
       const frameY = source.y;
       const imagePromptY = source.y + 330;
@@ -21198,6 +21559,27 @@
         addAstraLink(source.id, frame.id, { relation: 'cut_frame', inputRole: 'ref', actor: 'user', actionRunId: run?.id, project });
         return frame;
       });
+      if (mode === 'single_frame') {
+        updateNode(source.id, {
+          meta: {
+            ...(source.meta || {}),
+            referenceCut: {
+              mode,
+              cutPoints,
+              frameNodeIds: frames.map(node => node.id),
+              segmentNodeIds: [],
+              imagePromptNodeIds: [],
+              promptNodeIds: [],
+              planNodeId: '',
+              updatedAt: new Date().toISOString()
+            }
+          }
+        }, project);
+        state.selectedNodeIds = frames.map(node => node.id);
+        refreshProjectSurface(project, { nodeIds: [source.id, ...frames.map(node => node.id)] });
+        finishActionRun(run, 'completed', { astraIds: frames.map(node => node.id), summary: '单帧图片已提取' }, project);
+        return { source, frames, imagePrompts: [], segments: [], plan: null, prompts: [], run, imageRun: null };
+      }
       const imageRun = createActionRun(
         'deriveReferenceImagePrompts',
         [source.id, ...frames.map(node => node.id)],
