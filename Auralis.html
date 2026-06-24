@@ -1679,6 +1679,25 @@
       background: oklch(0.02 0.004 250);
     }
 
+    .media-viewer-body img {
+      cursor: zoom-in;
+      transform-origin: center center;
+      transition: transform 160ms ease-out;
+      -webkit-user-drag: none;
+      user-select: none;
+      touch-action: none;
+      will-change: transform;
+    }
+
+    .media-viewer-body img.zoomed {
+      cursor: grab;
+    }
+
+    .media-viewer-body img.dragging {
+      cursor: grabbing;
+      transition: none;
+    }
+
     .annotation-editor-backdrop {
       position: fixed;
       inset: 0;
@@ -5516,17 +5535,17 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.06';
+    const AURALIS_VERSION = 'Auralis v1.07';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增手动切帧“单帧提取”模式，可从视频任意时间点直接提取一张或多张参考图片 Astra，方便后续视频使用首帧制作。',
-      '优化主控操作失败后的回滚逻辑：媒体生成失败会保留当前画布和失败节点，方便直接重试；结构性操作失败时只回滚本次操作影响范围，避免误删同时进行或手动新增的节点。',
-      '优化图片反推 Prompt 的画风还原要求，提升对画风细节、构图和生成模型可读性的描述质量。',
-      '修复浅色主题下备份状态信息块背景和文字对比不足的问题。'
+      '新增 Astra 键盘复制/粘贴能力，支持用 Ctrl/Cmd+C 和 Ctrl/Cmd+V 复制选中节点，并保留复制组内部连接关系。',
+      '新增图片查看器缩放和拖拽查看能力，方便放大检查参考图、生成图等图片细节。',
+      '修复复制参考图后缩略图或显示资源丢失的问题，复制出的参考图会保留可见图片内容。',
+      '修复图/视频参考输入路由，避免参考图或参考视频被误当作首帧；只有明确首帧连接时才作为首帧输入。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -6285,7 +6304,9 @@
       iseeMode: false,
       suppressPromptAutoTarget: false,
       inlineEditorNodeId: '',
+      astraClipboard: null,
       mediaViewerNodeId: '',
+      mediaViewerTransform: { nodeId: '', scale: 1, x: 0, y: 0 },
       annotationEditor: null,
       frameCutNodeId: '',
       frameCutDraft: null,
@@ -10066,12 +10087,91 @@
       const node = nodeById(id);
       if (!node || !assetDisplayUrl(node)) return;
       state.mediaViewerNodeId = id;
+      state.mediaViewerTransform = defaultMediaViewerTransform(id);
       renderMediaViewer();
     }
 
     function closeMediaViewer() {
       state.mediaViewerNodeId = '';
+      state.mediaViewerTransform = defaultMediaViewerTransform();
       renderMediaViewer();
+    }
+
+    function defaultMediaViewerTransform(nodeId = '') {
+      return { nodeId: String(nodeId || ''), scale: 1, x: 0, y: 0 };
+    }
+
+    function mediaViewerImageTransform(nodeId) {
+      if (!state.mediaViewerTransform || state.mediaViewerTransform.nodeId !== nodeId) {
+        state.mediaViewerTransform = defaultMediaViewerTransform(nodeId);
+      }
+      return state.mediaViewerTransform;
+    }
+
+    function clampMediaViewerImagePan(transform, image) {
+      if (!transform || transform.scale <= 1) {
+        transform.x = 0;
+        transform.y = 0;
+        return transform;
+      }
+      const maxX = Math.max(0, ((image?.offsetWidth || 0) * transform.scale - (image?.offsetWidth || 0)) / 2);
+      const maxY = Math.max(0, ((image?.offsetHeight || 0) * transform.scale - (image?.offsetHeight || 0)) / 2);
+      transform.x = Math.min(maxX, Math.max(-maxX, Number(transform.x) || 0));
+      transform.y = Math.min(maxY, Math.max(-maxY, Number(transform.y) || 0));
+      return transform;
+    }
+
+    function applyMediaViewerImageTransform(image, transform) {
+      if (!image || !transform) return;
+      const scale = Math.max(1, Math.min(5, Number(transform.scale) || 1));
+      transform.scale = scale;
+      clampMediaViewerImagePan(transform, image);
+      image.style.transform = `translate(${transform.x}px, ${transform.y}px) scale(${scale})`;
+      image.classList.toggle('zoomed', scale > 1.01);
+    }
+
+    function attachMediaViewerImageInteractions(image, nodeId) {
+      if (!image) return;
+      const transform = mediaViewerImageTransform(nodeId);
+      applyMediaViewerImageTransform(image, transform);
+      image.addEventListener('wheel', event => {
+        event.preventDefault();
+        event.stopPropagation();
+        const nextScale = Math.max(1, Math.min(5, transform.scale * (event.deltaY > 0 ? 0.9 : 1.1)));
+        if (Math.abs(nextScale - transform.scale) < 0.001) return;
+        transform.scale = nextScale;
+        if (nextScale <= 1.01) {
+          transform.scale = 1;
+          transform.x = 0;
+          transform.y = 0;
+        }
+        applyMediaViewerImageTransform(image, transform);
+      }, { passive: false });
+      image.addEventListener('pointerdown', event => {
+        if (event.button !== 0 || transform.scale <= 1.01) return;
+        event.preventDefault();
+        event.stopPropagation();
+        image.classList.add('dragging');
+        image.setPointerCapture?.(event.pointerId);
+        const start = { x: event.clientX, y: event.clientY, panX: transform.x, panY: transform.y };
+        const move = pointerEvent => {
+          if (pointerEvent.pointerId !== event.pointerId) return;
+          transform.x = start.panX + pointerEvent.clientX - start.x;
+          transform.y = start.panY + pointerEvent.clientY - start.y;
+          applyMediaViewerImageTransform(image, transform);
+        };
+        const up = pointerEvent => {
+          if (pointerEvent?.pointerId != null && pointerEvent.pointerId !== event.pointerId) return;
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          window.removeEventListener('pointercancel', up);
+          image.releasePointerCapture?.(event.pointerId);
+          image.classList.remove('dragging');
+        };
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+        window.addEventListener('pointercancel', up);
+      });
     }
 
     function renderMediaViewer() {
@@ -10092,7 +10192,7 @@
         ? ` data-segment-start="${segmentStart}" data-segment-end="${segmentEnd}"`
         : '';
       const media = node.mime.startsWith('image/')
-        ? `<img src="${assetUrl}" alt="${escapeHtml(node.title)}">`
+        ? `<img src="${assetUrl}" alt="${escapeHtml(node.title)}" data-media-viewer-image draggable="false">`
         : `<video src="${assetUrl}" controls controlsList="nodownload" autoplay playsinline${segmentAttrs}></video>`;
       root.innerHTML = `<div class="media-viewer-backdrop" data-media-viewer-backdrop>
         <section class="media-viewer" data-family="${escapeHtml(node.family || '')}">
@@ -10118,8 +10218,26 @@
           downloadMediaNode(node.id);
         };
       }
+      attachMediaViewerImageInteractions(root.querySelector('[data-media-viewer-image]'), node.id);
       const segmentVideo = root.querySelector('video[data-segment-start]');
       if (segmentVideo) attachSegmentPlayback(segmentVideo, Number(segmentVideo.dataset.segmentStart), Number(segmentVideo.dataset.segmentEnd), { autoplay: true, loop: true });
+    }
+
+    async function restoreLocalAssetDisplayUrl(node) {
+      if (!node?.meta?.localAssetId) return false;
+      try {
+        const record = await dbGetAsset(node.meta.localAssetId);
+        if (!record?.blob) return false;
+        const localMime = concreteMime(record.blob.type, record.mime || node.mime || 'application/octet-stream');
+        const displayBlob = record.blob.type === localMime ? record.blob : record.blob.slice(0, record.blob.size, localMime);
+        node.displayUrl = URL.createObjectURL(displayBlob);
+        node.assetUrl = '';
+        node.mime = localMime;
+        node.asset = assetFromNode(node);
+        return true;
+      } catch (_) {
+        return false;
+      }
     }
 
     function startImageAnnotationFromContext(id) {
@@ -12410,10 +12528,127 @@
       }, { silent: true });
       if (result?.ok) {
         state.selectedNodeIds = result.applied?.[0]?.astraIds || [];
+        await restoreCopiedAstraDisplayUrls(selectedNodes(project, state.selectedNodeIds));
         addActivity('astra', `已复制 ${state.selectedNodeIds.length} 个 Astra`, 'ok');
         render();
       }
       return result;
+    }
+
+    function copySelectedAstraToClipboard(options = {}) {
+      const project = options.project || currentProject();
+      if (!project) return false;
+      const nodes = selectedNodes(project);
+      if (!nodes.length) return false;
+      const nodeIds = new Set(nodes.map(node => node.id));
+      const links = (project.links || [])
+        .filter(link => nodeIds.has(link.fromNodeId || link.from_astra_id) && nodeIds.has(link.toNodeId || link.to_astra_id))
+        .map(link => structuredCloneSafe(link));
+      state.astraClipboard = {
+        nodes: nodes.map(node => structuredCloneSafe(node)),
+        links,
+        createdAt: new Date().toISOString()
+      };
+      if (options.notify !== false) addActivity('astra', `Copied ${nodes.length} Astra`, 'ok');
+      return true;
+    }
+
+    async function pasteAstraClipboardAtPoint(point = null, options = {}) {
+      const project = options.project || currentProject();
+      const clipboard = state.astraClipboard;
+      if (!project || !clipboard?.nodes?.length) return null;
+      const before = captureCanvasUndoSnapshot(project);
+      const result = instantiateAstraClipboard(clipboard, point || canvasPastePoint(), project);
+      if (!result.created.length) return result;
+      await restoreCopiedAstraDisplayUrls(result.created);
+      state.selectedNodeIds = result.created.map(node => node.id);
+      recordEvent('astra_clipboard_pasted', {
+        actor: 'user',
+        astraIds: state.selectedNodeIds,
+        linkIds: result.copiedLinks.map(link => link.id),
+        summary: `Pasted ${result.created.length} Astra.`
+      }, project);
+      project.updatedAt = new Date().toISOString();
+      scheduleSave();
+      render();
+      pushCanvasUndoEntry(`Paste ${result.created.length} Astra`, before, captureCanvasUndoSnapshot(project));
+      if (options.notify !== false) addActivity('astra', `Pasted ${result.created.length} Astra`, 'ok');
+      return result;
+    }
+
+    function instantiateAstraClipboard(clipboard, point, project = currentProject()) {
+      if (!project) return { created: [], copiedLinks: [] };
+      const seen = new Set();
+      const sources = arrayFrom(clipboard?.nodes)
+        .filter(node => node?.id)
+        .filter(node => {
+          if (seen.has(node.id)) return false;
+          seen.add(node.id);
+          return true;
+        });
+      if (!sources.length) return { created: [], copiedLinks: [] };
+      const sourceIds = new Set(sources.map(node => node.id));
+      const bounds = boundsForRects(sources.map(nodeRect));
+      const width = Math.max(1, bounds.right - bounds.left);
+      const height = Math.max(1, bounds.bottom - bounds.top);
+      const fallbackPoint = visibleCanvasCenterPoint();
+      const preferred = {
+        x: Number.isFinite(Number(point?.x)) ? Number(point.x) : fallbackPoint.x,
+        y: Number.isFinite(Number(point?.y)) ? Number(point.y) : fallbackPoint.y
+      };
+      const base = findFreePosition(width, height, preferred.x, preferred.y, { project });
+      const idMap = new Map();
+      const created = sources.map(source => {
+        const clone = structuredCloneSafe(source);
+        const oldId = clone.id || uid('old_node');
+        clone.id = uid('node');
+        idMap.set(oldId, clone.id);
+        clone.title = sources.length === 1 ? `${source.title || 'Astra'} copy` : (clone.title || 'Astra');
+        clone.x = Math.max(40, Math.round(base.x + (Number(source.x) || 0) - bounds.left));
+        clone.y = Math.max(40, Math.round(base.y + (Number(source.y) || 0) - bounds.top));
+        clone.createdAt = nowText();
+        clone.updatedAt = nowText();
+        clone.meta = { ...(clone.meta || {}), duplicatedFromNodeId: oldId };
+        clone.librarySourceId = null;
+        delete clone.displayUrl;
+        if (['running', 'queued', 'analyzing'].includes(clone.status)) {
+          clone.status = nodeHasAsset(clone) ? 'completed' : 'placeholder';
+          clone.progressText = '';
+          clone.error = '';
+        }
+        return clone;
+      });
+      created.forEach(node => {
+        remapNodeReferences(node, idMap);
+        normalizeNode(node);
+      });
+      const copiedLinks = arrayFrom(clipboard?.links)
+        .filter(link => sourceIds.has(link.fromNodeId || link.from_astra_id) && sourceIds.has(link.toNodeId || link.to_astra_id))
+        .map(source => {
+          const fromNodeId = idMap.get(source.fromNodeId || source.from_astra_id);
+          const toNodeId = idMap.get(source.toNodeId || source.to_astra_id);
+          if (!fromNodeId || !toNodeId || fromNodeId === toNodeId) return null;
+          return {
+            ...structuredCloneSafe(source),
+            id: uid('link'),
+            fromNodeId,
+            toNodeId,
+            from_astra_id: fromNodeId,
+            to_astra_id: toNodeId,
+            createdByActionRunId: '',
+            createdAt: new Date().toISOString(),
+            actor: 'astra_clipboard'
+          };
+        })
+        .filter(Boolean);
+      project.nodes.push(...created);
+      if (!Array.isArray(project.links)) project.links = [];
+      project.links.push(...copiedLinks);
+      return { created, copiedLinks, sourceIds, idMap, base };
+    }
+
+    async function restoreCopiedAstraDisplayUrls(nodes = []) {
+      await Promise.all(arrayFrom(nodes).map(node => restoreLocalAssetDisplayUrl(node)));
     }
 
     function duplicateAstraTargets(targets, options = {}, project = currentProject()) {
@@ -20391,7 +20626,7 @@
         : null;
       if (linkedPrompt) {
         const linkedImage = kind === 'video'
-          ? linkedImageForRole(linkedPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) || sourceImageHint || linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project)
+          ? linkedImageForRole(linkedPrompt.id, ['first_frame'], project) || sourceImageHint || linkedImageForRole(selectedTarget.id, ['first_frame'], project)
           : null;
         return promptPick(promptTextFromNode(linkedPrompt, { allowSummary: true }), options, {
           nodeId: linkedPrompt.id,
@@ -20406,7 +20641,7 @@
       if (directPrompt) {
         const downstreamTarget = downstreamTargetForPrompt(directPrompt.id, targetRole, project);
         const sourceImage = kind === 'video'
-          ? (linkedImageForRole(directPrompt.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) || sourceImageHint || selected.find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame', 'ref', 'style_ref', 'subject_ref'], project) : null) || project.nodes.findLast?.(n => nodeHasAsset(n) && n.mime?.startsWith('image/')))
+          ? (linkedImageForRole(directPrompt.id, ['first_frame'], project) || sourceImageHint || selected.find(n => nodeHasAsset(n) && n.mime?.startsWith('image/')) || (selectedTarget ? linkedImageForRole(selectedTarget.id, ['first_frame'], project) : null) || (downstreamTarget ? linkedImageForRole(downstreamTarget.id, ['first_frame'], project) : null))
           : null;
         return promptPick(promptTextFromNode(directPrompt, { allowSummary: true }), options, {
           nodeId: directPrompt.id,
@@ -21003,7 +21238,6 @@
       const lastInput = firstLinkedImageInputForRoles(inputOwners, ['last_frame'], false, project);
       const linkedFirst = firstInput && assetDisplayUrl(firstInput) ? firstInput : null;
       const linkedLast = lastInput && assetDisplayUrl(lastInput) ? lastInput : null;
-      const linkedRef = firstLinkedImageInputForRoles(inputOwners, ['ref', 'style_ref', 'subject_ref'], true, project);
       const selectedImages = selected.filter(node => assetDisplayUrl(node) && node.mime?.startsWith('image/'));
       const mentionNodes = (promptPick.mentionNodeIds || [])
         .map(id => nodeById(id, project))
@@ -21013,12 +21247,24 @@
       const editMentionIds = new Set((promptPick.mentionBindings || [])
         .filter(binding => binding.inputRole === 'video_edit')
         .map(binding => binding.nodeId));
+      const firstFrameMentionIds = new Set((promptPick.mentionBindings || [])
+        .filter(binding => binding.inputRole === 'first_frame')
+        .map(binding => binding.nodeId));
+      const lastFrameMentionIds = new Set((promptPick.mentionBindings || [])
+        .filter(binding => binding.inputRole === 'last_frame')
+        .map(binding => binding.nodeId));
       const editVideo = linkedEditVideo || mentionedVideos.find(node => editMentionIds.has(node.id)) || null;
-      const fallbackImage = project.nodes.findLast?.(node => assetDisplayUrl(node) && node.mime?.startsWith('image/'));
       const hasExplicitFrameInput = !!firstInput || !!lastInput;
       const pickedSourceImage = promptPick.sourceImageNodeId ? project.nodes.find(node => node.id === promptPick.sourceImageNodeId) : null;
-      const first = editVideo ? null : linkedFirst || (!hasExplicitFrameInput ? mentionedImages[0] || pickedSourceImage || selectedImages[0] || linkedRef || fallbackImage : null) || null;
-      const last = editVideo ? null : linkedLast || (!hasExplicitFrameInput && selectedImages.length >= 2 ? selectedImages[1] : null);
+      const mentionedFirst = mentionedImages.find(node => firstFrameMentionIds.has(node.id)) || null;
+      const mentionedLast = mentionedImages.find(node => lastFrameMentionIds.has(node.id)) || null;
+      const hasReferenceVideoInput = referenceVideoInputs.length || mentionedVideos.some(node => !editMentionIds.has(node.id));
+      const canUseSelectedFrameHint = !hasExplicitFrameInput && !hasReferenceVideoInput;
+      const selectedFrameHint = canUseSelectedFrameHint
+        ? (pickedSourceImage && assetDisplayUrl(pickedSourceImage) ? pickedSourceImage : selectedImages[0])
+        : null;
+      const first = editVideo ? null : linkedFirst || mentionedFirst || selectedFrameHint || null;
+      const last = editVideo ? null : linkedLast || mentionedLast || (canUseSelectedFrameHint && first && selectedImages.length >= 2 ? selectedImages.find(node => node.id !== first.id) : null) || null;
       const linkedRefs = inputOwners
         .flatMap(ownerId => linkedImageInputsForRoles(ownerId, ['ref', 'style_ref', 'subject_ref'], true, project))
         .map(node => node.id);
@@ -21053,7 +21299,8 @@
           editInput && !linkedEditVideo ? 'video_edit' : '',
           referenceVideoInputs.some(node => !assetDisplayUrl(node)) ? 'reference_video' : '',
           firstInput && !linkedFirst ? 'first_frame' : '',
-          lastInput && !linkedLast ? 'last_frame' : ''
+          lastInput && !linkedLast ? 'last_frame' : '',
+          last && !first ? 'first_frame' : ''
         ].filter(Boolean)
       };
     }
@@ -23345,6 +23592,21 @@
             redoCanvasOperation();
             return;
           }
+          if (key === 'c') {
+            if (copySelectedAstraToClipboard({ notify: true })) {
+              event.preventDefault();
+              return;
+            }
+          }
+          if (key === 'v') {
+            if (state.astraClipboard?.nodes?.length) {
+              event.preventDefault();
+              pasteAstraClipboardAtPoint(canvasPastePoint(event), { notify: true }).catch(error => {
+                addMessage('system', `Astra 粘贴失败：${error.message}`);
+              });
+              return;
+            }
+          }
         }
         if (event.key === 'Escape') {
           closeMediaViewer();
@@ -23452,6 +23714,10 @@
       undoCanvasOperation,
       redoCanvasOperation,
       canvasHistory,
+      copySelectedAstraToClipboard,
+      pasteAstraClipboardAtPoint,
+      instantiateAstraClipboard,
+      attachMediaViewerImageInteractions,
       controllerOperationRunnerNames,
       controllerOperationPostconditionNames,
       verifyControllerOperationResult,
