@@ -27,8 +27,15 @@
       --edge-prompt: oklch(0.73 0.115 205 / 0.5);
       --edge-media: oklch(0.73 0.12 158 / 0.46);
       --edge-candidate: oklch(0.79 0.075 112 / 0.74);
-      --edge-candidate-start: oklch(0.79 0.075 112 / 0.2);
-      --edge-candidate-end: oklch(0.79 0.075 112 / 0.95);
+      --edge-candidate-start: oklch(0.79 0.075 112 / 0.86);
+      --edge-candidate-end: oklch(0.79 0.075 112 / 0.32);
+      --official-edge: oklch(0.84 0.018 255 / 0.9);
+      --official-glow: oklch(0.73 0.115 205 / 0.28);
+      --official-glow-soft: oklch(0.73 0.115 205 / 0.16);
+      --candidate-card-bg: oklch(0.185 0.004 250 / 0.98);
+      --candidate-head-bg: oklch(0.175 0.004 250 / 0.98);
+      --candidate-body-bg: oklch(0.225 0.004 250);
+      --candidate-foot-bg: oklch(0.195 0.004 250 / 0.98);
       --edge-sequence: oklch(0.84 0.018 255 / 0.36);
       --edge-reference: oklch(0.7 0.065 195 / 0.5);
       --edge-dot: var(--silver);
@@ -70,8 +77,15 @@
       --edge-prompt: oklch(0.5 0.13 215 / 0.62);
       --edge-media: oklch(0.48 0.12 158 / 0.56);
       --edge-candidate: oklch(0.5 0.115 138 / 0.78);
-      --edge-candidate-start: oklch(0.5 0.115 138 / 0.22);
-      --edge-candidate-end: oklch(0.43 0.13 138 / 0.92);
+      --edge-candidate-start: oklch(0.43 0.13 138 / 0.82);
+      --edge-candidate-end: oklch(0.5 0.115 138 / 0.3);
+      --official-edge: oklch(0.42 0.1 215 / 0.86);
+      --official-glow: oklch(0.5 0.135 215 / 0.22);
+      --official-glow-soft: oklch(0.5 0.135 215 / 0.12);
+      --candidate-card-bg: oklch(0.925 0.006 250 / 0.98);
+      --candidate-head-bg: oklch(0.905 0.008 250 / 0.94);
+      --candidate-body-bg: oklch(0.92 0.004 250);
+      --candidate-foot-bg: oklch(0.91 0.008 250 / 0.94);
       --edge-sequence: oklch(0.48 0.025 255 / 0.42);
       --edge-reference: oklch(0.45 0.075 205 / 0.48);
       --edge-dot: var(--silver);
@@ -942,9 +956,9 @@
 
     .edge-line.candidate {
       stroke: var(--edge-candidate);
-      stroke-width: 2.6;
-      stroke-dasharray: 8 7;
-      filter: drop-shadow(0 0 4px oklch(0.79 0.075 112 / 0.18));
+      stroke-width: 2.3;
+      stroke-dasharray: 7 8;
+      filter: drop-shadow(0 0 4px oklch(0.79 0.075 112 / 0.12));
     }
 
     .edge-line.sequence {
@@ -1016,7 +1030,7 @@
     }
 
     .edge-label.candidate {
-      fill: var(--edge-candidate-end);
+      fill: var(--edge-candidate);
       font-weight: 650;
     }
 
@@ -1194,7 +1208,7 @@
       display: grid;
       grid-template-rows: auto 1fr auto;
       overflow: hidden;
-      transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
+      transition: background .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease;
       z-index: 2;
     }
 
@@ -1260,6 +1274,38 @@
     .card.candidate {
       border-style: dashed;
       border-color: oklch(0.79 0.075 112 / 0.74);
+      background: var(--candidate-card-bg);
+      box-shadow: 0 0 0 1px oklch(0.84 0.018 255 / 0.05), var(--shadow-sm);
+    }
+
+    .card.candidate .card-head {
+      background: var(--candidate-head-bg);
+    }
+
+    .card.candidate .card-body {
+      background: var(--candidate-body-bg);
+    }
+
+    .card.candidate .card-foot {
+      background: var(--candidate-foot-bg);
+    }
+
+    .card.candidate .card-menu-btn,
+    .card.candidate .card-menu-btn:hover,
+    .card.candidate .card-menu-btn:focus-visible {
+      background: var(--candidate-body-bg);
+    }
+
+    .card.official:is([data-role="genImage"], [data-role="genVideo"]):not(.selected):not(.running):not(.failed) {
+      border-width: 2px;
+      border-top-width: 4px;
+      border-bottom-width: 4px;
+      border-style: solid;
+      border-color: var(--official-edge);
+      box-shadow:
+        0 0 0 2px var(--official-glow-soft),
+        0 0 14px var(--official-glow),
+        var(--shadow-md);
     }
 
     .card.link-source {
@@ -2070,7 +2116,7 @@
     .prompt-preview {
       white-space: normal !important;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
     }
 
@@ -3162,6 +3208,10 @@
       background: oklch(0.992 0.004 250 / 0.98);
     }
 
+    html[data-visual-scheme="caelum"] .card.candidate {
+      background: var(--candidate-card-bg);
+    }
+
     html[data-visual-scheme="caelum"] .card[data-family="Polaris"],
     html[data-visual-scheme="caelum"] .media-viewer[data-family="Polaris"] {
       --family-color: oklch(0.54 0.13 212);
@@ -3509,7 +3559,7 @@
         <span class="pill"><span class="dot" id="apiDot"></span><span id="apiStatusText">未配置 API</span></span>
         <span class="pill" id="saveStatus"><span>●</span><span>本地已保存</span></span>
         <button class="icon-btn" id="settingsBtn" title="设置">⚙</button>
-        <button class="primary-btn" id="downloadBtn">导出</button>
+        <button class="primary-btn" id="downloadBtn" title="导出素材包">导出素材</button>
       </div>
     </header>
 
@@ -3517,6 +3567,7 @@
       <div class="rail-actions">
         <button class="icon-btn" id="toggleRailBtn" title="展开或收起项目栏">☰</button>
         <button class="icon-btn" id="newProjectBtn" title="新项目">＋</button>
+        <button class="icon-btn" id="exportAuraBtn" title="导出当前 Aura" aria-label="导出当前 Aura">⇡</button>
         <button class="icon-btn" id="importBtn" title="导入项目">⇣</button>
       </div>
       <div class="rail-tabs" role="tablist" aria-label="左侧面板">
@@ -3702,7 +3753,7 @@
   <div id="annotationEditorRoot"></div>
   <div id="frameCutRoot"></div>
 
-  <input class="hidden" id="importFileInput" type="file" accept=".json">
+  <input class="hidden" id="importFileInput" type="file" accept=".json,application/json">
 
   <script>
 /* Inlined from src/auralis-controller-foundation.js. */
@@ -5535,17 +5586,17 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.07';
+    const AURALIS_VERSION = 'Auralis v1.08';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 Astra 键盘复制/粘贴能力，支持用 Ctrl/Cmd+C 和 Ctrl/Cmd+V 复制选中节点，并保留复制组内部连接关系。',
-      '新增图片查看器缩放和拖拽查看能力，方便放大检查参考图、生成图等图片细节。',
-      '修复复制参考图后缩略图或显示资源丢失的问题，复制出的参考图会保留可见图片内容。',
-      '修复图/视频参考输入路由，避免参考图或参考视频被误当作首帧；只有明确首帧连接时才作为首帧输入。'
+      '新增 Aura 单独导入/导出能力，可将当前 Aura 导出为包含本地素材的 JSON 文件，并在其他项目中导入恢复节点、连线和素材。',
+      '优化生成结果与候选 Astra 的卡片信息和视觉状态，候选节点、生成来源和派生关系更容易辨认。',
+      '修复候选 Astra 派生线方向和淡化显示，使候选结果与正式结果之间的关系更清晰。',
+      '优化主控操作流程，当出现报错会先识别是否可以通过调整计划修复。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -6032,6 +6083,7 @@
           'AURALIS_OPS_PLANNER',
           'Use input JSON target_context as the selector-oriented target catalog. Prefer target_context.selected, selectedNeighborhood, activeFlow, capabilityTargets, labelIndex, recentRuns, and recentBatches before guessing ids.',
           'Use input JSON message_mentions when the user writes @ references in the controller input. message_mentions only resolves Astra in the current selected/reference range, including selected Astra and directly linked inputs/outputs. message_mentions.direct resolves single Astra; message_mentions.groups resolves scoped batch shortcuts such as @所有<同类型Astra>, for example @所有图片prompt, @所有生成图片, @所有视频prompt, or @所有镜头脚本. Prefer their astraIds for selectors before inferring targets from prose.',
+          'Use input JSON resolved_references as hard current-turn reference facts. When the user says these, selected, referenced, or this batch, prefer resolved_references.capabilityTargets selectors for the operation target before asking the user to identify targets again.',
           'Use controller_capabilities.controller_profile for Auralis product semantics, chat-vs-canvas boundaries, assistant modes, and Astra family meanings.',
           'Use operation_contract.operationCatalog as the primary action catalog. Each row combines name, schema, plannerHint, executionPolicy, and targetCompatibility.',
           'Operation-specific intent, target, and hard-rule guidance is in operation_contract.operationPlannerHints. Read those hints before choosing an op, and never invent ops outside operation_contract.operations.',
@@ -7592,11 +7644,15 @@
       if (!options.skipAutoBackup) noteBackupStateSaved();
     }
 
-    function serializableProjects() {
-      return state.projects.map(project => ({
+    function serializableProject(project = {}) {
+      return {
         ...project,
         nodes: (project.nodes || []).map(serializableNode)
-      }));
+      };
+    }
+
+    function serializableProjects() {
+      return state.projects.map(serializableProject);
     }
 
     function serializableNode(node = {}) {
@@ -9038,7 +9094,14 @@
         const to = byId.get(link.toNodeId || link.to_astra_id);
         if (!from || !to) continue;
         if (isPolarisAstra(from) || isPolarisAstra(to)) continue;
-        edges.push({ from, to, kind: edgeKindFromLink(link, to), inputRole: link.inputRole || link.input_role || '' });
+        // candidate_of is stored as candidate -> official, but displayed as official -> candidate.
+        const isCandidateLink = link.relation === 'candidate_of';
+        edges.push({
+          from: isCandidateLink ? to : from,
+          to: isCandidateLink ? from : to,
+          kind: edgeKindFromLink(link, to),
+          inputRole: link.inputRole || link.input_role || ''
+        });
       }
       for (const node of project.nodes) {
         const sourceId = node.meta?.sourceNodeId || node.meta?.promptNodeId;
@@ -9384,6 +9447,7 @@
       el.classList.toggle('running', ['queued', 'running', 'analyzing'].includes(node.status) && !nodeHasAsset(node));
       el.classList.toggle('failed', node.status === 'failed');
       el.classList.toggle('candidate', node.assetState === 'candidate');
+      el.classList.toggle('official', node.assetState === 'official' && nodeHasAsset(node));
       el.classList.toggle('link-source', state.pendingLink?.fromNodeId === node.id);
       el.classList.toggle('link-target', !!state.pendingLink && state.pendingLink.fromNodeId !== node.id);
       el.classList.toggle('link-hover', state.pendingLink?.targetNodeId === node.id);
@@ -9425,6 +9489,7 @@
       const running = ['queued', 'running', 'analyzing'].includes(node.status) && !nodeHasAsset(node) ? 'running' : '';
       const failed = node.status === 'failed' ? 'failed' : '';
       const candidate = node.assetState === 'candidate' ? 'candidate' : '';
+      const official = node.assetState === 'official' && nodeHasAsset(node) ? 'official' : '';
       const linkSource = state.pendingLink?.fromNodeId === node.id ? 'link-source' : '';
       const linkTarget = state.pendingLink && state.pendingLink.fromNodeId !== node.id ? 'link-target' : '';
       const linkHover = state.pendingLink?.targetNodeId === node.id ? 'link-hover' : '';
@@ -9434,7 +9499,7 @@
       const footer = renderCardFoot(node);
       const mediaBodyKey = mediaBodyRenderKey(node);
       const mediaBodyKeyAttr = mediaBodyKey ? ` data-media-body-key="${escapeHtml(mediaBodyKey)}"` : '';
-      return `<article class="card ${selected} ${running} ${failed} ${candidate} ${linkSource} ${linkTarget} ${linkHover}" style="left:${node.x}px;top:${node.y}px;width:${nodeWidth(node)}px" data-node-id="${node.id}" data-family="${escapeHtml(node.family || '')}" data-role="${escapeHtml(node.role || '')}"${mediaBodyKeyAttr}>
+      return `<article class="card ${selected} ${running} ${failed} ${candidate} ${official} ${linkSource} ${linkTarget} ${linkHover}" style="left:${node.x}px;top:${node.y}px;width:${nodeWidth(node)}px" data-node-id="${node.id}" data-family="${escapeHtml(node.family || '')}" data-role="${escapeHtml(node.role || '')}" data-asset-state="${escapeHtml(node.assetState || '')}"${mediaBodyKeyAttr}>
         <button class="astra-port input" data-port="input" title="接入 Astra" aria-label="接入 Astra"></button>
         <button class="astra-port output" data-port="output" title="连出 Astra" aria-label="连出 Astra"></button>
         <div class="card-head" data-drag-handle>
@@ -9781,10 +9846,11 @@
         state.contextMenu = null;
         return '';
       }
-      const { x, y } = clampContextMenuPoint(menu.x, menu.y, 184, project.id === state.currentProjectId ? 132 : 168);
+      const { x, y } = clampContextMenuPoint(menu.x, menu.y, 184, project.id === state.currentProjectId ? 166 : 202);
       return `<div class="context-menu" style="left:${x}px;top:${y}px" data-context-menu data-menu-type="aura" data-menu-id="${escapeHtml(project.id)}">
         <div class="context-menu-title">${escapeHtml(project.name)}</div>
         ${project.id === state.currentProjectId ? '' : '<button type="button" data-menu-action="open">打开</button>'}
+        <button type="button" data-menu-action="export">导出 Aura</button>
         <button type="button" data-menu-action="duplicate">复制 Aura</button>
         <button type="button" class="danger" data-menu-action="delete">删除 Aura</button>
       </div>`;
@@ -10032,6 +10098,7 @@
 
     function runAuraMenuAction(id, action) {
       if (action === 'open') return switchProject(id);
+      if (action === 'export') return exportAuraProject(projectById(id));
       if (action === 'duplicate') return duplicateAura(id);
       if (action === 'delete') return deleteAura(id);
       render();
@@ -11871,22 +11938,76 @@
       setTimeout(() => URL.revokeObjectURL(url), 0);
     }
 
+    function generationModeLabel(node) {
+      const generation = node?.generation && typeof node.generation === 'object' ? node.generation : {};
+      const mode = String(generation.mode || node?.meta?.generationMode || '').trim();
+      const labels = {
+        text_to_image: '\u6587\u751f\u56fe',
+        image_edit: '\u56fe\u7247\u7f16\u8f91',
+        image_with_references: '\u53c2\u8003\u56fe\u751f\u6210',
+        text_to_video: '\u6587\u751f\u89c6\u9891',
+        image_to_video: '\u56fe\u751f\u89c6\u9891\uff08\u9996\u5e27\uff09',
+        image_to_video_first_last_frame: '\u9996\u5c3e\u5e27\u89c6\u9891',
+        video_edit: '\u89c6\u9891\u7f16\u8f91',
+        planned_image: 'StarFlow \u56fe\u50cf\u5360\u4f4d',
+        planned_first_frame: 'StarFlow \u4ec5\u9996\u5e27',
+        planned_first_last_frame: 'StarFlow \u9996\u5c3e\u5e27',
+        first_frame: '\u4ec5\u9996\u5e27',
+        first_last: '\u9996\u5c3e\u5e27\u76f8\u8fde'
+      };
+      if (labels[mode]) return labels[mode];
+      const productionMode = String(generation.mediaSettings?.productionMode || generation.productionMode || node?.meta?.productionMode || '').trim();
+      if (labels[productionMode]) return labels[productionMode];
+      if (mode) return mode.replace(/_/g, ' ');
+      if (node?.meta?.sourceImageNodeId) {
+        if (isVideoAstra(node)) return labels.image_to_video;
+        if (isImageAstra(node)) return labels.image_edit;
+      }
+      return '';
+    }
+
+    function generationParameterText(node) {
+      const generation = node?.generation && typeof node.generation === 'object' ? node.generation : null;
+      const hasMediaSettings = generation?.mediaSettings && typeof generation.mediaSettings === 'object';
+      if (!generation?.model || !hasMediaSettings) return '';
+      const kind = isVideoAstra(node) ? 'video' : isImageAstra(node) ? 'image' : '';
+      if (!kind) return '';
+      const settings = mediaSettingsForExecution(generation);
+      const model = compactMediaModelLabel(generation.model, kind);
+      if (kind === 'video') {
+        return [
+          model,
+          settings.videoAspectRatio,
+          `${videoDurationForMediaSettings(settings)}s`,
+          settings.videoResolution
+        ].filter(Boolean).join(' | ');
+      }
+      return [
+        model,
+        settings.imageAspectRatio,
+        imageResolutionCompactLabel(settings.imageResolution)
+      ].filter(Boolean).join(' | ');
+    }
+
     function renderGenerationMeta(node) {
       const meta = node.meta || {};
       const hasReferenceTiming = Number.isFinite(Number(meta.cutTime)) || Number.isFinite(Number(meta.segmentStart)) || Number.isFinite(Number(meta.segmentEnd)) || meta.referenceMode;
-      if (!meta.prompt && !meta.promptNodeId && !meta.assetId && !meta.segmentId && !meta.sourceImageId && !node.mediaAnalysis?.summary && !hasReferenceTiming) return '';
+      const generationMode = generationModeLabel(node);
+      const parameterText = generationParameterText(node);
+      if (!meta.prompt && !meta.promptNodeId && !meta.assetId && !meta.segmentId && !meta.sourceImageId && !node.mediaAnalysis?.summary && !hasReferenceTiming && !generationMode && !parameterText) return '';
       const promptNode = meta.promptNodeId ? currentProject().nodes.find(n => n.id === meta.promptNodeId) : null;
       const promptSourceTitle = promptNode
         ? displayNodeTitle(promptNode, ASTRA_ROLE_LABELS[promptNode.role] || promptNode.role || TYPE_LABELS[promptNode.type] || '') || promptNode.title
         : '';
       const rows = [
-        promptNode ? `<div><b>来源</b> ${escapeHtml(promptSourceTitle)}</div>` : '',
-        meta.sourceImageNodeId ? `<div><b>延续</b> 来自选中的图片 Astra</div>` : '',
+        promptNode ? `<div><b>\u6765\u6e90</b> ${escapeHtml(promptSourceTitle)}</div>` : '',
+        generationMode ? `<div><b>\u751f\u6210\u6a21\u5f0f</b> ${escapeHtml(generationMode)}</div>` : '',
         Number.isFinite(Number(meta.cutTime)) ? `<div><b>切点</b> ${escapeHtml(formatTimePrecise(Number(meta.cutTime)))}</div>` : '',
         Number.isFinite(Number(meta.segmentStart)) && Number.isFinite(Number(meta.segmentEnd)) ? `<div><b>片段</b> ${escapeHtml(formatTimePrecise(Number(meta.segmentStart)))} - ${escapeHtml(formatTimePrecise(Number(meta.segmentEnd)))}</div>` : '',
-        meta.referenceMode ? `<div><b>参考模式</b> ${escapeHtml(referenceModeLabel(meta.referenceMode))}</div>` : '',
-        node.mediaAnalysis?.summary ? `<div><b>理解</b> ${escapeHtml(truncateText(node.mediaAnalysis.summary, 180))}</div>` : '',
-        meta.prompt ? `<div class="prompt-preview" title="${escapeHtml(meta.prompt)}"><b>Prompt</b> ${escapeHtml(truncateText(meta.prompt, 260))}</div>` : ''
+        !generationMode && meta.referenceMode ? `<div><b>\u53c2\u8003\u6a21\u5f0f</b> ${escapeHtml(referenceModeLabel(meta.referenceMode))}</div>` : '',
+        node.mediaAnalysis?.summary ? `<div><b>\u7406\u89e3</b> ${escapeHtml(truncateText(node.mediaAnalysis.summary, 180))}</div>` : '',
+        meta.prompt ? `<div class="prompt-preview" title="${escapeHtml(meta.prompt)}"><b>Prompt</b> ${escapeHtml(truncateText(meta.prompt, 260))}</div>` : '',
+        parameterText ? `<div class="generation-parameters" title="${escapeHtml(parameterText)}"><b>\u53c2\u6570\uff1a</b> ${escapeHtml(parameterText)}</div>` : ''
       ].filter(Boolean);
       return rows.length ? `<div class="generation-meta">${rows.join('')}</div>` : '';
     }
@@ -14246,10 +14367,85 @@
       ].filter(Boolean).join('\n')).join('\n\n');
     }
 
+    function controllerResolvedReferenceContext(userText, project = currentProject(), options = {}) {
+      const selectedIds = uniqueIds(arrayFrom(options.selectedNodeIds || state.selectedNodeIds)
+        .map(String)
+        .filter(id => nodeById(id, project)));
+      const messageMentions = options.messageMentions || controllerMessageMentionContext(userText, project, { selectedNodeIds: selectedIds });
+      const directMentionIds = arrayFrom(messageMentions?.direct).map(item => String(item.astraId || '')).filter(id => nodeById(id, project));
+      const groupMentionIds = arrayFrom(messageMentions?.groups).flatMap(item => arrayFrom(item.astraIds)).map(String).filter(id => nodeById(id, project));
+      const explicitIds = uniqueIds([...selectedIds, ...directMentionIds, ...groupMentionIds]);
+      const scopeIds = controllerReferenceScopeIds(explicitIds, project);
+      const explicitNodes = uniqueNodes(explicitIds.map(id => nodeById(id, project)).filter(Boolean));
+      const scopeNodes = uniqueNodes(scopeIds.map(id => nodeById(id, project)).filter(Boolean));
+      return {
+        schemaVersion: 1,
+        purpose: 'Resolved current-turn references. These ids are the hard targets implied by selection, confirmation, and explicit @ references; use capabilityTargets before asking the user to re-identify them.',
+        selectedIds,
+        directMentionIds: uniqueIds(directMentionIds),
+        groupMentionIds: uniqueIds(groupMentionIds),
+        ids: explicitNodes.map(node => node.id),
+        selector: explicitNodes.length ? { ids: explicitNodes.map(node => node.id) } : null,
+        unresolvedMentions: arrayFrom(messageMentions?.unresolved),
+        explicit: explicitNodes.map(controllerResolvedReferenceSummary),
+        scopeIds: scopeNodes.map(node => node.id),
+        capabilityTargets: {
+          promptDraft: controllerResolvedReferenceBucket(scopeNodes.filter(isPromptDraftAstra)),
+          textRewrite: controllerResolvedReferenceBucket(scopeNodes.filter(isTextRewriteAstra)),
+          imageGeneration: controllerResolvedReferenceBucket(scopeNodes.filter(node => isGenerationOperationTarget(node, 'image'))),
+          videoGeneration: controllerResolvedReferenceBucket(scopeNodes.filter(node => isGenerationOperationTarget(node, 'video'))),
+          generatedMedia: controllerResolvedReferenceBucket(scopeNodes.filter(node => ['genImage', 'genVideo'].includes(node.role))),
+          imageOrVideoAssets: controllerResolvedReferenceBucket(scopeNodes.filter(node => isPromptDerivableMedia(node)))
+        }
+      };
+    }
+
+    function controllerReferenceScopeIds(explicitIds = [], project = currentProject()) {
+      const ids = new Set(arrayFrom(explicitIds).map(String).filter(Boolean));
+      if (!project || !ids.size) return [];
+      arrayFrom(project.links).forEach(link => {
+        const from = String(link.fromNodeId || link.from_astra_id || '');
+        const to = String(link.toNodeId || link.to_astra_id || '');
+        if (!from || !to) return;
+        if (ids.has(from)) ids.add(to);
+        if (ids.has(to)) ids.add(from);
+      });
+      return [...ids].filter(id => nodeById(id, project));
+    }
+
+    function controllerResolvedReferenceBucket(nodes = []) {
+      const items = uniqueNodes(nodes).map(controllerResolvedReferenceSummary);
+      return {
+        count: items.length,
+        ids: items.map(item => item.id),
+        selector: items.length ? { ids: items.map(item => item.id) } : null,
+        astra: items
+      };
+    }
+
+    function controllerResolvedReferenceSummary(node) {
+      const roleDefinition = window.AuralisFoundation?.astraRoleDefinition?.(node.family, node.role);
+      return {
+        id: node.id,
+        title: node.title || '',
+        family: node.family || '',
+        role: node.role || '',
+        type: node.type || '',
+        status: node.status || '',
+        dataKind: roleDefinition?.dataKind || node.dataKind || '',
+        roleScope: roleDefinition?.roleScope || node.roleScope || '',
+        capabilities: arrayFrom(roleDefinition?.capabilities || node.roleCapabilities),
+        hasAsset: !!assetDisplayUrl(node),
+        sequence: node.sequence || null
+      };
+    }
+
     function buildControllerPayload(userText, project = currentProject(), options = {}) {
       const selectedNodeIds = options.selectedNodeIds || state.selectedNodeIds;
       const selected = selectedNodes(project, selectedNodeIds).map(controllerNodeSummary);
       const controllerFoundation = buildControllerFoundationPayload(project, { selectedNodeIds });
+      const messageMentions = controllerMessageMentionContext(userText, project, { selectedNodeIds });
+      const resolvedReferences = controllerResolvedReferenceContext(userText, project, { selectedNodeIds, messageMentions });
       const recentMessages = (project?.messages || [])
         .filter(message => message.role !== 'system')
         .slice(-8)
@@ -14264,7 +14460,8 @@
       }));
       return {
         user_message: userText,
-        message_mentions: controllerMessageMentionContext(userText, project, { selectedNodeIds }),
+        message_mentions: messageMentions,
+        resolved_references: resolvedReferences,
         pending_intent: activePendingControllerIntent(project) || null,
         selected_astra: selected,
         selected_count: selectedNodeIds.length,
@@ -14358,12 +14555,108 @@
       });
       const parsed = parseStructuredJsonObject(content);
       if (!parsed || typeof parsed !== 'object') return { ok: false, plan: null, issues: [{ severity: 'error', message: 'Operation planner did not return JSON.' }] };
-      return validateControllerOperationPlan(repairControllerOperationPlan(parsed, userText, project, options), project, options);
+      const repaired = repairControllerOperationPlan(parsed, userText, project, options);
+      const validation = validateControllerOperationPlan(repaired, project, options);
+      if (repaired?.repairedFromReferences && validation.plan) validation.plan.repairedFromReferences = true;
+      return validation;
     }
 
     function repairControllerOperationPlan(planInput, userText, project = currentProject(), options = {}) {
-      const withImageReferences = repairControllerImageReferencePlan(planInput, userText, project, options);
+      const withReferencedTargets = repairControllerReferencedTargetPlan(planInput, userText, project, options);
+      const withImageReferences = repairControllerImageReferencePlan(withReferencedTargets, userText, project, options);
       return repairControllerMediaVariantCountPlan(withImageReferences, userText, project);
+    }
+
+    function repairControllerReferencedTargetPlan(planInput, userText, project = currentProject(), options = {}) {
+      const foundation = window.AuralisFoundation;
+      const plan = foundation?.normalizeOperationPlan ? foundation.normalizeOperationPlan(planInput) : planInput;
+      const ops = arrayFrom(plan?.ops);
+      if (!ops.length) return planInput;
+      const resolvedReferences = controllerResolvedReferenceContext(userText, project, options);
+      if (!resolvedReferences?.scopeIds?.length) return planInput;
+      let changed = false;
+      const repairedOps = ops.map(op => {
+        if (!controllerOperationUsesAstraTarget(op)) return op;
+        const targetIds = controllerReferenceTargetIdsForOperation(op, resolvedReferences, project);
+        if (!targetIds.length) return op;
+        if (!controllerOperationTargetNeedsReferenceRepair(op, project)) return op;
+        changed = true;
+        return {
+          ...op,
+          reason: op.reason || 'Use the current referenced Astra as operation targets.',
+          payload: {
+            ...(op.payload || {}),
+            target: { ids: targetIds }
+          }
+        };
+      });
+      return changed ? { ...plan, ops: repairedOps, repairedFromReferences: true } : planInput;
+    }
+
+    function controllerOperationUsesAstraTarget(op) {
+      if (!op || !op.op) return false;
+      return [
+        'updateAstraFields',
+        'labelAstra',
+        'layoutAstra',
+        'duplicateAstra',
+        'deleteAstra',
+        'deriveMediaPrompts',
+        'draftPrompts',
+        'rewriteTextAstra',
+        'generateMedia',
+        'generateMediaVariants',
+        'promoteMediaCandidate',
+        'markStale'
+      ].includes(op.op);
+    }
+
+    function controllerOperationTargetNeedsReferenceRepair(op, project = currentProject()) {
+      const selector = op?.payload?.target;
+      if (!selector || typeof selector !== 'object' || Array.isArray(selector) || !Object.keys(selector).length) return true;
+      if (controllerOperationResultRefs(selector).length) return false;
+      try {
+        const targets = resolveControllerOperationTargets(selector, project);
+        const compatible = controllerReferenceCompatibleNodesForOperation(op, targets);
+        return !compatible.length || compatible.length !== targets.length;
+      } catch (_) {
+        return true;
+      }
+    }
+
+    function controllerReferenceTargetIdsForOperation(op, resolvedReferences, project = currentProject()) {
+      const explicitNodes = uniqueNodes(arrayFrom(resolvedReferences?.ids).map(id => nodeById(id, project)).filter(Boolean));
+      const scopeNodes = uniqueNodes(arrayFrom(resolvedReferences?.scopeIds).map(id => nodeById(id, project)).filter(Boolean));
+      const explicit = controllerReferenceCompatibleNodesForOperation(op, explicitNodes);
+      if (explicit.length) return explicit.map(node => node.id);
+      return controllerReferenceCompatibleNodesForOperation(op, scopeNodes).map(node => node.id);
+    }
+
+    function controllerReferenceCompatibleNodesForOperation(op, nodes = []) {
+      const kind = String(op?.payload?.kind || 'image').trim() === 'video' ? 'video' : 'image';
+      switch (op?.op) {
+        case 'draftPrompts':
+          return uniqueNodes(nodes).filter(isPromptDraftAstra);
+        case 'rewriteTextAstra':
+          return uniqueNodes(nodes).filter(isTextRewriteAstra);
+        case 'deriveMediaPrompts':
+          return uniqueNodes(nodes).filter(isPromptDerivableMedia);
+        case 'generateMedia':
+        case 'generateMediaVariants':
+          return uniqueNodes(nodes).filter(node => isGenerationOperationTarget(node, kind));
+        case 'promoteMediaCandidate':
+          return uniqueNodes(nodes).filter(node => ['genImage', 'genVideo'].includes(node.role) && node.assetState === 'candidate');
+        case 'markStale':
+          return uniqueNodes(nodes).filter(node => ['genImage', 'genVideo'].includes(node.role));
+        case 'updateAstraFields':
+        case 'labelAstra':
+        case 'layoutAstra':
+        case 'duplicateAstra':
+        case 'deleteAstra':
+          return uniqueNodes(nodes);
+        default:
+          return [];
+      }
     }
 
     function repairControllerMediaVariantCountPlan(planInput, userText, project = currentProject()) {
@@ -14759,8 +15052,8 @@
       const selectedNodeIds = options.selectedNodeIds || state.selectedNodeIds;
       const validation = validateControllerOperationPlan(plan, project, { selectedNodeIds });
       if (!validation.ok) {
-        const message = validation.issues.map(issue => issue.message).filter(Boolean).join('；') || '操作计划无法执行。';
-        if (options.silent !== true) addMessage('system', message, { project });
+        const message = controllerOperationPlanningFailureMessage(validation);
+        if (options.silent !== true) addMessage('agent', message, { project });
         return { ok: false, applied: [], issues: validation.issues };
       }
       const confirmation = controllerOperationConfirmation(validation.plan, project);
@@ -22866,6 +23159,69 @@
       addMessage('system', `已下载 ${assetCount} 个${scope}。${suffix ? `有${suffix.slice(1)}。` : ''}`);
     }
 
+    async function exportAuraProject(project = currentProject()) {
+      if (!project) return;
+      try {
+        const payload = await buildProjectTransferPayload(project);
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${safeFileName(project.name)}-aura.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+        const assetCount = Object.values(payload.assets || {}).filter(asset => asset?.dataUrl).length;
+        const skipped = Object.values(payload.assets || {}).filter(asset => asset?.error).length;
+        const suffix = skipped ? `，${skipped} 个本地素材未能内嵌` : '';
+        const message = `已导出 Aura：${project.name}（含 ${project.nodes?.length || 0} 个 Astra，${assetCount} 个本地素材${suffix}）。`;
+        addActivity('export', message, 'ok', {}, project);
+        addMessage('system', message, { project });
+      } catch (error) {
+        const message = `Aura 导出失败：${error.message}`;
+        addActivity('export', message, 'fail', {}, project);
+        addMessage('system', message, { project });
+      }
+    }
+
+    async function buildProjectTransferPayload(project = currentProject()) {
+      if (!project) throw new Error('没有可导出的 Aura。');
+      await flushPendingAssetWrites();
+      const exportedProject = structuredCloneSafe(serializableProject(project));
+      const assetIds = collectBackupAssetIds([exportedProject], []);
+      const assets = await buildInlineTransferAssets(assetIds);
+      return {
+        schema: 'auralis.project.v1',
+        schemaVersion: 1,
+        appVersion: AURALIS_VERSION,
+        exportedAt: new Date().toISOString(),
+        source: { origin: location.origin, href: location.href },
+        project: exportedProject,
+        assets
+      };
+    }
+
+    async function buildInlineTransferAssets(assetIds = []) {
+      const manifest = {};
+      for (const assetId of assetIds) {
+        try {
+          const record = await dbGetAsset(assetId);
+          if (!record?.blob) continue;
+          const mime = concreteMime(record.blob.type || record.mime, record.mime || 'application/octet-stream');
+          const blob = record.blob.type === mime ? record.blob : record.blob.slice(0, record.blob.size, mime);
+          manifest[assetId] = {
+            dataUrl: await fileToDataUrl(blob),
+            mime,
+            size: blob.size || record.size || 0,
+            remoteUrl: record.remoteUrl || '',
+            savedAt: record.savedAt || ''
+          };
+        } catch (error) {
+          manifest[assetId] = { error: error.message };
+        }
+      }
+      return manifest;
+    }
+
     async function collectPackageMediaFiles(nodes) {
       const files = [];
       let skipped = 0;
@@ -23283,17 +23639,35 @@
     }
 
     async function importProjectFile(file) {
-      const text = await file.text();
-      const json = JSON.parse(text);
-      const project = prepareImportedProject(json.project || json);
-      state.projects.unshift(normalizeProject(project));
-      state.currentProjectId = project.id;
-      state.selectedNodeIds = [];
-      state.pendingLink = null;
-      state.linkRoleMenu = null;
-      state.contextMenu = null;
-      scheduleSave();
-      render();
+      try {
+        const text = await file.text();
+        const json = JSON.parse(text);
+        if (json?.schema === 'auralis.backup.v1') {
+          throw new Error('这是完整备份文件，请在设置里使用“恢复最近备份”。');
+        }
+        if (json?.schema === 'auralis.project.v1') {
+          await restoreBackupAssets(json.assets || {});
+        }
+        const sourceProject = json?.schema === 'auralis.project.v1' ? json.project : (json.project || json);
+        if (!sourceProject || typeof sourceProject !== 'object') throw new Error('这不是有效的 Auralis Aura 文件。');
+        const project = prepareImportedProject(sourceProject);
+        state.projects.unshift(normalizeProject(project));
+        state.currentProjectId = project.id;
+        state.activeLeftPanel = 'projects';
+        state.selectedNodeIds = [];
+        state.pendingLink = null;
+        state.linkRoleMenu = null;
+        state.contextMenu = null;
+        await hydrateLocalAssets();
+        scheduleSave();
+        render();
+        return project;
+      } catch (error) {
+        const message = `导入 Aura 失败：${error.message}`;
+        addActivity('import', message, 'fail');
+        addMessage('system', message);
+        return null;
+      }
     }
 
     function isTextInputTarget(target) {
@@ -23447,8 +23821,13 @@
         scheduleSave();
         render();
       };
+      $('exportAuraBtn').onclick = () => exportAuraProject(currentProject());
       $('importBtn').onclick = () => $('importFileInput').click();
-      $('importFileInput').onchange = event => event.target.files[0] && importProjectFile(event.target.files[0]);
+      $('importFileInput').onchange = event => {
+        const file = event.target.files[0];
+        if (!file) return;
+        importProjectFile(file).finally(() => { event.target.value = ''; });
+      };
       $('projectNameInput').oninput = () => {
         currentProject().name = $('projectNameInput').value || nextProjectName();
         scheduleSave();
@@ -23677,8 +24056,13 @@
       saveState,
       dbGet,
       dbGetAsset,
+      dbSetAsset,
       flushPendingAssetWrites,
+      buildProjectTransferPayload,
+      exportAuraProject,
+      importProjectFile,
       serializableProjects,
+      serializableProject,
       nodeHasAsset,
       assetDisplayUrl,
       dataUrlForAsset,
