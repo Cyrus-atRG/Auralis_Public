@@ -614,6 +614,7 @@
       display: grid;
       grid-template-rows: auto auto 1fr auto;
       min-width: 0;
+      min-height: 0;
       overflow: hidden;
       z-index: 4;
     }
@@ -698,14 +699,40 @@
     }
 
     .project-list {
+      min-height: 0;
       padding: 10px;
       overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-gutter: stable;
+      scrollbar-width: thin;
+      scrollbar-color: oklch(0.56 0.018 255 / 0.82) transparent;
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
+    .project-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .project-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .project-list::-webkit-scrollbar-thumb {
+      border: 2px solid transparent;
+      border-radius: 999px;
+      background: oklch(0.56 0.018 255 / 0.72);
+      background-clip: content-box;
+    }
+
+    .project-list:hover::-webkit-scrollbar-thumb {
+      background: oklch(0.73 0.115 205 / 0.82);
+      background-clip: content-box;
+    }
+
     .project-item {
+      flex: 0 0 auto;
       border: 1px solid transparent;
       border-radius: var(--radius);
       padding: 10px;
@@ -789,6 +816,7 @@
     .rail-collapsed .project-initial { display: block; }
 
     .library-empty {
+      flex: 0 0 auto;
       padding: 12px;
       color: var(--muted);
       font-size: 12px;
@@ -796,6 +824,7 @@
     }
 
     .library-item {
+      flex: 0 0 auto;
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 10px;
@@ -885,6 +914,7 @@
       min-width: 0;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: minmax(36px, auto);
       gap: 6px;
     }
 
@@ -1653,8 +1683,10 @@
       min-width: 0;
     }
     .asset-cache-warning {
+      appearance: none;
       width: 24px;
       height: 24px;
+      padding: 0;
       min-height: 24px;
       display: inline-grid;
       place-items: center;
@@ -1669,12 +1701,20 @@
       font-weight: 900;
       line-height: 1;
       box-shadow: 0 0 0 2px oklch(0.68 0.145 24 / 0.13), 0 0 12px oklch(0.68 0.145 24 / 0.18);
-      cursor: help;
+      cursor: pointer;
     }
     .asset-cache-warning:hover {
       border-color: oklch(0.78 0.16 28 / 0.88);
       color: oklch(0.9 0.15 32);
       background: oklch(0.23 0.07 24 / 0.98);
+    }
+    .asset-cache-warning.repairing,
+    .asset-cache-warning:disabled {
+      cursor: progress;
+      opacity: 0.82;
+      color: oklch(0.92 0.12 82);
+      border-color: oklch(0.78 0.15 82 / 0.76);
+      background: oklch(0.21 0.055 82 / 0.94);
     }
     .astra-labels {
       display: flex;
@@ -6415,18 +6455,18 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.13';
+    const AURALIS_VERSION = 'Auralis v1.14';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增生成媒体本地缓存风险提示，当图片 / 视频只剩远程链接或缓存失败时，会在 Astra 上提示先预览另存，避免远程素材失效。',
-      '优化 WaveSpeed 视频生成请求，参考视频和视频编辑素材会先上传为远程媒体地址，减少参考视频无法被网关读取的问题。',
-      '修正公司 LLM 网关请求参数，自动过滤 local-codex 模型并适配不支持 temperature 的模型，提升诊断和主控调用稳定性。',
-      '优化 I see 引用选择体验，@ 节点时优先显示已引用目标并高亮选中项，减少视觉理解引用错位。',
-      '优化媒体预览和撤销状态，预览生成结果后会自动标记已查看，撤销生成操作时会保留已完成媒体状态。'
+      '新增生成媒体缓存一键修复，点击缓存风险提示可通过本地 media bridge 自动重新缓存，失败时会打开远程素材链接方便手动保存。',
+      '新增本地 media bridge 远程素材代取能力，当浏览器无法直连下载生成素材时，可由本地服务代取并写回本地缓存。',
+      '优化 file:// 启动场景下的 WaveSpeed 媒体上传，参考视频和视频编辑素材可通过本地 bridge 上传，并提升上传体积上限。',
+      '优化 Astra 素材库 / 项目列表滚动和卡片布局，素材较多时保持列表滚动，避免卡片和按钮被挤压。',
+      '修复无参考素材的视频生成路径判断，避免没有参考视频时误走参考视频或视频编辑请求。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -7293,6 +7333,7 @@
         running: false
       },
       pendingAssetWrites: new Set(),
+      assetCacheRepairingNodeIds: new Set(),
       editorNodeId: ''
     };
 
@@ -10581,13 +10622,20 @@
     function shouldRenderAssetCacheWarning(node) {
       const status = String(node?.meta?.localAssetStatus || '').toLowerCase();
       const isGeneratedMedia = ['genImage', 'genVideo'].includes(node?.role) || !!node?.generation || !!node?.meta?.promptNodeId;
-      return isGeneratedMedia && !!assetDisplayUrl(node) && ['remote-only', 'cache-failed'].includes(status);
+      return isGeneratedMedia && !!assetDisplayUrl(node) && (['remote-only', 'cache-failed'].includes(status) || isAssetCacheRepairing(node));
+    }
+
+    function isAssetCacheRepairing(node) {
+      return !!node?.id && state.assetCacheRepairingNodeIds.has(node.id);
     }
 
     function renderAssetCacheWarning(node) {
       if (!shouldRenderAssetCacheWarning(node)) return '';
-      const title = '这个生成素材未能缓存到本地。请先右键预览另存为，避免远程链接失效。';
-      return `<span class="asset-cache-warning" data-asset-cache-warning role="img" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">!</span>`;
+      const repairing = isAssetCacheRepairing(node);
+      const title = repairing
+        ? '正在尝试重新缓存这个生成素材。'
+        : '这个生成素材未能缓存到本地。点击尝试自动修复；如果修复失败，会打开远程预览链接供你保存。';
+      return `<button type="button" class="asset-cache-warning ${repairing ? 'repairing' : ''}" data-asset-cache-warning data-action="repairAssetCache" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}" ${repairing ? 'disabled aria-busy="true"' : ''}>${repairing ? '...' : '!'}</button>`;
     }
 
     function renderNodeHeaderActions(node, menuLabel = 'Astra 操作') {
@@ -14817,12 +14865,87 @@
       return `${base}.${resolvedExt}`;
     }
 
+    function remoteAssetOpenUrl(node) {
+      const sourceUrl = assetSourceUrl(node) || assetDisplayUrl(node);
+      return /^https?:\/\//i.test(sourceUrl) ? sourceUrl : '';
+    }
+
+    function openRemoteAssetFallback(node) {
+      const url = remoteAssetOpenUrl(node);
+      if (!url) return false;
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.download = mediaDownloadFileName(node, extensionFromMime(node?.mime || '', url));
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      return true;
+    }
+
+    async function repairAssetCacheForNode(id) {
+      const project = projectContainingNode(id) || currentProject();
+      const node = nodeById(id, project);
+      if (!node || !shouldRenderAssetCacheWarning(node) || isAssetCacheRepairing(node)) return;
+      const sourceUrl = assetSourceUrl(node) || assetDisplayUrl(node);
+      if (!sourceUrl) {
+        addActivity('storage', '没有可用于修复的素材链接。', 'fail', {}, project);
+        return;
+      }
+      state.assetCacheRepairingNodeIds.add(id);
+      patchRenderedNode(node, project) || (isProjectActive(project) ? render() : false);
+      try {
+        addActivity('storage', '正在尝试重新缓存生成素材。', 'info', {}, project);
+        const cached = await cacheMediaAsset(id, sourceUrl, node.mime || mediaFromUrl(sourceUrl, 'image').mime || 'application/octet-stream');
+        const nextMeta = {
+          ...(node.meta || {}),
+          ...(cached.meta || {}),
+          localAssetRepairedAt: new Date().toISOString()
+        };
+        if (cached.meta?.localAssetStatus === 'cached') {
+          delete nextMeta.localAssetError;
+          if (/^blob:/i.test(sourceUrl) && nextMeta.remoteAssetUrl === sourceUrl) delete nextMeta.remoteAssetUrl;
+        } else {
+          nextMeta.localAssetStatus = 'cache-failed';
+        }
+        updateNode(id, {
+          assetUrl: cached.assetUrl,
+          displayUrl: cached.displayUrl || node.displayUrl || '',
+          mime: cached.mime || node.mime || '',
+          meta: nextMeta
+        }, project);
+        if (cached.meta?.localAssetStatus === 'cached') addActivity('storage', '素材已重新缓存到本地。', 'ok', {}, project);
+        else {
+          const opened = openRemoteAssetFallback(node);
+          addActivity('storage', opened ? '仍未能缓存到本地，已打开远程素材链接，请在新页面保存。' : '仍未能缓存到本地，请右键预览另存为。', 'fail', {}, project);
+        }
+      } catch (error) {
+        updateNode(id, {
+          meta: {
+            ...(node.meta || {}),
+            localAssetStatus: 'cache-failed',
+            localAssetError: error.message
+          }
+        }, project);
+        const opened = openRemoteAssetFallback(node);
+        addActivity('storage', opened ? `素材修复失败，已打开远程素材链接：${error.message}` : `素材修复失败：${error.message}`, 'fail', {}, project);
+      } finally {
+        state.assetCacheRepairingNodeIds.delete(id);
+        const latest = nodeById(id, project);
+        if (latest) patchRenderedNode(latest, project) || (isProjectActive(project) ? render() : false);
+      }
+    }
+
     async function downloadMediaNode(id) {
       const node = nodeById(id);
       if (!node || !isExportableAsset(node)) return;
       const asset = await dataForAsset(node);
       if (!asset) {
-        const message = '这个素材的本地缓存缺失，远程文件也没有取回，暂时不能下载。';
+        const opened = openRemoteAssetFallback(node);
+        const message = opened
+          ? '这个素材的本地缓存缺失，已尝试打开远程预览链接，请在新页面保存。'
+          : '这个素材的本地缓存缺失，远程文件也没有取回，暂时不能下载。';
         addActivity('download', message, 'fail');
         addMessage('system', message);
         return;
@@ -14931,6 +15054,7 @@
         markGeneratedMediaViewed(id);
         const action = event.target?.dataset?.action;
         if (action === 'retry') return retryNode(id);
+        if (action === 'repairAssetCache') return repairAssetCacheForNode(id);
         if (action === 'generateImage') return isImageGenerationPromptAstra(nodeById(id)) ? generateForContextSelection(id, 'image') : null;
         if (action === 'generateVideo') return isVideoGenerationPromptAstra(nodeById(id)) ? generateForContextSelection(id, 'video') : null;
         if (action === 'analyzeMedia') return analyzeUploadedMedia(id);
@@ -23612,12 +23736,7 @@
       const form = new FormData();
       const ext = extensionFromMime(asset.mime || node.mime || '', node.title || '');
       form.append('file', asset.blob, mediaDownloadFileName(node, ext));
-      const response = await fetch(`${WAVESPEED_URL}/media/upload/binary`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${state.settings.wavespeedApiKey}` },
-        body: form
-      });
-      const json = await responseJsonOrThrow(response, 'WaveSpeed media upload');
+      const json = await waveSpeedUploadMediaForm(form);
       const downloadUrl = normalizeMediaUrl(json?.data?.download_url || json?.data?.downloadUrl || json?.data?.url || json?.download_url || json?.url || '');
       if (!/^https?:\/\//i.test(downloadUrl)) throw new Error(`WaveSpeed media upload response missing download_url: ${JSON.stringify(json).slice(0, 500)}`);
       if (node.id) {
@@ -23631,6 +23750,28 @@
         }, project);
       }
       return downloadUrl;
+    }
+
+    async function waveSpeedUploadMediaForm(form) {
+      try {
+        const response = await fetchWithTimeout(`${LOCAL_MEDIA_URL}/wavespeed-upload`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.settings.wavespeedApiKey}` },
+          body: form
+        }, IMAGE_GENERATION_TIMEOUT_MS);
+        return await responseJsonOrThrow(response, 'WaveSpeed media upload via local bridge');
+      } catch (bridgeError) {
+        const directResponse = await fetch(`${WAVESPEED_URL}/media/upload/binary`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.settings.wavespeedApiKey}` },
+          body: form
+        });
+        try {
+          return await responseJsonOrThrow(directResponse, 'WaveSpeed media upload');
+        } catch (directError) {
+          throw new Error(`WaveSpeed media upload failed. Local bridge: ${bridgeError.message}; direct upload: ${directError.message}`);
+        }
+      }
     }
 
     function videoReferenceNodesForExecution(resolvedExecution = null, project = currentProject()) {
@@ -24388,9 +24529,28 @@
     }
 
     async function fetchAssetBlob(url) {
-      const response = await fetch(url);
-      if (!response.ok) throw new Error(`素材下载失败：HTTP ${response.status}`);
-      return response.blob();
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`素材下载失败：HTTP ${response.status}`);
+        return response.blob();
+      } catch (directError) {
+        return fetchAssetBlobViaLocalBridge(url, directError);
+      }
+    }
+
+    async function fetchAssetBlobViaLocalBridge(url, directError) {
+      if (!/^https?:\/\//i.test(String(url || ''))) throw directError;
+      try {
+        const response = await fetchWithTimeout(`${LOCAL_MEDIA_URL}/fetch-asset`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ url })
+        }, IMAGE_GENERATION_TIMEOUT_MS);
+        if (!response.ok) throw new Error(await responseErrorText(response));
+        return response.blob();
+      } catch (bridgeError) {
+        throw new Error(`素材下载失败：浏览器直连失败（${directError.message}）；本地 media bridge 也未能取回（${bridgeError.message}）。`);
+      }
     }
 
     function dataUriToBlob(uri) {
@@ -27265,9 +27425,7 @@
       }
       if (!sourceUrl) return null;
       try {
-        const response = await fetch(sourceUrl);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const blob = await response.blob();
+        const blob = await fetchAssetBlob(sourceUrl);
         const fetchedMime = blob.type || mime;
         return { ext: extensionFromMime(fetchedMime, sourceUrl), mime: fetchedMime, bytes: new Uint8Array(await blob.arrayBuffer()) };
       } catch (_) {
