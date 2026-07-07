@@ -46,6 +46,11 @@
       --candidate-promote-border-hover: oklch(0.79 0.075 112 / 0.66);
       --candidate-promote-ink: var(--silver);
       --candidate-promote-shadow: 0 1px 4px oklch(0 0 0 / 0.16);
+      --mention-referenced-bg: oklch(0.22 0.045 215 / 0.7);
+      --mention-referenced-bg-hover: oklch(0.255 0.055 215 / 0.82);
+      --mention-referenced-border: oklch(0.73 0.115 205 / 0.44);
+      --mention-referenced-badge-bg: oklch(0.73 0.115 205 / 0.18);
+      --mention-referenced-badge-ink: var(--silver);
       --edge-sequence: oklch(0.84 0.018 255 / 0.36);
       --edge-reference: oklch(0.7 0.065 195 / 0.5);
       --edge-dot: var(--silver);
@@ -106,6 +111,11 @@
       --candidate-promote-border-hover: oklch(0.55 0.105 138 / 0.58);
       --candidate-promote-ink: var(--ink);
       --candidate-promote-shadow: 0 1px 4px oklch(0.28 0.025 250 / 0.09);
+      --mention-referenced-bg: oklch(0.93 0.038 215 / 0.86);
+      --mention-referenced-bg-hover: oklch(0.9 0.05 215 / 0.96);
+      --mention-referenced-border: oklch(0.55 0.13 215 / 0.38);
+      --mention-referenced-badge-bg: oklch(0.55 0.13 215 / 0.12);
+      --mention-referenced-badge-ink: var(--ink);
       --edge-sequence: oklch(0.48 0.025 255 / 0.42);
       --edge-reference: oklch(0.45 0.075 205 / 0.48);
       --edge-dot: var(--silver);
@@ -1560,7 +1570,7 @@
     .card-head-inner {
       min-height: 40px;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 40px;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: start;
       gap: 10px;
     }
@@ -1635,6 +1645,36 @@
       color: var(--warning);
       border-color: oklch(0.76 0.12 78 / 0.34);
       background: oklch(0.2 0.052 78 / 0.32);
+    }
+    .card-head-actions {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      min-width: 0;
+    }
+    .asset-cache-warning {
+      width: 24px;
+      height: 24px;
+      min-height: 24px;
+      display: inline-grid;
+      place-items: center;
+      align-self: start;
+      flex: 0 0 auto;
+      margin-top: 8px;
+      border: 1px solid oklch(0.68 0.145 24 / 0.72);
+      border-radius: 999px;
+      background: oklch(0.18 0.055 24 / 0.94);
+      color: oklch(0.82 0.17 28);
+      font-size: 15px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: 0 0 0 2px oklch(0.68 0.145 24 / 0.13), 0 0 12px oklch(0.68 0.145 24 / 0.18);
+      cursor: help;
+    }
+    .asset-cache-warning:hover {
+      border-color: oklch(0.78 0.16 28 / 0.88);
+      color: oklch(0.9 0.15 32);
+      background: oklch(0.23 0.07 24 / 0.98);
     }
     .astra-labels {
       display: flex;
@@ -1758,6 +1798,20 @@
       color: var(--silver);
     }
 
+    .mention-option.referenced {
+      background-color: var(--mention-referenced-bg);
+      box-shadow: inset 0 0 0 1px var(--mention-referenced-border);
+    }
+
+    .mention-option.referenced:hover,
+    .mention-option.referenced.active {
+      background-color: var(--mention-referenced-bg-hover);
+    }
+
+    .mention-option.referenced .mention-thumb {
+      border-color: var(--mention-referenced-border);
+    }
+
     .mention-thumb {
       width: 36px;
       height: 36px;
@@ -1798,6 +1852,28 @@
       color: var(--muted);
       font-family: var(--font-mono);
       font-size: 11px;
+    }
+
+    .mention-alias-row {
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mention-referenced-badge {
+      flex: 0 0 auto;
+      min-height: 18px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 6px;
+      border: 1px solid var(--mention-referenced-border);
+      border-radius: 999px;
+      background: var(--mention-referenced-badge-bg);
+      color: var(--mention-referenced-badge-ink);
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1;
     }
 
     .mention-kind {
@@ -4015,9 +4091,31 @@
     html[data-visual-scheme="caelum"] .mention-option.active,
     html[data-visual-scheme="caelum"] .context-menu button:hover,
     html[data-visual-scheme="caelum"] .context-menu button:focus-visible,
-    html[data-visual-scheme="caelum"] .card-menu-btn:hover,
-    html[data-visual-scheme="caelum"] .card-menu-btn:focus-visible {
+      html[data-visual-scheme="caelum"] .card-menu-btn:hover,
+      html[data-visual-scheme="caelum"] .card-menu-btn:focus-visible {
       background: oklch(0.91 0.045 215 / 0.62);
+      color: var(--ink);
+    }
+
+    html[data-visual-scheme="caelum"] .asset-cache-warning {
+      border-color: oklch(0.56 0.15 28 / 0.72);
+      background: oklch(0.96 0.052 28 / 0.94);
+      color: oklch(0.48 0.16 28);
+      box-shadow: 0 0 0 2px oklch(0.56 0.15 28 / 0.12), 0 4px 10px oklch(0.56 0.15 28 / 0.14);
+    }
+
+    html[data-visual-scheme="caelum"] .mention-option.referenced {
+      background-color: oklch(0.93 0.038 215 / 0.86);
+    }
+
+    html[data-visual-scheme="caelum"] .mention-option.referenced:hover,
+    html[data-visual-scheme="caelum"] .mention-option.referenced.active {
+      background-color: oklch(0.9 0.05 215 / 0.96);
+      color: var(--ink);
+    }
+
+    html[data-visual-scheme="caelum"] .mention-referenced-badge {
+      background: oklch(0.55 0.13 215 / 0.12);
       color: var(--ink);
     }
 
@@ -6317,18 +6415,18 @@
     const BASE_URL = '';
     const LOCAL_CODEX_URL = 'http://127.0.0.1:17876/v1';
     const LOCAL_MEDIA_URL = 'http://127.0.0.1:17877/v1';
-    const AURALIS_VERSION = 'Auralis v1.12';
+    const AURALIS_VERSION = 'Auralis v1.13';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增图片扩图工具，可从已有图片直接创建固定比例扩图或自定义扩图，并继续生成扩展后的图片。',
-      '大幅优化画布整理功能，整理选中 Astra 时会根据流程关系、候选关系和节点类型重新排布，减少节点堆叠和遮挡。',
-      '新增多种画布整理逻辑，可按智能整理、紧凑整理、流程、时间和品质等方式快速整理不同类型的画布内容。',
-      '新增磁吸对齐辅助，拖动 Astra 时可根据边缘、中心线和等距关系显示对齐参考，降低手动排版成本。',
-      '优化候选图片 / 视频卡片显示，压缩候选节点信息层级，并将“转正”操作放到更顺手的位置。'
+      '新增生成媒体本地缓存风险提示，当图片 / 视频只剩远程链接或缓存失败时，会在 Astra 上提示先预览另存，避免远程素材失效。',
+      '优化 WaveSpeed 视频生成请求，参考视频和视频编辑素材会先上传为远程媒体地址，减少参考视频无法被网关读取的问题。',
+      '修正公司 LLM 网关请求参数，自动过滤 local-codex 模型并适配不支持 temperature 的模型，提升诊断和主控调用稳定性。',
+      '优化 I see 引用选择体验，@ 节点时优先显示已引用目标并高亮选中项，减少视觉理解引用错位。',
+      '优化媒体预览和撤销状态，预览生成结果后会自动标记已查看，撤销生成操作时会保留已完成媒体状态。'
     ]);
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -6358,6 +6456,7 @@
     };
     const LLM_MODELS = ['claude-opus-4-8', 'deepseek-v4-pro', 'gemini-3.5-flash', 'gemini-3.1-pro-preview', 'gpt-5.5'];
     const LOCAL_CODEX_MODELS = ['local-codex/gpt-5.5'];
+    const CHAT_TEMPERATURE_UNSUPPORTED_MODELS = new Set(['claude-opus-4-8']);
     const LOCAL_CODEX_REASONING_EFFORTS = [
       { value: 'low', label: '低，推荐' },
       { value: 'medium', label: '中' },
@@ -7507,6 +7606,35 @@
         && !!assetDisplayUrl(node);
     }
 
+    function shouldPreserveGeneratedMediaStateForUndo(snapshotNode, currentNode) {
+      return !!snapshotNode
+        && snapshotNode.id === currentNode?.id
+        && ['genImage', 'genVideo'].includes(snapshotNode.role)
+        && shouldPreserveGeneratedMediaForUndo(currentNode)
+        && !shouldPreserveGeneratedMediaForUndo(snapshotNode);
+    }
+
+    function mergeGeneratedMediaStateForUndo(snapshotNode, currentNode) {
+      const currentMeta = currentNode?.meta && typeof currentNode.meta === 'object' ? currentNode.meta : {};
+      const snapshotMeta = snapshotNode?.meta && typeof snapshotNode.meta === 'object' ? snapshotNode.meta : {};
+      return {
+        ...snapshotNode,
+        status: currentNode.status,
+        assetUrl: currentNode.assetUrl || '',
+        displayUrl: currentNode.displayUrl || '',
+        mime: currentNode.mime || snapshotNode.mime || '',
+        model: currentNode.model || snapshotNode.model || '',
+        content: currentNode.content || snapshotNode.content || '',
+        summary: currentNode.summary || snapshotNode.summary || '',
+        asset: currentNode.asset || null,
+        mediaAnalysis: currentNode.mediaAnalysis || snapshotNode.mediaAnalysis || null,
+        generation: currentNode.generation || snapshotNode.generation || null,
+        meta: { ...snapshotMeta, ...currentMeta },
+        version: Math.max(Number(snapshotNode.version || 0), Number(currentNode.version || 0)),
+        updatedAt: currentNode.updatedAt || snapshotNode.updatedAt
+      };
+    }
+
     function canvasLinkKey(link) {
       return [
         link.id || '',
@@ -7525,6 +7653,16 @@
       let nextNodes = cloneCanvasValue(snapshot.nodes || []);
       let nextLinks = cloneCanvasValue(snapshot.links || []);
       if (options.preserveGeneratedMedia !== false) {
+        const currentMediaById = new Map(currentNodes
+          .filter(shouldPreserveGeneratedMediaForUndo)
+          .map(node => [node.id, node]));
+        const preservedMediaIds = new Set();
+        nextNodes = nextNodes.map(snapshotNode => {
+          const currentNode = currentMediaById.get(snapshotNode.id);
+          if (!shouldPreserveGeneratedMediaStateForUndo(snapshotNode, currentNode)) return snapshotNode;
+          preservedMediaIds.add(snapshotNode.id);
+          return mergeGeneratedMediaStateForUndo(snapshotNode, currentNode);
+        });
         const snapshotNodeIds = new Set(nextNodes.map(node => node.id));
         const preservedMedia = currentNodes.filter(node => !snapshotNodeIds.has(node.id) && shouldPreserveGeneratedMediaForUndo(node));
         const nextNodeIds = new Set(snapshotNodeIds);
@@ -7532,14 +7670,14 @@
           nextNodes.push(node);
           nextNodeIds.add(node.id);
         });
-        if (preservedMedia.length) {
-          const preservedIds = new Set(preservedMedia.map(node => node.id));
+        preservedMedia.forEach(node => preservedMediaIds.add(node.id));
+        if (preservedMediaIds.size) {
           const linkKeys = new Set(nextLinks.map(canvasLinkKey));
           currentLinks
             .filter(link => {
               const from = link.fromNodeId || link.from_astra_id;
               const to = link.toNodeId || link.to_astra_id;
-              return (preservedIds.has(from) || preservedIds.has(to)) && nextNodeIds.has(from) && nextNodeIds.has(to);
+              return (preservedMediaIds.has(from) || preservedMediaIds.has(to)) && nextNodeIds.has(from) && nextNodeIds.has(to);
             })
             .forEach(link => {
               const key = canvasLinkKey(link);
@@ -7740,7 +7878,7 @@
       project.activity = Array.isArray(project.activity) ? project.activity : [];
       project.messages = Array.isArray(project.messages) ? project.messages : [];
       project.runtime = {
-        llmModel: project.runtime?.llmModel || state.settings.llmModel,
+        llmModel: normalizeLlmModelForMode(project.runtime?.llmModel || state.settings.llmModel),
         imageModel: canonicalModelValue(project.runtime?.imageModel || state.settings.imageModel),
         videoModel: canonicalModelValue(project.runtime?.videoModel || state.settings.videoModel)
       };
@@ -8135,6 +8273,7 @@
       state.astraLibrary = (state.astraLibrary || []).map(normalizeLibraryItem);
       state.settings.visualScheme = normalizeVisualScheme(state.settings.visualScheme);
       state.settings.llmMode = state.settings.llmMode || 'company';
+      state.settings.llmModel = normalizeLlmModelForMode(state.settings.llmModel, state.settings.llmMode);
       state.settings.localCodexUrl = state.settings.localCodexUrl || LOCAL_CODEX_URL;
       state.settings.localCodexReasoningEffort = normalizeLocalCodexReasoningEffort(state.settings.localCodexReasoningEffort);
       state.settings.analysisModel = ANALYSIS_MODELS.includes(state.settings.analysisModel) ? state.settings.analysisModel : ANALYSIS_MODELS[0];
@@ -9428,6 +9567,8 @@
     function syncSettingsUI() {
       const project = currentProject();
       state.settings.visualScheme = normalizeVisualScheme(state.settings.visualScheme);
+      state.settings.llmModel = normalizeLlmModelForMode(state.settings.llmModel, state.settings.llmMode);
+      if (project?.runtime) project.runtime.llmModel = normalizeLlmModelForMode(project.runtime.llmModel || state.settings.llmModel, state.settings.llmMode);
       applyVisualScheme();
       normalizeVisibleMediaModels(state.settings, project);
       const imageModels = activeImageModels();
@@ -10437,6 +10578,22 @@
       if (!quality && ring) ring.remove();
     }
 
+    function shouldRenderAssetCacheWarning(node) {
+      const status = String(node?.meta?.localAssetStatus || '').toLowerCase();
+      const isGeneratedMedia = ['genImage', 'genVideo'].includes(node?.role) || !!node?.generation || !!node?.meta?.promptNodeId;
+      return isGeneratedMedia && !!assetDisplayUrl(node) && ['remote-only', 'cache-failed'].includes(status);
+    }
+
+    function renderAssetCacheWarning(node) {
+      if (!shouldRenderAssetCacheWarning(node)) return '';
+      const title = '这个生成素材未能缓存到本地。请先右键预览另存为，避免远程链接失效。';
+      return `<span class="asset-cache-warning" data-asset-cache-warning role="img" title="${escapeHtml(title)}" aria-label="${escapeHtml(title)}">!</span>`;
+    }
+
+    function renderNodeHeaderActions(node, menuLabel = 'Astra 操作') {
+      return `<div class="card-head-actions">${renderAssetCacheWarning(node)}<button class="small-btn card-menu-btn" data-action="menu" title="${escapeHtml(menuLabel)}" aria-label="${escapeHtml(menuLabel)}">⋯</button></div>`;
+    }
+
     function renderNodeHeader(node) {
       const roleLabel = ASTRA_ROLE_LABELS[node.role] || node.role || '';
       const title = displayNodeTitle(node, roleLabel);
@@ -10452,7 +10609,7 @@
               </div>
               ${title ? `<div class="card-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>` : ''}
             </div>
-            <button class="small-btn card-menu-btn" data-action="menu" title="Astra actions" aria-label="Astra actions">...</button>
+            ${renderNodeHeaderActions(node)}
           </div>
         </div>`;
     }
@@ -10500,7 +10657,7 @@
               </div>
               ${title ? `<div class="card-title" title="${escapeHtml(title)}">${escapeHtml(title)}</div>` : ''}
             </div>
-            <button class="small-btn card-menu-btn" data-action="menu" title="Astra 操作" aria-label="Astra 操作">⋯</button>
+            ${renderNodeHeaderActions(node)}
           </div>
         </div>
         <div class="card-body ${isInlineEditableNode(node) ? 'editable' : ''}" data-card-body>${reviewQuality ? '<span class="card-quality-ring" aria-hidden="true"></span>' : ''}${renderNodeBody(node)}</div>
@@ -11887,6 +12044,7 @@
           root.innerHTML = '';
           return;
         }
+        markGeneratedMediaViewed(node.id);
         const batch = mediaViewerBatchNodes();
         state.mediaViewerBatchNodeIds = batch.map(item => item.id);
         const index = mediaViewerIndex(batch);
@@ -13951,11 +14109,11 @@
       const title = menu.source === 'chat' ? '选择画布引用目标' : '选择已连接素材';
       root.innerHTML = `<div class="mention-menu" style="left:${x}px;top:${y}px" data-mention-menu data-placement="${escapeHtml(menu.placement || 'above')}">
         <div class="mention-menu-title">${escapeHtml(title)}</div>
-        ${items.map((item, index) => `<button class="mention-option ${index === activeIndex ? 'active' : ''}" type="button" data-mention-alias="${escapeHtml(item.alias)}" data-mention-node-id="${escapeHtml(item.node?.id || '')}">
+        ${items.map((item, index) => `<button class="mention-option ${index === activeIndex ? 'active' : ''} ${item.highlighted ? 'referenced' : ''}" type="button" data-mention-alias="${escapeHtml(item.alias)}" data-mention-node-id="${escapeHtml(item.node?.id || '')}" data-mention-referenced="${item.referenced ? 'true' : 'false'}" data-mention-selected="${item.selected ? 'true' : 'false'}">
           ${renderMentionThumb(item)}
           <span class="mention-main">
             <span class="mention-name">${escapeHtml(item.title || item.node?.title || item.alias)}</span>
-            <span class="mention-alias">@${escapeHtml(item.alias)}</span>
+            <span class="mention-alias-row"><span class="mention-alias">@${escapeHtml(item.alias)}</span>${item.referenceLabel ? `<span class="mention-referenced-badge">${escapeHtml(item.referenceLabel)}</span>` : ''}</span>
           </span>
           <span class="mention-kind">${escapeHtml(item.kindLabel)}</span>
         </button>`).join('')}
@@ -13978,7 +14136,7 @@
     }
 
     function mentionMenuItems(menu = state.mentionMenu) {
-      if (menu?.source === 'chat') return filteredControllerMentionCandidates(menu.query);
+      if (menu?.source === 'chat') return filteredControllerMentionCandidates(menu.query, currentProject(), { referenceState: menu.referenceState });
       return filteredPromptReferenceCandidates(menu?.nodeId, menu?.query);
     }
 
@@ -14011,7 +14169,8 @@
       if (!textarea) return closePromptMentionMenu();
       const trigger = promptMentionTriggerAtCursor(textarea);
       if (!trigger) return closePromptMentionMenu();
-      const items = filteredControllerMentionCandidates(trigger.query);
+      const referenceState = controllerMentionReferenceStateForText(textarea.value);
+      const items = filteredControllerMentionCandidates(trigger.query, currentProject(), { referenceState });
       if (!items.length) return closePromptMentionMenu();
       const rect = textareaCaretClientRect(textarea);
       const placement = rect.top < 190 ? 'below' : 'above';
@@ -14025,6 +14184,7 @@
         x: rect.left,
         y: placement === 'below' ? rect.bottom + 8 : rect.top,
         placement,
+        referenceState,
         activeIndex: previous?.source === 'chat' && previous?.query === trigger.query ? previous.activeIndex || 0 : 0
       };
       renderMentionMenu();
@@ -14098,7 +14258,7 @@
     function handleControllerMentionKeydown(event, textarea) {
       const menu = state.mentionMenu;
       if (menu?.source !== 'chat') return false;
-      const items = filteredControllerMentionCandidates(menu.query);
+      const items = filteredControllerMentionCandidates(menu.query, currentProject(), { referenceState: menu.referenceState });
       if (!items.length) return false;
       if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
         event.preventDefault();
@@ -22572,7 +22732,7 @@
       const response = await fetchWithTimeout(`${trimSlash(llmBaseUrl())}/chat/completions`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(chatCompletionBody(state.settings.llmMode === 'local-codex' ? LOCAL_CODEX_MODELS[0] : model, messages, bodyOptions))
+        body: JSON.stringify(chatCompletionBody(chatRequestModel(model), messages, bodyOptions))
       }, options.timeoutMs ?? DEFAULT_LLM_TIMEOUT_MS);
       if (!response.ok) throw new Error(await responseErrorText(response));
       const json = await response.json();
@@ -22586,7 +22746,7 @@
       const response = await fetchWithTimeout(`${trimSlash(state.settings.baseUrl || BASE_URL)}/chat/completions`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${state.settings.apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(chatCompletionBody(model, messages, options))
+        body: JSON.stringify(chatCompletionBody(companyChatRequestModel(model), messages, options))
       }, options.timeoutMs ?? DEFAULT_LLM_TIMEOUT_MS);
       if (!response.ok) throw new Error(await responseErrorText(response));
       const json = await response.json();
@@ -22595,12 +22755,37 @@
       return options.returnDetail ? detail : detail.content;
     }
 
+    function chatRequestModel(model) {
+      return normalizeLlmModelForMode(model, state.settings.llmMode);
+    }
+
+    function companyChatRequestModel(model) {
+      return normalizeLlmModelForMode(model, 'company');
+    }
+
+    function normalizeLlmModelForMode(model, mode = state.settings.llmMode) {
+      const value = String(model || '').trim();
+      if (mode === 'local-codex') {
+        return LOCAL_CODEX_MODELS.includes(value) ? value : LOCAL_CODEX_MODELS[0];
+      }
+      if (LOCAL_CODEX_MODELS.includes(value)) return companyLlmFallbackModel();
+      return value || companyLlmFallbackModel();
+    }
+
+    function companyLlmFallbackModel() {
+      return LLM_MODELS.includes(state.settings.llmModel) ? state.settings.llmModel : LLM_MODELS.at(-1);
+    }
+
+    function supportsChatTemperature(model) {
+      return !CHAT_TEMPERATURE_UNSUPPORTED_MODELS.has(String(model || '').trim());
+    }
+
     function chatCompletionBody(model, messages, options = {}) {
       const body = {
         model,
-        messages,
-        temperature: options.temperature ?? 0.7
+        messages
       };
+      if (supportsChatTemperature(model)) body.temperature = options.temperature ?? 0.7;
       const maxTokens = Number(options.maxTokens);
       if (Number.isFinite(maxTokens) && maxTokens > 0) body.max_tokens = Math.floor(maxTokens);
       if (options.responseFormat) body.response_format = options.responseFormat;
@@ -23413,6 +23598,41 @@
       return dataUrlForAsset(node);
     }
 
+    async function waveSpeedVideoRequestUrlForAsset(node, project = currentProject()) {
+      const remote = normalizeMediaUrl(node?.meta?.remoteAssetUrl || '');
+      if (/^https?:\/\//i.test(remote)) return remote;
+      return waveSpeedUploadMediaAsset(node, project);
+    }
+
+    async function waveSpeedUploadMediaAsset(node, project = currentProject()) {
+      if (!node) return '';
+      requireWaveSpeedKey();
+      const asset = await blobForAssetUpload(node);
+      if (!asset?.blob) throw new Error('WaveSpeed media upload failed: local media cache is missing.');
+      const form = new FormData();
+      const ext = extensionFromMime(asset.mime || node.mime || '', node.title || '');
+      form.append('file', asset.blob, mediaDownloadFileName(node, ext));
+      const response = await fetch(`${WAVESPEED_URL}/media/upload/binary`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${state.settings.wavespeedApiKey}` },
+        body: form
+      });
+      const json = await responseJsonOrThrow(response, 'WaveSpeed media upload');
+      const downloadUrl = normalizeMediaUrl(json?.data?.download_url || json?.data?.downloadUrl || json?.data?.url || json?.download_url || json?.url || '');
+      if (!/^https?:\/\//i.test(downloadUrl)) throw new Error(`WaveSpeed media upload response missing download_url: ${JSON.stringify(json).slice(0, 500)}`);
+      if (node.id) {
+        updateNode(node.id, {
+          meta: {
+            ...(node.meta || {}),
+            remoteAssetUrl: downloadUrl,
+            localAssetStatus: node.meta?.localAssetId ? (node.meta.localAssetStatus || 'cached') : 'remote-only',
+            waveSpeedMediaUploadedAt: new Date().toISOString()
+          }
+        }, project);
+      }
+      return downloadUrl;
+    }
+
     function videoReferenceNodesForExecution(resolvedExecution = null, project = currentProject()) {
       const editVideo = nodeById(resolvedExecution?.editVideoNodeId, project) || null;
       const allowImplicitFirstFrame = !resolvedExecution;
@@ -23697,7 +23917,7 @@
     }
 
     async function diagnoseChatEndpoint() {
-      const content = await chatCompletion(state.settings.llmModel, [{ role: 'user', content: 'Reply with OK only.' }], { maxTokens: 16, temperature: 0 });
+      const content = await chatCompletion(state.settings.llmModel, [{ role: 'user', content: 'Reply with OK only.' }], { maxTokens: 256, temperature: 0 });
       if (!normalizeContent(content).trim()) throw new Error('empty chat response');
       return 'chat completion returned text';
     }
@@ -23922,11 +24142,11 @@
       requireWaveSpeedKey();
       const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
       const references = videoReferenceNodesForExecution(resolvedExecution, project);
-      const editVideoUrl = await videoRequestUrlForAsset(references.editVideo);
+      const editVideoUrl = await waveSpeedVideoRequestUrlForAsset(references.editVideo, project);
       const sourceImageUrl = await dataUrlForAsset(references.first);
       const lastImageUrl = await dataUrlForAsset(references.last);
       const referenceImageUrls = (await Promise.all(references.refs.map(dataUrlForAsset))).filter(Boolean);
-      const referenceVideoUrls = (await Promise.all(references.referenceVideos.map(videoRequestUrlForAsset))).filter(Boolean);
+      const referenceVideoUrls = (await Promise.all(references.referenceVideos.map(node => waveSpeedVideoRequestUrlForAsset(node, project)))).filter(Boolean);
       const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl, !!editVideoUrl);
       const body = {
         prompt: [prompt, '无口播 无BGM 只有音效'].filter(Boolean).join('\n'),
@@ -24741,18 +24961,58 @@
       return { direct, groups, unresolved };
     }
 
-    function filteredControllerMentionCandidates(query = '', project = currentProject()) {
+    function controllerMentionReferenceStateForText(text, project = currentProject(), options = {}) {
+      const selectedIds = uniqueIds(options.selectedNodeIds || state.selectedNodeIds);
+      const mentions = controllerMessageMentionContext(text, project, { selectedNodeIds: selectedIds });
+      return {
+        nodeIds: new Set(arrayFrom(mentions.direct).map(item => String(item.astraId || '')).filter(Boolean)),
+        groups: new Set(arrayFrom(mentions.groups).map(item => String(item.group || '')).filter(Boolean)),
+        selectedNodeIds: new Set(selectedIds.map(String))
+      };
+    }
+
+    function isControllerMentionItemReferenced(item, referenceState) {
+      if (!item || !referenceState) return false;
+      if (item.group) return referenceState.groups?.has?.(String(item.group || '')) || false;
+      return referenceState.nodeIds?.has?.(String(item.node?.id || '')) || false;
+    }
+
+    function isControllerMentionItemSelected(item, referenceState) {
+      if (!item || !referenceState) return false;
+      if (item.group) return false;
+      return referenceState.selectedNodeIds?.has?.(String(item.node?.id || '')) || false;
+    }
+
+    function prioritizeControllerMentionReferences(items = [], referenceState = null) {
+      return arrayFrom(items)
+        .map((item, index) => {
+          const referenced = isControllerMentionItemReferenced(item, referenceState);
+          const selected = isControllerMentionItemSelected(item, referenceState);
+          return {
+            ...item,
+            referenced,
+            selected,
+            highlighted: referenced || selected,
+            referenceLabel: referenced ? '\u5df2\u5f15\u7528' : selected ? '\u5df2\u9009\u4e2d' : '',
+            sortIndex: index
+          };
+        })
+        .sort((a, b) => Number(!!b.referenced) - Number(!!a.referenced) || Number(!!b.selected) - Number(!!a.selected) || a.sortIndex - b.sortIndex)
+        .map(({ sortIndex, ...item }) => item);
+    }
+
+    function filteredControllerMentionCandidates(query = '', project = currentProject(), options = {}) {
       const needle = String(query || '').trim().toLowerCase();
-      const items = controllerMentionCandidates(project);
-      if (!needle) return items;
-      return items.filter(item => [
+      const items = controllerMentionCandidates(project, options);
+      const filtered = needle ? items.filter(item => [
         item.alias,
         item.title,
         item.kindLabel,
         item.node?.id,
         item.node?.title,
         ...(item.node?.userLabels || [])
-      ].some(value => String(value || '').toLowerCase().includes(needle)));
+      ].some(value => String(value || '').toLowerCase().includes(needle))) : items;
+      return prioritizeControllerMentionReferences(filtered, options.referenceState);
     }
 
     function controllerMentionCandidates(project = currentProject(), options = {}) {
@@ -27015,6 +27275,35 @@
       }
     }
 
+    async function blobForAssetUpload(node) {
+      if (!node) return null;
+      const mime = node.mime || '';
+      const sourceUrl = assetSourceUrl(node);
+      if (node.meta?.localAssetId) {
+        try {
+          const record = await dbGetAsset(node.meta.localAssetId);
+          if (record?.blob) {
+            const localMime = concreteMime(record.blob.type, record.mime || mime || 'application/octet-stream');
+            return {
+              blob: record.blob.type === localMime ? record.blob : record.blob.slice(0, record.blob.size, localMime),
+              mime: localMime
+            };
+          }
+        } catch (_) {}
+      }
+      if (!sourceUrl) return null;
+      try {
+        const blob = /^data:/i.test(sourceUrl) ? dataUriToBlob(sourceUrl) : await fetchAssetBlob(sourceUrl);
+        const uploadMime = concreteMime(blob.type, mime || 'application/octet-stream');
+        return {
+          blob: blob.type === uploadMime ? blob : blob.slice(0, blob.size, uploadMime),
+          mime: uploadMime
+        };
+      } catch (_) {
+        return null;
+      }
+    }
+
     function isExportableAsset(node) {
       const mime = node.mime || '';
       return mime.startsWith('image/') || mime.startsWith('video/') || mime.startsWith('audio/') || isSubtitleNode(node);
@@ -27522,6 +27811,7 @@
         } else {
           state.settings.llmModel = LLM_MODELS.includes(state.settings.llmModel) ? state.settings.llmModel : LLM_MODELS.at(-1);
         }
+        if (currentProject()?.runtime) currentProject().runtime.llmModel = state.settings.llmModel;
         state.settings.analysisModel = ANALYSIS_MODELS.includes(state.settings.analysisModel) ? state.settings.analysisModel : ANALYSIS_MODELS[0];
         syncSettingsUI();
       };
@@ -27908,6 +28198,7 @@
       trackTelemetryTokenUsage,
       flushTelemetry,
       parseTelemetryFeedback,
+      chatCompletion,
       chatUsageFromResponse,
       extractAuralisVersionFromHtml,
       compareAuralisVersions,
