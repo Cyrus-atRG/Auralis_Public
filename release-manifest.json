@@ -1,0 +1,48 @@
+{
+    "schemaVersion":  2,
+    "releaseVersion":  "Auralis v1.17",
+    "publishedAt":  "2026-07-27T09:35:18.2239067Z",
+    "changelog":  [
+                      "本地主控升级为基于 Codex App Server 的持久会话：每个 Aura 独立运行，支持流式回复、停止、断线重连和重启恢复，并避免跨 Aura 串线。",
+                      "新增 the mobs Aura 与内置创作工作流，覆盖参考视频分析、创意方案、Prompt、生图、生视频、复刻和口播稿；创意、图片、视频阶段可停靠确认，执行进度会回显到画布。",
+                      "扩展主控可调用的统一画布操作，支持按需读取上下文、创建与更新 Astra、连接与布局、媒体生成、视频抽帧和参考分析；并加强幂等、版本冲突和后台并发保护，优先保留用户编辑。",
+                      "新增 Auralis Windows 启动器与便携运行时，可自动连接本地 Bridge 和 Codex、安装或切换版本化运行时与主控包，并在更新时保留本地数据和自定义规则。",
+                      "Windows 启动器现可可靠自更新：下载后校验大小与 SHA-256，退出后由独立更新器备份并原子替换，失败自动回滚，完成后重新打开启动器。",
+                      "增强本地主控恢复可靠性，修复失效 journal 游标、历史画布操作重复回放、快速完成时空白回复，以及 Windows 重连后仍使用旧运行时等问题。",
+                      "修复视频参考选择误入首尾帧输入的问题，并将 RG 的 Nano Banana Pro 与 Nano Banana 2 更新到最新模型标识。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.17",
+                           "url":  "Auralis.html",
+                           "size":  1781757,
+                           "sha256":  "b8cabeab447362b1299fbc082407c0b73463b67234f74d7859b7c0e7236aacc4",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.17",
+                           "url":  "auralis-runtime-windows-x64.zip",
+                           "size":  33640840,
+                           "sha256":  "309346d509bc85122d414f709d3d1d0473f2a8a346a28765364a84290a684f98",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.17",
+                           "url":  "auralis-controller-packs.zip",
+                           "size":  22123,
+                           "sha256":  "405d6b890ce662b594dbda85580b08b74bfcea63978059c419cade2a8047beee",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.17.0",
+                           "url":  "Auralis Launcher.exe",
+                           "size":  119808,
+                           "sha256":  "ece57d2ffc8abc3ad5e01de0493a9fe409a4c0053e252623a0295c5f8a2b0aa9",
+                           "format":  "file"
+                       }
+                   ]
+}
