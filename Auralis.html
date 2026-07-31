@@ -5393,7 +5393,7 @@
   <div id="outpaintEditorRoot"></div>
   <div id="frameCutRoot"></div>
 
-  <input class="hidden" id="importFileInput" type="file" accept=".json,application/json">
+  <input class="hidden" id="importFileInput" type="file" accept=".json,.zip,.aura,application/json,application/zip">
 
   <script>
 /* Inlined from src/auralis-controller-foundation.js. */
@@ -7335,20 +7335,17 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.17';
+    const AURALIS_VERSION = 'Auralis v1.18';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '本地主控升级为基于 Codex App Server 的持久会话：每个 Aura 独立运行，支持流式回复、停止、断线重连和重启恢复，并避免跨 Aura 串线。',
-      '新增 the mobs Aura 与内置创作工作流，覆盖参考视频分析、创意方案、Prompt、生图、生视频、复刻和口播稿；创意、图片、视频阶段可停靠确认，执行进度会回显到画布。',
-      '扩展主控可调用的统一画布操作，支持按需读取上下文、创建与更新 Astra、连接与布局、媒体生成、视频抽帧和参考分析；并加强幂等、版本冲突和后台并发保护，优先保留用户编辑。',
-      '新增 Auralis Windows 启动器与便携运行时，可自动连接本地 Bridge 和 Codex、安装或切换版本化运行时与主控包，并在更新时保留本地数据和自定义规则。',
-      'Windows 启动器现可可靠自更新：下载后校验大小与 SHA-256，退出后由独立更新器备份并原子替换，失败自动回滚，完成后重新打开启动器。',
-      '增强本地主控恢复可靠性，修复失效 journal 游标、历史画布操作重复回放、快速完成时空白回复，以及 Windows 重连后仍使用旧运行时等问题。',
-      '修复视频参考选择误入首尾帧输入的问题，并将 RG 的 Nano Banana Pro 与 Nano Banana 2 更新到最新模型标识。'
+      'Aura 导入导出升级为 ZIP 归档：媒体素材改为独立文件流式写入与恢复，显著降低大型 Aura 导出时的内存占用，并继续兼容旧版 JSON Aura。',
+      '新增 Apple Silicon Mac 启动器与便携运行时，可自动安装或更新 Auralis、主控包和本地 Bridge；更新会经过校验、备份与启动确认，失败时自动回滚。',
+      'Mac 启动器现可自动识别 ChatGPT App 内置的 Codex CLI，无需依赖 Finder 启动环境中的终端 PATH 或手动配置 CODEX_CLI_PATH。',
+      '修正 Nano Banana Pro 的 Gemini 3 Pro Image 请求模型名，并让风格测试与媒体查看器显示结果实际使用的生成模型和参数。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9116,12 +9113,12 @@
       'rg-gpt-image-2': { provider: 'company', endpoint: 'images', editEndpoint: 'images', requestModel: 'gpt-image-2' },
       'rg-nano-banana-2': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3.1-flash-image' },
       'rg-nano-banana-flash': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3.1-flash-image', canonical: 'rg-nano-banana-2' },
-      'rg-nano-banana-pro': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3-pro-imag' },
+      'rg-nano-banana-pro': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3-pro-image' },
       'gpt-image-2': { provider: 'company', endpoint: 'images', editEndpoint: 'images', requestModel: 'gpt-image-2', canonical: 'rg-gpt-image-2' },
       'gemini-3.1-flash-image': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3.1-flash-image', canonical: 'rg-nano-banana-2' },
-      'gemini-3-pro-imag': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3-pro-imag', canonical: 'rg-nano-banana-pro' },
+      'gemini-3-pro-image': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3-pro-image', canonical: 'rg-nano-banana-pro' },
       'gemini-3.1-flash-image-preview': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3.1-flash-image', canonical: 'rg-nano-banana-2' },
-      'gemini-3-pro-image-preview': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3-pro-imag', canonical: 'rg-nano-banana-pro' },
+      'gemini-3-pro-image-preview': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3-pro-image', canonical: 'rg-nano-banana-pro' },
       'doubao-seedream-5-0-pro-260628': { provider: 'company', endpoint: 'images', requestModel: 'doubao-seedream-5-0-pro-260628', bodyKind: 'seedream', imageInputField: 'image', maxImageInputs: 10, imageResolutions: ['1080', '2k'], canonical: 'rg-seedream-5-pro' },
       'ws-gpt-image-2': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2/text-to-image', editEndpointModel: 'openai/gpt-image-2/edit', bodyKind: 'gpt-image' },
       'ws-nano-banana-pro': { provider: 'wavespeed', endpointModel: 'google/nano-banana-pro/text-to-image', editEndpointModel: 'google/nano-banana-pro/edit', bodyKind: 'generic-image' },
@@ -9862,6 +9859,8 @@
     const ASTRA_SNAP_THRESHOLD_PX = 10;
     const AUTO_BACKUP_FILE_NAME = 'auralis-auto-backup.json';
     const AUTO_BACKUP_ASSETS_DIR = 'auralis-backup-assets';
+    const AURA_TRANSFER_ARCHIVE_MANIFEST = 'aura.json';
+    const AURA_TRANSFER_ARCHIVE_ASSETS_DIR = 'assets';
     const AUTO_BACKUP_ACTIVE_MS = 10 * 60 * 1000;
     const AUTO_BACKUP_IDLE_PAUSE_MS = 60 * 1000;
     const AUTO_BACKUP_TICK_MS = 1000;
@@ -15315,10 +15314,20 @@
       return actions.map(([action, label]) => `<button class="small-btn" data-action="${action}">${label}</button>`).join('');
     }
 
-    function renderPromptGenerationControls(node) {
+    function renderPromptGenerationControls(node, displayedGeneration = null) {
       const kind = promptGenerationKind(node);
       if (!kind) return '';
-      const settings = promptGenerationSettings(node, kind);
+      const promptSettings = promptGenerationSettings(node, kind);
+      const displayedModel = displayedGeneration?.model
+        ? visibleMediaModel(displayedGeneration.model, kind)
+        : promptSettings.model;
+      const settings = displayedGeneration?.model
+        ? {
+          kind,
+          model: displayedModel,
+          mediaSettings: mergeMediaSettings(promptSettings.mediaSettings, displayedGeneration.mediaSettings, kind, displayedModel)
+        }
+        : promptSettings;
       if (node.role === 'outpaintTool') {
         const ratio = outpaintRatioValue(node);
         return `<div class="prompt-generation-controls outpaint-tool-controls" data-prompt-generation-controls>
@@ -16481,7 +16490,7 @@
       const promptNode = promptState.promptNode;
       const changed = mediaReviewPromptChanged(node, promptNode);
       const promptText = promptState.promptText;
-      const settings = promptNode ? renderPromptGenerationControls(promptNode) : '';
+      const settings = promptNode ? renderPromptGenerationControls(promptNode, node.generation) : '';
       const promptEditorAttrs = [
         'data-media-prompt-editor',
         `data-media-id="${escapeHtml(node.id)}"`,
@@ -33794,17 +33803,21 @@
 
     async function exportAuraProject(project = currentProject()) {
       if (!project) return;
+      const button = $('exportAuraBtn');
+      if (button) {
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+      }
       try {
-        const payload = await buildProjectTransferPayload(project);
-        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+        const archive = await buildProjectTransferArchive(project);
+        const url = URL.createObjectURL(archive.blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${safeFileName(project.name)}-aura.json`;
+        a.download = `${safeFileName(project.name)}-aura.zip`;
         a.click();
-        URL.revokeObjectURL(url);
-        const assetCount = Object.values(payload.assets || {}).filter(asset => asset?.dataUrl).length;
-        const skipped = Object.values(payload.assets || {}).filter(asset => asset?.error).length;
+        setTimeout(() => URL.revokeObjectURL(url), 60_000);
+        const assetCount = Object.values(archive.payload.assets || {}).filter(asset => asset?.file).length;
+        const skipped = Object.values(archive.payload.assets || {}).filter(asset => asset?.error).length;
         const suffix = skipped ? `，${skipped} 个本地素材未能内嵌` : '';
         const message = `已导出 Aura：${project.name}（含 ${project.nodes?.length || 0} 个 Astra，${assetCount} 个本地素材${suffix}）。`;
         addActivity('export', message, 'ok', {}, project);
@@ -33813,20 +33826,16 @@
         const message = `Aura 导出失败：${error.message}`;
         addActivity('export', message, 'fail', {}, project);
         addMessage('system', message, { project });
+      } finally {
+        if (button) {
+          button.disabled = false;
+          button.removeAttribute('aria-busy');
+        }
       }
     }
 
     async function buildProjectTransferPayload(project = currentProject()) {
-      if (!project) throw new Error('没有可导出的 Aura。');
-      await flushPendingAssetWrites();
-      const exportedProject = structuredCloneSafe(serializableProject(project));
-      delete exportedProject.operationReceipts;
-      delete exportedProject.localCodexJournalId;
-      delete exportedProject.localCodexLastEventId;
-      exportedProject.messages = arrayFrom(exportedProject.messages).map(message => {
-        const { requestId, threadId, turnId, itemId, ...portable } = message || {};
-        return { ...portable, status: portable.status === 'streaming' ? 'completed' : portable.status };
-      });
+      const exportedProject = await buildPortableTransferProject(project);
       const assetIds = collectBackupAssetIds([exportedProject], []);
       const assets = await buildInlineTransferAssets(assetIds);
       return {
@@ -33838,6 +33847,41 @@
         project: exportedProject,
         assets
       };
+    }
+
+    async function buildProjectTransferArchive(project = currentProject()) {
+      const exportedProject = await buildPortableTransferProject(project);
+      const assetIds = collectBackupAssetIds([exportedProject], []);
+      const { assets, files } = await buildArchiveTransferAssets(assetIds);
+      const payload = {
+        schema: 'auralis.project.v2',
+        schemaVersion: 2,
+        appVersion: AURALIS_VERSION,
+        exportedAt: new Date().toISOString(),
+        source: { origin: location.origin, href: location.href },
+        project: exportedProject,
+        assets
+      };
+      const manifest = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const blob = await makeZipFromBlobs([
+        { name: AURA_TRANSFER_ARCHIVE_MANIFEST, data: manifest },
+        ...files
+      ]);
+      return { blob, payload };
+    }
+
+    async function buildPortableTransferProject(project = currentProject()) {
+      if (!project) throw new Error('没有可导出的 Aura。');
+      await flushPendingAssetWrites();
+      const exportedProject = structuredCloneSafe(serializableProject(project));
+      delete exportedProject.operationReceipts;
+      delete exportedProject.localCodexJournalId;
+      delete exportedProject.localCodexLastEventId;
+      exportedProject.messages = arrayFrom(exportedProject.messages).map(message => {
+        const { requestId, threadId, turnId, itemId, ...portable } = message || {};
+        return { ...portable, status: portable.status === 'streaming' ? 'completed' : portable.status };
+      });
+      return exportedProject;
     }
 
     async function buildInlineTransferAssets(assetIds = []) {
@@ -33860,6 +33904,31 @@
         }
       }
       return manifest;
+    }
+
+    async function buildArchiveTransferAssets(assetIds = []) {
+      const assets = {};
+      const files = [];
+      for (const assetId of assetIds) {
+        try {
+          const record = await dbGetAsset(assetId);
+          if (!record?.blob) continue;
+          const mime = concreteMime(record.blob.type || record.mime, record.mime || 'application/octet-stream');
+          const blob = record.blob.type === mime ? record.blob : record.blob.slice(0, record.blob.size, mime);
+          const file = `${AURA_TRANSFER_ARCHIVE_ASSETS_DIR}/${backupAssetFileName(assetId, mime)}`;
+          assets[assetId] = {
+            file,
+            mime,
+            size: blob.size || record.size || 0,
+            remoteUrl: record.remoteUrl || '',
+            savedAt: record.savedAt || ''
+          };
+          files.push({ name: file, data: blob });
+        } catch (error) {
+          assets[assetId] = { error: error.message };
+        }
+      }
+      return { assets, files };
     }
 
     async function collectPackageMediaFiles(nodes) {
@@ -34110,6 +34179,35 @@
       return new Blob(parts, { type: 'application/zip' });
     }
 
+    async function makeZipFromBlobs(files) {
+      if (files.length > 0xffff) throw new Error('Aura 素材数量超过 ZIP 格式上限。');
+      const encoder = new TextEncoder();
+      const parts = [];
+      const central = [];
+      let offset = 0;
+      for (const file of files) {
+        const nameBytes = encoder.encode(file.name);
+        if (nameBytes.length > 0xffff) throw new Error(`Aura 素材文件名过长：${file.name}`);
+        const data = file.data instanceof Blob ? file.data : new Blob([file.data]);
+        if (data.size > 0xffffffff) throw new Error(`单个 Aura 素材超过 4 GB：${file.name}`);
+        const crc = await crc32Blob(data);
+        const local = zipLocalHeader(nameBytes, data.size, crc);
+        if (offset + local.length + data.size > 0xffffffff) throw new Error('Aura 导出包超过 4 GB，请拆分 Aura 后重试。');
+        parts.push(local, data);
+        central.push(zipCentralHeader(nameBytes, data.size, crc, offset));
+        offset += local.length + data.size;
+      }
+      const centralOffset = offset;
+      let centralSize = 0;
+      for (const item of central) {
+        parts.push(item);
+        centralSize += item.length;
+      }
+      if (centralOffset + centralSize > 0xffffffff) throw new Error('Aura 导出包超过 4 GB，请拆分 Aura 后重试。');
+      parts.push(zipEnd(files.length, centralSize, centralOffset));
+      return new Blob(parts, { type: 'application/zip' });
+    }
+
     function zipLocalHeader(name, size, crc) {
       const out = new Uint8Array(30 + name.length);
       const view = new DataView(out.buffer);
@@ -34162,6 +34260,22 @@
     function crc32(bytes) {
       let crc = 0xffffffff;
       for (const b of bytes) crc = crcTable[(crc ^ b) & 0xff] ^ (crc >>> 8);
+      return (crc ^ 0xffffffff) >>> 0;
+    }
+
+    async function crc32Blob(blob) {
+      if (typeof blob.stream !== 'function') return crc32(new Uint8Array(await blob.arrayBuffer()));
+      let crc = 0xffffffff;
+      const reader = blob.stream().getReader();
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          for (let i = 0; i < value.length; i++) crc = crcTable[(crc ^ value[i]) & 0xff] ^ (crc >>> 8);
+        }
+      } finally {
+        reader.releaseLock();
+      }
       return (crc ^ 0xffffffff) >>> 0;
     }
 
@@ -34316,15 +34430,29 @@
 
     async function importProjectFile(file) {
       try {
-        const text = await file.text();
-        const json = JSON.parse(text);
+        let json;
+        let archiveEntries = null;
+        if (await isZipBlob(file)) {
+          archiveEntries = await readStoredZipEntries(file);
+          const manifest = archiveEntries.get(AURA_TRANSFER_ARCHIVE_MANIFEST);
+          if (!manifest) throw new Error(`Aura 导出包缺少 ${AURA_TRANSFER_ARCHIVE_MANIFEST}。`);
+          json = JSON.parse(await manifest.blob.text());
+          if (json?.schema !== 'auralis.project.v2') throw new Error('这不是有效的 Auralis Aura 导出包。');
+          await restoreArchiveTransferAssets(json.assets || {}, archiveEntries);
+        } else {
+          json = JSON.parse(await file.text());
+        }
         if (json?.schema === 'auralis.backup.v1') {
           throw new Error('这是完整备份文件，请在设置里使用“恢复最近备份”。');
         }
         if (json?.schema === 'auralis.project.v1') {
           await restoreBackupAssets(json.assets || {});
         }
-        const sourceProject = json?.schema === 'auralis.project.v1' ? json.project : (json.project || json);
+        if (json?.schema === 'auralis.project.v2' && !archiveEntries) {
+          throw new Error('Aura v2 必须从完整的 .zip 导出包导入。');
+        }
+        const isTransfer = json?.schema === 'auralis.project.v1' || json?.schema === 'auralis.project.v2';
+        const sourceProject = isTransfer ? json.project : (json.project || json);
         if (!sourceProject || typeof sourceProject !== 'object') throw new Error('这不是有效的 Auralis Aura 文件。');
         const project = prepareImportedProject(sourceProject);
         state.projects.unshift(normalizeProject(project));
@@ -34344,6 +34472,77 @@
         addActivity('import', message, 'fail');
         addMessage('system', message);
         return null;
+      }
+    }
+
+    async function isZipBlob(blob) {
+      if (!blob || blob.size < 4) return false;
+      const bytes = new Uint8Array(await blob.slice(0, 4).arrayBuffer());
+      return new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength).getUint32(0, true) === 0x04034b50;
+    }
+
+    async function readStoredZipEntries(blob) {
+      const entries = new Map();
+      const decoder = new TextDecoder();
+      let offset = 0;
+      while (offset + 4 <= blob.size) {
+        const signatureBytes = new Uint8Array(await blob.slice(offset, offset + 4).arrayBuffer());
+        const signature = new DataView(signatureBytes.buffer, signatureBytes.byteOffset, signatureBytes.byteLength).getUint32(0, true);
+        if (signature === 0x02014b50 || signature === 0x06054b50) break;
+        if (signature !== 0x04034b50 || offset + 30 > blob.size) throw new Error('Aura ZIP 结构损坏。');
+        const headerBytes = new Uint8Array(await blob.slice(offset, offset + 30).arrayBuffer());
+        const header = new DataView(headerBytes.buffer, headerBytes.byteOffset, headerBytes.byteLength);
+        const flags = header.getUint16(6, true);
+        const compression = header.getUint16(8, true);
+        const crc = header.getUint32(14, true);
+        const compressedSize = header.getUint32(18, true);
+        const uncompressedSize = header.getUint32(22, true);
+        const nameLength = header.getUint16(26, true);
+        const extraLength = header.getUint16(28, true);
+        if (flags & 0x0001) throw new Error('不支持加密的 Aura ZIP。');
+        if (flags & 0x0008) throw new Error('不支持带数据描述符的 Aura ZIP。');
+        if (compression !== 0 || compressedSize !== uncompressedSize) throw new Error('Aura ZIP 使用了不支持的压缩方式。');
+        const nameStart = offset + 30;
+        const dataStart = nameStart + nameLength + extraLength;
+        const dataEnd = dataStart + compressedSize;
+        if (dataEnd > blob.size) throw new Error('Aura ZIP 素材数据不完整。');
+        const nameBytes = new Uint8Array(await blob.slice(nameStart, nameStart + nameLength).arrayBuffer());
+        const name = decoder.decode(nameBytes);
+        const parts = name.split('/');
+        if (!name || name.includes('\\') || name.startsWith('/') || parts.includes('..')) throw new Error('Aura ZIP 包含无效文件路径。');
+        if (entries.has(name)) throw new Error(`Aura ZIP 包含重复文件：${name}`);
+        entries.set(name, {
+          name,
+          blob: blob.slice(dataStart, dataEnd),
+          size: uncompressedSize,
+          crc
+        });
+        offset = dataEnd;
+      }
+      return entries;
+    }
+
+    async function restoreArchiveTransferAssets(assets = {}, entries = new Map()) {
+      const pending = [];
+      for (const [assetId, asset] of Object.entries(assets || {})) {
+        if (!asset?.file) continue;
+        const entry = entries.get(asset.file);
+        if (!entry) throw new Error(`Aura ZIP 缺少素材：${asset.file}`);
+        if (Number.isFinite(Number(asset.size)) && Number(asset.size) !== entry.size) {
+          throw new Error(`Aura ZIP 素材大小不匹配：${asset.file}`);
+        }
+        pending.push({ assetId, asset, entry });
+      }
+      for (const { assetId, asset, entry } of pending) {
+        const mime = concreteMime(asset.mime, 'application/octet-stream');
+        const storedBlob = entry.blob.slice(0, entry.blob.size, mime);
+        await dbSetAsset(assetId, {
+          blob: storedBlob,
+          mime,
+          size: storedBlob.size,
+          remoteUrl: asset.remoteUrl || '',
+          savedAt: asset.savedAt || new Date().toISOString()
+        });
       }
     }
 
@@ -34837,6 +35036,7 @@
       dbSetAsset,
       flushPendingAssetWrites,
       buildProjectTransferPayload,
+      buildProjectTransferArchive,
       exportAuraProject,
       importProjectFile,
       serializableProjects,
