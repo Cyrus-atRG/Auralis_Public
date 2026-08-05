@@ -5529,7 +5529,7 @@
     connectAstra: {
       from: 'selector',
       to: 'selector',
-      inputRole: 'prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|none',
+      inputRole: 'prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|upscale|none',
       relation: 'input',
       batch: 'supports one-to-many, many-to-one, equal-count paired connections, or reference fanout from multiple reference sources to multiple targets'
     },
@@ -5579,6 +5579,10 @@
       models: 'model id or alias string[]',
       variantsPerModel: 'number',
       mediaSettings: 'optional object, same shape as generateMedia'
+    },
+    upscaleVideo: {
+      target: 'selector for video Astra with media assets',
+      targetResolution: '720p|1080p|2k|4k optional; default derives from the source video resolution'
     },
     promoteMediaCandidate: {
       target: 'selector'
@@ -5668,6 +5672,11 @@
         })
       }
     }),
+    upscaleVideo: operationTargetRule({
+      selectorField: 'target',
+      dataKinds: ['video'],
+      description: 'Targets must be video Astra with readable media assets.'
+    }),
     markStale: operationTargetRule({
       selectorField: 'target',
       anyCapabilities: ['generation_target'],
@@ -5704,6 +5713,7 @@
     rewriteTextAstra: operationExecutionPolicy({ effect: 'canvas', undo: 'canvas' }),
     generateMedia: operationExecutionPolicy({ effect: 'media', undo: 'none' }),
     generateMediaVariants: operationExecutionPolicy({ effect: 'media', undo: 'none' }),
+    upscaleVideo: operationExecutionPolicy({ effect: 'media', undo: 'none' }),
     promoteMediaCandidate: operationExecutionPolicy({ effect: 'canvas', undo: 'canvas' }),
     markStale: operationExecutionPolicy({ effect: 'canvas', undo: 'canvas' }),
     extractVideoFrames: operationExecutionPolicy({ effect: 'canvas', undo: 'canvas' }),
@@ -5731,6 +5741,7 @@
     rewriteTextAstra: ['astra'],
     generateMedia: ['astra'],
     generateMediaVariants: ['astra'],
+    upscaleVideo: ['astra', 'link'],
     promoteMediaCandidate: ['astra'],
     markStale: ['astra'],
     extractVideoFrames: ['astra', 'link'],
@@ -5826,6 +5837,11 @@
       intent: 'Generate multiple candidate versions, usually with multiple models or variants per model.',
       target: 'Same target rules as generateMedia, plus models and variantsPerModel.',
       notes: ['Use for requests like gi2 and nbp each make two versions.', 'Use for requests like generate two videos from this prompt by setting models to the current video model and variantsPerModel to the requested count.', 'Use payload.mediaSettings for one-off aspect ratio, image resolution, video resolution, or duration overrides.']
+    }),
+    upscaleVideo: operationPlannerHint({
+      intent: 'Upscale one or more existing video Astra with WaveSpeed video-upscaler-pro.',
+      target: 'Use selected or explicitly referenced Luna video Astra with readable assets.',
+      notes: ['Omit targetResolution unless the user requests a specific output size: 720/768-class sources default to 1080p, 1080-class sources default to 2k, and larger sources default to 4k.', 'Each source produces one completed Luna.genVideo Astra connected from the source with inputRole upscale.']
     }),
     markStale: operationPlannerHint({
       intent: 'Mark downstream generated media as needing regeneration after upstream text/prompt/style changes.',
@@ -6364,7 +6380,7 @@
         to: 'target Astra selector',
         flowId: 'flow id',
         scope: 'active_flow|all',
-        inputRoles: ['prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|none'],
+        inputRoles: ['prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|upscale|none'],
         relations: ['input|sequence_next|candidate_of|reverse_prompt'],
         limit: 'maximum links'
       },
@@ -6545,7 +6561,7 @@
         }
         if (!allowedMediaKinds().has(String(payload.kind || ''))) fail('generateMedia requires payload.kind image or video.');
         if (payload.concurrency !== undefined && !allowedConcurrency().has(String(payload.concurrency))) fail('generateMedia payload.concurrency must be parallel or serial.');
-        validateMediaSettingsPayload(payload.mediaSettings ?? payload.media_settings, String(payload.kind || ''), fail, 'generateMedia payload.mediaSettings');
+        validateMediaSettingsPayload(payload.mediaSettings ?? payload.media_settings, String(payload.kind || ''), fail, 'generateMedia payload.mediaSettings', payload.model);
         break;
       case 'generateMediaVariants':
         {
@@ -6556,7 +6572,18 @@
         if (!allowedMediaKinds().has(String(payload.kind || ''))) fail('generateMediaVariants requires payload.kind image or video.');
         if (!arrayFrom(payload.models).map(String).filter(Boolean).length) fail('generateMediaVariants requires non-empty payload.models.');
         if (!positiveIntegerInRange(payload.variantsPerModel, 1, 12)) fail('generateMediaVariants requires payload.variantsPerModel between 1 and 12.');
-        validateMediaSettingsPayload(payload.mediaSettings ?? payload.media_settings, String(payload.kind || ''), fail, 'generateMediaVariants payload.mediaSettings');
+        validateMediaSettingsPayload(payload.mediaSettings ?? payload.media_settings, String(payload.kind || ''), fail, 'generateMediaVariants payload.mediaSettings', payload.models);
+        break;
+      case 'upscaleVideo':
+        {
+          const targets = requireTargets(payload.target);
+          requireCompatibleTargetsByRule(targets, targetCompatibilityForOperation(op), fail, op);
+          const withoutAssets = targets.filter(node => node.hasAsset !== true);
+          if (withoutAssets.length) fail(`upscaleVideo target must have video assets: ${withoutAssets.map(astraLabel).join(', ')}.`);
+        }
+        if (payload.targetResolution !== undefined && !new Set(['720p', '1080p', '2k', '4k']).has(String(payload.targetResolution).toLowerCase())) {
+          fail('upscaleVideo payload.targetResolution must be 720p, 1080p, 2k, or 4k.');
+        }
         break;
       case 'promoteMediaCandidate':
         {
@@ -7187,7 +7214,7 @@
     return new Set(['parallel', 'serial']);
   }
 
-  function validateMediaSettingsPayload(mediaSettings, kind, fail, label = 'mediaSettings') {
+  function validateMediaSettingsPayload(mediaSettings, kind, fail, label = 'mediaSettings', modelInput = '') {
     if (mediaSettings === undefined) return;
     if (!mediaSettings || typeof mediaSettings !== 'object' || Array.isArray(mediaSettings)) {
       fail(`${label} must be an object when provided.`);
@@ -7198,15 +7225,21 @@
     const imageResolution = mediaSettings.imageResolution || mediaSettings.image_resolution || (kind === 'image' ? mediaSettings.resolution : '');
     const videoResolution = mediaSettings.videoResolution || mediaSettings.video_resolution || (kind === 'video' ? mediaSettings.resolution : '');
     const duration = mediaSettings.segmentDurationSeconds ?? mediaSettings.segment_duration_seconds ?? mediaSettings.duration;
+    const videoModels = (Array.isArray(modelInput) ? modelInput : [modelInput]).filter(Boolean);
+    const videoAspectRatios = videoModels.length ? [...new Set(videoModels.flatMap(plannerVideoAspectRatioOptions))] : PLANNER_VIDEO_ASPECT_RATIOS;
+    const videoResolutions = videoModels.length ? [...new Set(videoModels.flatMap(plannerVideoResolutionOptions))] : PLANNER_VIDEO_RESOLUTIONS;
     if (imageAspect !== undefined && !new Set(['1:1', '16:9', '9:16']).has(String(imageAspect))) fail(`${label}.imageAspectRatio must be 1:1, 16:9, or 9:16.`);
-    if (videoAspect !== undefined && !new Set(['1:1', '16:9', '9:16']).has(String(videoAspect))) fail(`${label}.videoAspectRatio must be 1:1, 16:9, or 9:16.`);
+    if (videoAspect !== undefined && !new Set(videoAspectRatios).has(String(videoAspect))) fail(`${label}.videoAspectRatio must be one of: ${videoAspectRatios.join(', ')}.`);
     if (imageResolution !== undefined && imageResolution !== '' && !new Set(['1080', '2k', '4k']).has(String(imageResolution))) fail(`${label}.imageResolution must be 1080, 2k, or 4k.`);
-    if (videoResolution !== undefined && videoResolution !== '' && !new Set(['720p', '1080p']).has(String(videoResolution))) fail(`${label}.videoResolution must be 720p or 1080p.`);
-    if (duration !== undefined && !positiveIntegerInRange(duration, 4, 15)) fail(`${label}.duration must be 4-15 seconds.`);
+    if (videoResolution !== undefined && videoResolution !== '' && !new Set(videoResolutions).has(String(videoResolution))) fail(`${label}.videoResolution must be one of: ${videoResolutions.join(', ')}.`);
+    if (duration !== undefined) {
+      const ranges = videoModels.length ? videoModels.map(videoDurationRange) : [{ min: SEEDANCE2_DURATION_MIN, max: SEEDANCE2_DURATION_MAX }];
+      if (ranges.some(range => !positiveIntegerInRange(duration, range.min, range.max))) fail(`${label}.duration is outside the selected video model range.`);
+    }
   }
 
   function allowedInputRoles() {
-    return new Set(['prompt', 'first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'source_image', 'subject_ref', 'style_ref', 'none']);
+    return new Set(['prompt', 'first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'source_image', 'subject_ref', 'style_ref', 'upscale', 'none']);
   }
 
   function isReferenceFanoutInputRole(inputRole) {
@@ -7335,17 +7368,16 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.18';
+    const AURALIS_VERSION = 'Auralis v1.19';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      'Aura 导入导出升级为 ZIP 归档：媒体素材改为独立文件流式写入与恢复，显著降低大型 Aura 导出时的内存占用，并继续兼容旧版 JSON Aura。',
-      '新增 Apple Silicon Mac 启动器与便携运行时，可自动安装或更新 Auralis、主控包和本地 Bridge；更新会经过校验、备份与启动确认，失败时自动回滚。',
-      'Mac 启动器现可自动识别 ChatGPT App 内置的 Codex CLI，无需依赖 Finder 启动环境中的终端 PATH 或手动配置 CODEX_CLI_PATH。',
-      '修正 Nano Banana Pro 的 Gemini 3 Pro Image 请求模型名，并让风格测试与媒体查看器显示结果实际使用的生成模型和参数。'
+      '新增 WS / MiniMax H3 视频模型，支持文生视频、首尾帧图生视频和参考图/参考视频生视频，提供 480p/768p、5–15 秒及多种横竖画幅参数。',
+      '新增视频“超清处理”：可从单个或多选视频的右键菜单一键调用 WaveSpeed Video Upscaler，按源尺寸自动升至 1080p、2K 或 4K，也支持主控指定目标分辨率。',
+      '主控新增 upscaleVideo 画布操作，超清结果会作为新视频 Astra 与源视频建立关联；本地或缓存视频在提交前自动上传，避免 WaveSpeed 无法读取 file/blob 素材。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9025,6 +9057,7 @@
     ].join('');
     // AURALIS_TUTORIAL_EMBED_END
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
+    const VIDEO_UPSCALER_MODEL = 'wavespeed-ai/video-upscaler-pro';
     const WAVESPEED_UPLOAD_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
     const TELEMETRY_USAGE_WEBHOOK_URL = '';
@@ -9068,7 +9101,8 @@
       'rg-seedance-2-fast',
       'rg-seedance-2',
       'ws-seedance-2-fast',
-      'ws-seedance-2'
+      'ws-seedance-2',
+      'ws-minimax-h3'
     ];
     const SEEDANCE2_DURATION_MIN = 4;
     const SEEDANCE2_DURATION_MAX = 15;
@@ -9106,7 +9140,8 @@
       'rg-seedance-2-fast': 'RG/S2F',
       'rg-seedance-2': 'RG/S2',
       'ws-seedance-2-fast': 'WS/S2F',
-      'ws-seedance-2': 'WS/S2'
+      'ws-seedance-2': 'WS/S2',
+      'ws-minimax-h3': 'WS/H3'
     });
     const IMAGE_MODEL_REGISTRY = {
       'rg-seedream-5-pro': { provider: 'company', endpoint: 'images', requestModel: 'doubao-seedream-5-0-pro-260628', bodyKind: 'seedream', imageInputField: 'image', maxImageInputs: 10, imageResolutions: ['1080', '2k'] },
@@ -9143,6 +9178,7 @@
       'rg-seedance-2': { provider: 'company', requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
       'ws-seedance-2-fast': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast' },
       'ws-seedance-2': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2' },
+      'ws-minimax-h3': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3 },
       'ws-seedance-2.0-fast-image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
       'ws-seedance-2.0-fast-text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0-fast/image-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
       'ws-seedance-2.0-image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
@@ -9150,7 +9186,10 @@
       'bytedance/seedance-2.0/image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
       'bytedance/seedance-2.0/text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/text-to-video', imageEndpointModel: 'bytedance/seedance-2.0/image-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
       'bytedance/seedance-2.0/video-edit': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/video-edit', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2', canonical: 'ws-seedance-2' },
-      'bytedance/seedance-2.0-fast/video-edit': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/video-edit', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' }
+      'bytedance/seedance-2.0-fast/video-edit': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/video-edit', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
+      'wavespeed-ai/minimax-h3/image-to-video': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3, canonical: 'ws-minimax-h3' },
+      'wavespeed-ai/minimax-h3/text-to-video': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3, canonical: 'ws-minimax-h3' },
+      'wavespeed-ai/minimax-h3/reference-to-video': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3, canonical: 'ws-minimax-h3' }
     };
     const MODEL_LABELS = {
       'local-codex/app-server': '跟随 Codex App Server',
@@ -9169,7 +9208,8 @@
       'rg-seedance-2-fast': 'RG / Seedance 2 Fast',
       'rg-seedance-2': 'RG / Seedance 2',
       'ws-seedance-2-fast': 'WS / Seedance 2 Fast',
-      'ws-seedance-2': 'WS / Seedance 2'
+      'ws-seedance-2': 'WS / Seedance 2',
+      'ws-minimax-h3': 'WS / MiniMax H3'
     };
     const MODEL_ALIASES = Object.freeze({
       sd5p: 'rg-seedream-5-pro',
@@ -9261,6 +9301,7 @@
       source_image: '原图修改',
       annotation: '标注',
       outpaint: '扩图',
+      upscale: 'upscale',
       first_frame: '首帧',
       last_frame: '尾帧',
       style_ref: '风格',
@@ -15384,12 +15425,13 @@
         return values.map(value => ({ value, label: compactMediaModelLabel(value, kind) }));
       }
       if (field === 'imageAspectRatio') return PLANNER_IMAGE_ASPECT_RATIOS.map(value => ({ value, label: value }));
-      if (field === 'videoAspectRatio') return PLANNER_VIDEO_ASPECT_RATIOS.map(value => ({ value, label: value }));
+      if (field === 'videoAspectRatio') return plannerVideoAspectRatioOptions(settings.model).map(value => ({ value, label: value }));
       if (field === 'outpaintRatio') return OUTPAINT_RATIOS;
       if (field === 'imageResolution') return plannerImageResolutionOptions(settings.model).map(value => ({ value, label: imageResolutionCompactLabel(value) }));
       if (field === 'segmentDurationSeconds') {
-        return Array.from({ length: SEEDANCE2_DURATION_MAX - SEEDANCE2_DURATION_MIN + 1 }, (_, index) => {
-          const value = String(SEEDANCE2_DURATION_MIN + index);
+        const range = videoDurationRange(settings.model);
+        return Array.from({ length: range.max - range.min + 1 }, (_, index) => {
+          const value = String(range.min + index);
           return { value, label: `${value}s` };
         });
       }
@@ -15560,6 +15602,12 @@
         .slice(0, 30);
     }
 
+    function upscaleVideoTargetsForContext(id, project = currentProject()) {
+      return uniqueNodes(contextAstraTargets(id, project)
+        .filter(node => isVideoAstra(node) && assetDisplayUrl(node)))
+        .slice(0, 30);
+    }
+
     function renderOutpaintContextAction(id) {
       const targets = outpaintTargetsForContext(id);
       if (!targets.length) return '';
@@ -15712,6 +15760,10 @@
       const autoFrameCutAction = isVideoAstra(node) && assetDisplayUrl(node)
         ? '<button type="button" data-menu-action="autoFrameCut">自动抽帧</button>'
         : '';
+      const upscaleTargets = upscaleVideoTargetsForContext(node.id);
+      const upscaleAction = upscaleTargets.length
+        ? `<button type="button" data-menu-action="upscaleVideos">超清处理${upscaleTargets.length > 1 ? ` (${upscaleTargets.length})` : ''}</button>`
+        : '';
       const reversePromptTargets = mediaPromptTargetsForContext(node.id);
       const reversePromptAction = reversePromptTargets.length
         ? `<button type="button" data-menu-action="deriveMediaPrompts">反推 Prompt${reversePromptTargets.length > 1 ? ` (${reversePromptTargets.length})` : ''}</button>`
@@ -15738,7 +15790,7 @@
       const disconnectInputAction = `<button type="button" data-menu-action="disconnectInputs">取消输入连接${inputLinkCount ? ` (${inputLinkCount})` : ''}</button>`;
       const disconnectOutputAction = `<button type="button" data-menu-action="disconnectOutputs">取消输出连接${outputLinkCount ? ` (${outputLinkCount})` : ''}</button>`;
       const hasSubmenus = !!(bulkConfigAction || outpaintAction);
-      const extraActionHeight = 34 + (reviewGroupAction ? 34 : 0) + (retryAction ? 34 : 0) + (annotationAction ? 34 : 0) + (frameCutAction ? 34 : 0) + (autoFrameCutAction ? 34 : 0) + (reversePromptAction ? 34 : 0) + (generateImagesAction ? 34 : 0) + (generateVideosAction ? 34 : 0) + (styleTestAction ? 34 : 0) + (bulkConfigAction ? 34 : 0) + (outpaintAction ? 34 : 0);
+      const extraActionHeight = 34 + (reviewGroupAction ? 34 : 0) + (retryAction ? 34 : 0) + (annotationAction ? 34 : 0) + (frameCutAction ? 34 : 0) + (autoFrameCutAction ? 34 : 0) + (upscaleAction ? 34 : 0) + (reversePromptAction ? 34 : 0) + (generateImagesAction ? 34 : 0) + (generateVideosAction ? 34 : 0) + (styleTestAction ? 34 : 0) + (bulkConfigAction ? 34 : 0) + (outpaintAction ? 34 : 0);
       const { x, y } = clampContextMenuPoint(menu.x, menu.y, hasSubmenus ? 528 : 196, 300 + extraActionHeight);
       return `<div class="context-menu ${hasSubmenus ? 'has-submenus' : ''}" style="left:${x}px;top:${y}px" data-context-menu data-menu-type="astra" data-menu-id="${escapeHtml(node.id)}">
         <div class="context-menu-title">${escapeHtml(node.title)}</div>
@@ -15758,6 +15810,7 @@
         ${retryAction}
         ${groupAction}
         ${annotationAction}
+        ${upscaleAction}
         ${autoFrameCutAction}
         ${frameCutAction}
         ${reversePromptAction}
@@ -16101,6 +16154,7 @@
       if (action === 'outpaintCustom') return startCustomOutpaintFromContext(id);
       if (action === 'annotateImage') return startImageAnnotationFromContext(id);
       if (action === 'autoFrameCut') return runAutomaticFrameExtraction(id);
+      if (action === 'upscaleVideos') return runVideoUpscaleFromContext(id);
       if (action === 'manualFrameCut') return openFrameCutPanel(id);
       if (action === 'deriveMediaPrompts') return derivePromptsForMediaSelection(id);
       if (action === 'selectConnectedAstra') return selectConnectedAstra(id);
@@ -16108,6 +16162,31 @@
       if (action === 'disconnectInputs') return disconnectContextAstraLinks(id, 'input');
       if (action === 'disconnectOutputs') return disconnectContextAstraLinks(id, 'output');
       render();
+    }
+
+    async function runVideoUpscaleFromContext(id) {
+      const project = projectContainingNode(id) || currentProject();
+      const targets = upscaleVideoTargetsForContext(id, project);
+      if (!targets.length) return;
+      setAgentStatus('busy', 'video', '超清处理中', `正在处理 ${targets.length} 个视频`, project);
+      const result = await executeControllerOperationPlan({
+        summary: `超清处理 ${targets.length} 个视频`,
+        ops: [{
+          id: uid('op_upscale_video'),
+          op: 'upscaleVideo',
+          reason: 'Upscale the selected video Astra.',
+          payload: { target: { ids: targets.map(node => node.id) } }
+        }]
+      }, { project, selectedNodeIds: targets.map(node => node.id), confirmed: true, silent: true });
+      if (result?.ok) {
+        addMessage('system', `已完成 ${result.applied?.[0]?.count || targets.length} 个视频的超清处理。`, { project });
+        settleAgentStatus(project);
+      } else {
+        const message = result?.issues?.[0]?.message || '视频超清处理失败。';
+        setAgentStatus('fail', 'video', '超清处理失败', message, project);
+        addMessage('system', `视频超清处理失败：${message}`, { project });
+      }
+      return result;
     }
 
     async function runAutomaticFrameExtraction(id) {
@@ -19078,12 +19157,14 @@
     }
 
     function normalizePlannerVideoResolution(value, model = currentProject()?.runtime?.videoModel || state.settings.videoModel) {
-      const requested = PLANNER_VIDEO_RESOLUTIONS.includes(String(value || '')) ? String(value) : '720p';
-      if (mediaModelFamily(model, 'video') === 'seedance2-fast' && requested === '1080p') return '720p';
-      return requested;
+      const options = plannerVideoResolutionOptions(model);
+      const requested = String(value || '');
+      return options.includes(requested) ? requested : (options.includes('720p') ? '720p' : options[0]);
     }
 
     function plannerVideoResolutionOptions(model = currentProject()?.runtime?.videoModel || state.settings.videoModel) {
+      const configured = mediaModelConfig(model, 'video').videoResolutions;
+      if (Array.isArray(configured) && configured.length) return configured;
       return mediaModelFamily(model, 'video') === 'seedance2-fast' ? ['720p'] : PLANNER_VIDEO_RESOLUTIONS;
     }
 
@@ -19092,9 +19173,15 @@
       return PLANNER_IMAGE_ASPECT_RATIOS.includes(String(value || '')) ? String(value) : fallback;
     }
 
-    function normalizePlannerVideoAspectRatio(value, fallback = '1:1') {
-      const resolvedFallback = PLANNER_VIDEO_ASPECT_RATIOS.includes(String(fallback || '')) ? String(fallback) : '1:1';
-      return PLANNER_VIDEO_ASPECT_RATIOS.includes(String(value || '')) ? String(value) : resolvedFallback;
+    function plannerVideoAspectRatioOptions(model = currentProject()?.runtime?.videoModel || state.settings.videoModel) {
+      const configured = mediaModelConfig(model, 'video').videoAspectRatios;
+      return Array.isArray(configured) && configured.length ? configured : PLANNER_VIDEO_ASPECT_RATIOS;
+    }
+
+    function normalizePlannerVideoAspectRatio(value, fallback = '1:1', model = currentProject()?.runtime?.videoModel || state.settings.videoModel) {
+      const options = plannerVideoAspectRatioOptions(model);
+      const resolvedFallback = options.includes(String(fallback || '')) ? String(fallback) : (options.includes('1:1') ? '1:1' : options[0]);
+      return options.includes(String(value || '')) ? String(value) : resolvedFallback;
     }
 
     function plannerImageResolutionOptions(model = '') {
@@ -19161,9 +19248,9 @@
           plannerNodeId: media.plannerNodeId || mediaDefaults.plannerNodeId,
           productionMode: media.productionMode || mediaDefaults.productionMode,
           segmentCount: clampPlannerSegmentCount(media.segmentCount ?? mediaDefaults.segmentCount ?? 1),
-          segmentDurationSeconds: clampSeedance2Duration(media.segmentDurationSeconds ?? media.duration ?? mediaDefaults.segmentDurationSeconds ?? state.settings.duration),
+          segmentDurationSeconds: clampVideoDuration(media.segmentDurationSeconds ?? media.duration ?? mediaDefaults.segmentDurationSeconds ?? state.settings.duration, model),
           videoResolution: normalizePlannerVideoResolution(media.videoResolution || media.resolution || mediaDefaults.videoResolution, model),
-          videoAspectRatio: normalizePlannerVideoAspectRatio(videoAspect, mediaDefaults.videoAspectRatio),
+          videoAspectRatio: normalizePlannerVideoAspectRatio(videoAspect, mediaDefaults.videoAspectRatio, model),
           imageAspectRatio: normalizePlannerImageAspectRatio(media.imageAspectRatio || media.aspectRatio || mediaDefaults.imageAspectRatio),
           imageResolution: normalizePlannerImageResolution(media.imageResolution || mediaDefaults.imageResolution)
         };
@@ -19208,9 +19295,11 @@
       }
       return {
         ...next,
-        segmentDurationSeconds: clampSeedance2Duration(next.segmentDurationSeconds ?? state.settings.duration ?? 5),
+        segmentDurationSeconds: kind === 'video'
+          ? clampVideoDuration(next.segmentDurationSeconds ?? state.settings.duration ?? 5, model)
+          : clampSeedance2Duration(next.segmentDurationSeconds ?? state.settings.duration ?? 5),
         videoResolution: normalizePlannerVideoResolution(next.videoResolution, kind === 'video' ? model : undefined),
-        videoAspectRatio: normalizePlannerVideoAspectRatio(next.videoAspectRatio, next.imageAspectRatio),
+        videoAspectRatio: normalizePlannerVideoAspectRatio(next.videoAspectRatio, next.imageAspectRatio, kind === 'video' ? model : undefined),
         imageAspectRatio: normalizePlannerImageAspectRatio(next.imageAspectRatio),
         imageResolution: normalizePlannerImageResolution(next.imageResolution, kind === 'image' ? model : '')
       };
@@ -19225,16 +19314,32 @@
         plannerNodeId: provided.plannerNodeId || fallback.plannerNodeId,
         productionMode: provided.productionMode || fallback.productionMode,
         segmentCount: clampPlannerSegmentCount(provided.segmentCount ?? fallback.segmentCount ?? 1),
-        segmentDurationSeconds: clampSeedance2Duration(provided.segmentDurationSeconds ?? fallback.segmentDurationSeconds ?? state.settings.duration ?? 5),
+        segmentDurationSeconds: clampVideoDuration(provided.segmentDurationSeconds ?? fallback.segmentDurationSeconds ?? state.settings.duration ?? 5, videoModel),
         videoResolution: normalizePlannerVideoResolution(provided.videoResolution || fallback.videoResolution, videoModel),
-        videoAspectRatio: normalizePlannerVideoAspectRatio(provided.videoAspectRatio ?? provided.video_aspect_ratio ?? provided.aspectRatio ?? provided.aspect_ratio ?? fallback.videoAspectRatio, fallback.videoAspectRatio || provided.imageAspectRatio || fallback.imageAspectRatio),
+        videoAspectRatio: normalizePlannerVideoAspectRatio(provided.videoAspectRatio ?? provided.video_aspect_ratio ?? provided.aspectRatio ?? provided.aspect_ratio ?? fallback.videoAspectRatio, fallback.videoAspectRatio || provided.imageAspectRatio || fallback.imageAspectRatio, videoModel),
         imageAspectRatio: normalizePlannerImageAspectRatio(provided.imageAspectRatio || fallback.imageAspectRatio),
         imageResolution: normalizePlannerImageResolution(provided.imageResolution || fallback.imageResolution, imageModel)
       };
     }
 
-    function videoDurationForMediaSettings(mediaSettings = null) {
-      return clampSeedance2Duration(mediaSettings?.segmentDurationSeconds ?? state.settings.duration ?? 5);
+    function videoDurationRange(model = currentProject()?.runtime?.videoModel || state.settings.videoModel) {
+      const config = mediaModelConfig(model, 'video');
+      return {
+        min: Number(config.durationMin) || SEEDANCE2_DURATION_MIN,
+        max: Number(config.durationMax) || SEEDANCE2_DURATION_MAX
+      };
+    }
+
+    function clampVideoDuration(value, model = currentProject()?.runtime?.videoModel || state.settings.videoModel, options = {}) {
+      const range = videoDurationRange(model);
+      const numeric = Number(value);
+      if (options.allowZero && (!Number.isFinite(numeric) || numeric <= 0)) return 0;
+      const rounded = Math.round(Number.isFinite(numeric) ? numeric : range.min);
+      return Math.min(range.max, Math.max(range.min, rounded));
+    }
+
+    function videoDurationForMediaSettings(mediaSettings = null, model = currentProject()?.runtime?.videoModel || state.settings.videoModel) {
+      return clampVideoDuration(mediaSettings?.segmentDurationSeconds ?? state.settings.duration ?? 5, model);
     }
 
     function clampSeedance2Duration(value, options = {}) {
@@ -19724,9 +19829,9 @@
         : current.model;
       const nextMedia = { ...current.mediaSettings };
       if (field === 'imageAspectRatio') nextMedia.imageAspectRatio = normalizePlannerImageAspectRatio(value);
-      if (field === 'videoAspectRatio') nextMedia.videoAspectRatio = normalizePlannerVideoAspectRatio(value, nextMedia.imageAspectRatio);
+      if (field === 'videoAspectRatio') nextMedia.videoAspectRatio = normalizePlannerVideoAspectRatio(value, nextMedia.imageAspectRatio, nextModel);
       if (field === 'imageResolution') nextMedia.imageResolution = normalizePlannerImageResolution(value, nextModel);
-      if (field === 'segmentDurationSeconds') nextMedia.segmentDurationSeconds = clampSeedance2Duration(value);
+      if (field === 'segmentDurationSeconds') nextMedia.segmentDurationSeconds = clampVideoDuration(value, nextModel);
       if (field === 'videoResolution') nextMedia.videoResolution = normalizePlannerVideoResolution(value, nextModel);
       if (kind === 'video') nextMedia.videoResolution = normalizePlannerVideoResolution(nextMedia.videoResolution, nextModel);
       if (kind === 'image') nextMedia.imageResolution = normalizePlannerImageResolution(nextMedia.imageResolution, nextModel);
@@ -21214,6 +21319,7 @@
         return [];
       }
       if (to.role === 'genVideo') {
+        if (fromVideo) return ['upscale'];
         if (fromPrompt) return ['prompt', 'context'];
         return [];
       }
@@ -21268,6 +21374,8 @@
         原图: 'source_image',
         扩图: 'outpaint',
         outpaint: 'outpaint',
+        超清: 'upscale',
+        upscale: 'upscale',
         source: 'source_image',
         风格: 'style_ref',
         主体: 'subject_ref',
@@ -22752,6 +22860,8 @@
         case 'generateMedia':
         case 'generateMediaVariants':
           return uniqueNodes(nodes).filter(node => isGenerationOperationTarget(node, kind));
+        case 'upscaleVideo':
+          return uniqueNodes(nodes).filter(node => isVideoAstra(node) && !!assetDisplayUrl(node));
         case 'promoteMediaCandidate':
           return uniqueNodes(nodes).filter(node => ['genImage', 'genVideo'].includes(node.role) && node.assetState === 'candidate');
         case 'markStale':
@@ -23437,6 +23547,7 @@
       return [
         'generateMedia',
         'generateMediaVariants',
+        'upscaleVideo',
         'draftPrompts',
         'rewriteTextAstra',
         'deriveMediaPrompts',
@@ -24192,6 +24303,7 @@
       rewriteTextAstra: rewriteTextAstraByOperation,
       generateMedia: generateMediaByOperation,
       generateMediaVariants: generateMediaVariantsByOperation,
+      upscaleVideo: upscaleVideoByOperation,
       promoteMediaCandidate: promoteMediaCandidateByOperation,
       markStale: markStaleByOperation,
       extractVideoFrames: extractVideoFramesByOperation,
@@ -24219,6 +24331,7 @@
       'rewriteTextAstra',
       'generateMedia',
       'generateMediaVariants',
+      'upscaleVideo',
       'promoteMediaCandidate',
       'markStale',
       'extractVideoFrames',
@@ -24356,6 +24469,20 @@
         const expectedRole = op.payload?.kind === 'video' ? 'genVideo' : 'genImage';
         if (nodes.some(node => node.role !== expectedRole || node.status !== 'completed' || !assetDisplayUrl(node))) throw new Error(`${op.id} did not produce completed ${expectedRole} media.`);
         assertGeneratedMediaModels(op, nodes);
+        return true;
+      }
+      if (op.op === 'upscaleVideo') {
+        assertOperationAstraIds(op, astraIds);
+        assertOperationLinkIds(op, linkIds);
+        const nodes = assertOperationNodesExist(op, astraIds, project);
+        if (nodes.some(node => node.role !== 'genVideo' || node.status !== 'completed' || !assetDisplayUrl(node) || node.model !== VIDEO_UPSCALER_MODEL)) {
+          throw new Error(`${op.id} did not produce completed upscaled video Astra.`);
+        }
+        assertOperationLinksExist(op, linkIds, project);
+        if (linkIds.some(id => {
+          const link = arrayFrom(project.links).find(item => item.id === id);
+          return !link || link.inputRole !== 'upscale' || !astraIds.includes(link.toNodeId || link.to_astra_id);
+        })) throw new Error(`${op.id} did not connect every result with an upscale link.`);
         return true;
       }
       if (op.op === 'promoteMediaCandidate') {
@@ -25196,6 +25323,187 @@
       return { id: op.id, op: op.op, count: applied.updatedIds.length, astraIds: applied.updatedIds };
     }
 
+    function normalizeVideoUpscaleTargetResolution(value) {
+      const normalized = String(value || '').trim().toLowerCase();
+      const aliases = { '720': '720p', '1080': '1080p', '2k': '2k', '4k': '4k' };
+      const target = aliases[normalized] || normalized;
+      return new Set(['720p', '1080p', '2k', '4k']).has(target) ? target : '';
+    }
+
+    function videoUpscaleDimensionsFromMetadata(node) {
+      const meta = node?.meta || {};
+      const analysis = node?.mediaAnalysis || {};
+      const candidates = [
+        [meta.videoWidth, meta.videoHeight],
+        [meta.sourceVideoWidth, meta.sourceVideoHeight],
+        [meta.width, meta.height],
+        [analysis.videoWidth, analysis.videoHeight],
+        [analysis.width, analysis.height]
+      ];
+      for (const [rawWidth, rawHeight] of candidates) {
+        const width = Number(rawWidth);
+        const height = Number(rawHeight);
+        if (width > 0 && height > 0) return { width, height };
+      }
+      const declared = [
+        meta.videoResolution,
+        node?.generation?.mediaSettings?.videoResolution,
+        node?.generation?.mediaSettings?.resolution
+      ].map(value => String(value || '').trim()).find(Boolean) || '';
+      const dimensions = declared.match(/(\d{3,5})\s*[x×]\s*(\d{3,5})/i);
+      if (dimensions) return { width: Number(dimensions[1]), height: Number(dimensions[2]) };
+      const tier = declared.match(/(\d{3,4})p/i);
+      if (tier) return { width: Number(tier[1]), height: Number(tier[1]) };
+      return null;
+    }
+
+    async function videoUpscaleSourceDimensions(node, project = currentProject()) {
+      const cached = videoUpscaleDimensionsFromMetadata(node);
+      if (cached) return cached;
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.playsInline = true;
+      const sourceUrl = assetDisplayUrl(node) || await dataUrlForAsset(node);
+      if (!sourceUrl) throw new Error(`无法读取“${node?.title || '视频'}”的素材。`);
+      try {
+        const dimensions = await new Promise((resolve, reject) => {
+          let settled = false;
+          const finish = (fn, value) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timeoutId);
+            video.removeEventListener('loadedmetadata', onLoaded);
+            video.removeEventListener('error', onError);
+            fn(value);
+          };
+          const onLoaded = () => {
+            const width = Number(video.videoWidth);
+            const height = Number(video.videoHeight);
+            if (width > 0 && height > 0) finish(resolve, { width, height });
+            else finish(reject, new Error('视频元数据没有有效尺寸。'));
+          };
+          const onError = () => finish(reject, new Error('视频元数据加载失败。'));
+          const timeoutId = setTimeout(() => finish(reject, new Error('读取视频尺寸超时。')), 15000);
+          video.addEventListener('loadedmetadata', onLoaded, { once: true });
+          video.addEventListener('error', onError, { once: true });
+          video.src = sourceUrl;
+          video.load();
+        });
+        updateNode(node.id, {
+          meta: { ...(node.meta || {}), videoWidth: dimensions.width, videoHeight: dimensions.height }
+        }, project);
+        return dimensions;
+      } finally {
+        video.removeAttribute('src');
+        video.load();
+      }
+    }
+
+    async function defaultVideoUpscaleTargetResolution(node, project = currentProject()) {
+      const { width, height } = await videoUpscaleSourceDimensions(node, project);
+      const shortEdge = Math.min(width, height);
+      if (shortEdge <= 768) return '1080p';
+      if (shortEdge <= 1080) return '2k';
+      return '4k';
+    }
+
+    function videoUpscaleOutputTitle(source, targetResolution) {
+      const label = targetResolution === '2k' ? '2K' : targetResolution === '4k' ? '4K' : targetResolution;
+      return `${source.title} · ${label} 超清`;
+    }
+
+    async function upscaleVideoSource(source, requestedResolution, run, project = currentProject()) {
+      const sourceDimensions = await videoUpscaleSourceDimensions(source, project);
+      const targetResolution = requestedResolution || await defaultVideoUpscaleTargetResolution(source, project);
+      const output = addNode({
+        type: 'video',
+        family: 'Luna',
+        role: 'genVideo',
+        title: videoUpscaleOutputTitle(source, targetResolution),
+        status: 'running',
+        model: VIDEO_UPSCALER_MODEL,
+        progressText: `正在超清到 ${targetResolution === '2k' ? '2K' : targetResolution === '4k' ? '4K' : targetResolution}`,
+        assetState: 'official',
+        sequence: { group_id: 'seq_upscaled_video', kind: 'upscaled_videos', index: nextSequenceIndex('genVideo', project) },
+        generation: {
+          mode: 'upscale_video',
+          model: VIDEO_UPSCALER_MODEL,
+          sourceNodeId: source.id,
+          inputNodeIds: [source.id],
+          targetResolution
+        },
+        meta: {
+          createdBy: 'controller_ops',
+          sourceNodeId: source.id,
+          sourceVideoNodeId: source.id,
+          sourceVideoVersion: Number(source.version || 0),
+          sourceVideoWidth: sourceDimensions.width,
+          sourceVideoHeight: sourceDimensions.height,
+          targetResolution
+        },
+        placement: 'avoid',
+        x: Number(source.x || 0) + nodeWidth(source) + 84,
+        y: Number(source.y || 0),
+        select: false
+      }, project);
+      const link = addAstraLink(source.id, output.id, {
+        relation: 'input',
+        inputRole: 'upscale',
+        actor: 'controller_ops',
+        actionRunId: run?.id,
+        project
+      });
+      try {
+        const media = await waveSpeedVideoUpscale(source, targetResolution, output.id, project);
+        if (!mediaMatchesPreferred(media, 'video')) throw new Error('WaveSpeed 超清接口没有返回可识别的视频。');
+        const cached = await cacheMediaAsset(output.id, media.url, media.mime || 'video/mp4');
+        if (!String(cached.mime || '').toLowerCase().startsWith('video/')) throw new Error(`WaveSpeed 超清接口返回了 ${cached.mime || '非视频素材'}。`);
+        updateNode(output.id, {
+          status: 'completed',
+          progressText: '',
+          assetUrl: cached.assetUrl,
+          displayUrl: cached.displayUrl,
+          mime: cached.mime,
+          content: generatedMediaContent(media.raw, `${source.title} upscale ${targetResolution}`),
+          summary: `视频已超清到 ${targetResolution === '2k' ? '2K' : targetResolution === '4k' ? '4K' : targetResolution}`,
+          meta: { ...(output.meta || {}), ...cached.meta, upscaledAt: new Date().toISOString() }
+        }, project);
+        return { output: nodeById(output.id, project), link, targetResolution };
+      } catch (error) {
+        updateNode(output.id, { status: 'failed', progressText: '', error: error.message }, project);
+        throw new Error(`${source.title}：${error.message}`);
+      }
+    }
+
+    async function upscaleVideoByOperation(op, project = currentProject()) {
+      const targets = resolveControllerOperationTargets(op.payload?.target, project)
+        .filter(node => isVideoAstra(node) && assetDisplayUrl(node));
+      if (!targets.length) throw new Error(`${op.id} did not resolve any readable video Astra.`);
+      const requestedResolution = normalizeVideoUpscaleTargetResolution(op.payload?.targetResolution);
+      const run = createActionRun('upscaleVideos', targets.map(node => node.id), [], 'controller_ops', project);
+      const settled = await Promise.allSettled(targets.map(source => upscaleVideoSource(source, requestedResolution, run, project)));
+      const completed = settled.filter(item => item.status === 'fulfilled').map(item => item.value);
+      const failures = settled.filter(item => item.status === 'rejected').map(item => item.reason?.message || String(item.reason));
+      if (run) run.outputTargets = completed.map(item => ({ astraId: item.output.id, role: 'genVideo' }));
+      if (failures.length) {
+        finishActionRun(run, 'failed', { astraIds: completed.map(item => item.output.id), error: failures.join('；') }, project);
+        throw new Error(failures.join('；'));
+      }
+      const astraIds = completed.map(item => item.output.id);
+      const linkIds = completed.map(item => item.link?.id).filter(Boolean);
+      finishActionRun(run, 'completed', { astraIds, linkIds, summary: `已超清 ${astraIds.length} 个视频` }, project);
+      return {
+        id: op.id,
+        op: op.op,
+        count: astraIds.length,
+        astraIds,
+        linkIds,
+        sourceAstraIds: targets.map(node => node.id),
+        targetResolutions: completed.map(item => item.targetResolution)
+      };
+    }
+
     async function generateMediaByOperation(op, project = currentProject()) {
       const kind = op.payload?.kind === 'video' ? 'video' : 'image';
       const targets = resolveControllerOperationTargets(op.payload?.target, project).filter(node => isGenerationOperationTarget(node, kind));
@@ -25350,10 +25658,11 @@
       const videoResolution = raw.videoResolution || raw.video_resolution || (kind === 'video' ? raw.resolution : '');
       const duration = raw.segmentDurationSeconds ?? raw.segment_duration_seconds ?? raw.duration;
       if (imageAspect !== undefined) mediaSettings.imageAspectRatio = normalizePlannerImageAspectRatio(imageAspect);
-      if (videoAspect !== undefined) mediaSettings.videoAspectRatio = normalizePlannerVideoAspectRatio(videoAspect, mediaSettings.imageAspectRatio);
+      const videoModel = operationModelValue(payload.model, 'video');
+      if (videoAspect !== undefined) mediaSettings.videoAspectRatio = normalizePlannerVideoAspectRatio(videoAspect, mediaSettings.imageAspectRatio, videoModel);
       if (imageResolution !== undefined && imageResolution !== '') mediaSettings.imageResolution = normalizePlannerImageResolution(imageResolution);
       if (videoResolution !== undefined && videoResolution !== '') mediaSettings.videoResolution = normalizePlannerVideoResolution(videoResolution, operationModelValue(payload.model, 'video'));
-      if (duration !== undefined) mediaSettings.segmentDurationSeconds = clampSeedance2Duration(duration);
+      if (duration !== undefined) mediaSettings.segmentDurationSeconds = clampVideoDuration(duration, videoModel);
       return Object.keys(mediaSettings).length ? mediaSettings : null;
     }
 
@@ -30364,7 +30673,13 @@
       if (shouldUseWaveSpeedMedia(model, 'video')) {
         if (!state.settings.wavespeedApiKey) throw new Error('missing WaveSpeed API key for video generation');
         const settings = starFlowMediaSettings();
-        return `${modelDisplayLabel(model)} -> ${resolveWaveSpeedVideoModel(model, false)} / ${resolveWaveSpeedVideoModel(model, true)}, duration=${waveSpeedVideoDuration()}s, resolution=${settings.videoResolution}, aspect=${settings.videoAspectRatio}`;
+        const config = mediaModelConfig(model, 'video');
+        const endpoints = [
+          resolveWaveSpeedVideoModel(model, false),
+          resolveWaveSpeedVideoModel(model, true),
+          config.referenceEndpointModel ? resolveWaveSpeedVideoModel(model, false, false, true) : ''
+        ].filter(Boolean);
+        return `${modelDisplayLabel(model)} -> ${endpoints.join(' / ')}, duration=${waveSpeedVideoDuration()}s, resolution=${settings.videoResolution}, aspect=${settings.videoAspectRatio}`;
       }
       if (!state.settings.apiKey) throw new Error('missing company API key for video generation');
       return `${modelDisplayLabel(model)} -> ${mediaModelRequestModel(model, 'video', true)} / ${mediaModelRequestModel(model, 'video', false)}`;
@@ -30504,16 +30819,30 @@
       return config.endpointModel || model || 'google/nano-banana-pro/text-to-image';
     }
 
-    function resolveWaveSpeedVideoModel(model, hasSourceImage, hasSourceVideo = false) {
+    function waveSpeedVideoExecutionMode(hasSourceImage, hasSourceVideo = false, hasReferences = false) {
+      if (hasSourceVideo) return 'edit';
+      if (hasSourceImage) return 'image';
+      if (hasReferences) return 'reference';
+      return 'text';
+    }
+
+    function resolveWaveSpeedVideoModel(model, hasSourceImage, hasSourceVideo = false, hasReferences = false) {
       const config = mediaModelConfig(model, 'video');
+      const mode = waveSpeedVideoExecutionMode(hasSourceImage, hasSourceVideo, hasReferences);
+      if (Array.isArray(config.videoModes) && !config.videoModes.includes(mode)) {
+        const label = mode === 'edit' ? '视频编辑' : mode === 'reference' ? '参考生视频' : mode === 'image' ? '图生视频' : '文生视频';
+        throw new Error(`${modelDisplayLabel(model)} 的 WaveSpeed 接口不支持${label}。`);
+      }
       if (hasSourceVideo && config.editEndpointModel) return config.editEndpointModel;
+      if (hasReferences && config.referenceEndpointModel) return config.referenceEndpointModel;
       if (hasSourceImage && config.imageEndpointModel) return config.imageEndpointModel;
       if (!hasSourceImage && config.textEndpointModel) return config.textEndpointModel;
       return config.endpointModel || model || (hasSourceVideo ? 'bytedance/seedance-2.0/video-edit' : hasSourceImage ? 'bytedance/seedance-2.0/image-to-video' : 'bytedance/seedance-2.0/text-to-video');
     }
 
     function waveSpeedVideoDuration(resolvedExecution = null, project = currentProject()) {
-      return videoDurationForMediaSettings(mediaSettingsForExecution(resolvedExecution, project));
+      const model = resolvedExecution?.model || project?.runtime?.videoModel || state.settings.videoModel;
+      return videoDurationForMediaSettings(mediaSettingsForExecution(resolvedExecution, project), model);
     }
 
     function waveSpeedImageResolution(value) {
@@ -30692,8 +31021,7 @@
       });
     }
 
-    async function waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
-      requireWaveSpeedKey();
+    async function buildWaveSpeedVideoRequest(model, prompt, resolvedExecution = null, project = currentProject()) {
       const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
       const references = videoReferenceNodesForExecution(resolvedExecution, project);
       const editVideoUrl = await waveSpeedVideoRequestUrlForAsset(references.editVideo, project);
@@ -30701,9 +31029,34 @@
       const lastImageUrl = await videoImageRequestUrlForAsset(references.last);
       const referenceImageUrls = (await Promise.all(references.refs.map(videoImageRequestUrlForAsset))).filter(Boolean);
       const referenceVideoUrls = (await Promise.all(references.referenceVideos.map(node => waveSpeedVideoRequestUrlForAsset(node, project)))).filter(Boolean);
-      const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl, !!editVideoUrl);
+      const hasReferences = referenceImageUrls.length > 0 || referenceVideoUrls.length > 0;
+      const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl, !!editVideoUrl, hasReferences);
+      const config = mediaModelConfig(model, 'video');
+      const generationPrompt = [prompt, '无口播 无BGM 只有音效'].filter(Boolean).join('\n');
+      if (config.family === 'minimax-h3') {
+        if (sourceImageUrl && hasReferences) throw new Error('WS / MiniMax H3 不能在一次请求里混用首帧图生视频和参考生视频；请只保留一种输入模式。');
+        if (lastImageUrl && !sourceImageUrl) throw new Error('WS / MiniMax H3 的尾帧必须和首帧一起用于图生视频。');
+        if (referenceImageUrls.length > config.maxReferenceImages) throw new Error(`WS / MiniMax H3 最多支持 ${config.maxReferenceImages} 张参考图。`);
+        if (referenceVideoUrls.length > config.maxReferenceVideos) throw new Error(`WS / MiniMax H3 最多支持 ${config.maxReferenceVideos} 个参考视频。`);
+        if (referenceVideoUrls.length && mediaSettings.videoResolution !== '480p') throw new Error('WS / MiniMax H3 的参考视频输入目前只支持 480p 输出。');
+        const body = {
+          prompt: generationPrompt,
+          duration: waveSpeedVideoDuration(resolvedExecution, project),
+          resolution: mediaSettings.videoResolution,
+          seed: -1
+        };
+        if (sourceImageUrl) {
+          body.image = sourceImageUrl;
+          if (lastImageUrl) body.last_image = lastImageUrl;
+        } else {
+          body.aspect_ratio = mediaSettings.videoAspectRatio;
+          if (referenceImageUrls.length) body.reference_images = referenceImageUrls;
+          if (referenceVideoUrls.length) body.reference_videos = referenceVideoUrls;
+        }
+        return { endpointModel, body };
+      }
       const body = {
-        prompt: [prompt, '无口播 无BGM 只有音效'].filter(Boolean).join('\n'),
+        prompt: generationPrompt,
         duration: waveSpeedVideoDuration(resolvedExecution, project),
         resolution: mediaSettings.videoResolution,
         generate_audio: true,
@@ -30718,11 +31071,32 @@
         ...(referenceImageUrls.length ? { reference_images: referenceImageUrls } : {})
       };
       if (editVideoUrl) body.aspect_ratio = mediaSettings.videoAspectRatio;
+      return { endpointModel, body };
+    }
+
+    async function waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
+      requireWaveSpeedKey();
+      const { endpointModel, body } = await buildWaveSpeedVideoRequest(model, prompt, resolvedExecution, project);
       return waveSpeedSubmitAndPoll({
         model: endpointModel,
         preferred: 'video',
         nodeId,
         body
+      });
+    }
+
+    async function waveSpeedVideoUpscale(source, targetResolution, nodeId, project = currentProject()) {
+      requireWaveSpeedKey();
+      const video = await waveSpeedUploadMediaAsset(source, project);
+      if (!video) throw new Error('WaveSpeed 超清接口缺少源视频。');
+      return waveSpeedSubmitAndPoll({
+        model: VIDEO_UPSCALER_MODEL,
+        preferred: 'video',
+        nodeId,
+        body: {
+          video,
+          target_resolution: targetResolution
+        }
       });
     }
 
@@ -35162,6 +35536,10 @@
       ensureAnnotationImagePrompt,
       downstreamImagePromptsForAnnotation,
       outpaintTargetsForContext,
+      upscaleVideoTargetsForContext,
+      normalizeVideoUpscaleTargetResolution,
+      defaultVideoUpscaleTargetResolution,
+      upscaleVideoByOperation,
       createOutpaintToolForSource,
       createFixedOutpaintFromContext,
       startCustomOutpaintFromContext,
@@ -35188,6 +35566,8 @@
       buildImageEditFormData,
       imageResponseMedia,
       buildWaveSpeedImageBody,
+      buildWaveSpeedVideoRequest,
+      waveSpeedVideoUpscale,
       isImageEditExecution,
       supportsExplicitImageEdit,
       updateStarFlowPlannerField,
@@ -35204,6 +35584,8 @@
       mergeMediaSettings,
       mediaSettingsForExecution,
       plannerImageResolutionOptions,
+      plannerVideoResolutionOptions,
+      plannerVideoAspectRatioOptions,
       waveSpeedVideoDuration,
       waveSpeedImageResolution,
       sizeForAspect,
