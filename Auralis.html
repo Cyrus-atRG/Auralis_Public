@@ -3409,6 +3409,33 @@
       overflow: auto;
     }
     .composer .primary-btn { flex: 1; }
+    .composer-stop-btn {
+      flex: 0 0 auto;
+      min-width: 64px;
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      border-color: oklch(0.68 0.145 24 / 0.58);
+      background: oklch(0.18 0.04 24 / 0.92);
+      color: oklch(0.82 0.105 24);
+      font-weight: 700;
+    }
+    .composer-stop-btn[hidden] { display: none; }
+    .composer-stop-btn:hover,
+    .composer-stop-btn:focus-visible {
+      border-color: var(--danger);
+      background: oklch(0.22 0.055 24 / 0.96);
+      color: oklch(0.9 0.07 24);
+    }
+    .composer-stop-btn.stopping { color: var(--muted); }
+    .composer-stop-icon {
+      width: 9px;
+      height: 9px;
+      border-radius: 2px;
+      background: currentColor;
+    }
 
     .isee-banner {
       display: none;
@@ -4334,6 +4361,20 @@
       box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.85), 0 0 0 2px oklch(0.55 0.13 215 / 0.12);
     }
 
+    html[data-visual-scheme="caelum"] .composer-stop-btn {
+      border-color: oklch(0.58 0.14 24 / 0.5);
+      background: oklch(0.96 0.025 24 / 0.96);
+      color: oklch(0.48 0.16 24);
+      box-shadow: inset 0 1px 0 oklch(1 0 0 / 0.76);
+    }
+
+    html[data-visual-scheme="caelum"] .composer-stop-btn:hover,
+    html[data-visual-scheme="caelum"] .composer-stop-btn:focus-visible {
+      border-color: oklch(0.5 0.17 24 / 0.72);
+      background: oklch(0.92 0.05 24 / 0.98);
+      color: oklch(0.4 0.17 24);
+    }
+
     html[data-visual-scheme="caelum"] .topbar,
     html[data-visual-scheme="caelum"] .modal-head {
       background: oklch(0.985 0.006 250 / 0.9);
@@ -5178,6 +5219,10 @@
             </svg>
           </button>
           <button class="primary-btn" id="sendBtn">发送</button>
+          <button class="composer-stop-btn" id="stopControllerBtn" type="button" title="停止主控处理" aria-label="停止主控处理" hidden>
+            <span class="composer-stop-icon" aria-hidden="true"></span>
+            <span id="stopControllerLabel">停止</span>
+          </button>
         </div>
       </div>
     </aside>
@@ -5288,7 +5333,7 @@
               </select>
             </label>
             <label>默认视频时长
-              <input id="durationInput" type="number" min="4" max="15" step="1">
+              <input id="durationInput" type="number" min="4" max="30" step="1">
             </label>
             <label class="full">用户偏好
               <textarea id="preferenceInput" placeholder="常用题材、画风、禁忌、广告结构、品牌要求"></textarea>
@@ -5529,7 +5574,7 @@
     connectAstra: {
       from: 'selector',
       to: 'selector',
-      inputRole: 'prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|upscale|none',
+      inputRole: 'prompt|first_frame|last_frame|ref|reference_video|video_edit|video_extend|source_image|subject_ref|style_ref|upscale|none',
       relation: 'input',
       batch: 'supports one-to-many, many-to-one, equal-count paired connections, or reference fanout from multiple reference sources to multiple targets'
     },
@@ -5806,7 +5851,7 @@
     connectAstra: operationPlannerHint({
       intent: 'Create input links between existing Astra.',
       target: 'Use from/to selectors plus inputRole. One source may connect to many targets, many sources may connect to one target, equal source/target counts are paired by order, and reference roles may fan out all sources to all targets. Resolve endpoints from target_context, selected/referenced Astra, or resultOfOps.',
-      notes: ['Use inputRole source_image for original-image edits, ref for reference images, reference_video for video references, video_edit for editing from a source video, first_frame/last_frame for video frame control, prompt for prompt outputs, or none. Legacy subject_ref/style_ref are accepted as references. For one or more reference Astra feeding several newly created prompt Astra, connect from those reference selectors to target.resultOfOps with inputRole ref or reference_video; each target receives every reference. Do not use connectAstra for layout-only adjacency.']
+      notes: ['Use inputRole source_image for original-image edits, ref for reference images, reference_video for video references, video_edit for editing a source video, video_extend for extending a source video, first_frame/last_frame for video frame control, prompt for prompt outputs, or none. Legacy subject_ref/style_ref are accepted as references. For one or more reference Astra feeding several newly created prompt Astra, connect from those reference selectors to target.resultOfOps with inputRole ref or reference_video; each target receives every reference. Do not use connectAstra for layout-only adjacency.']
     }),
     layoutAstra: operationPlannerHint({
       intent: 'Tidy selected/referenced ordinary Astra.',
@@ -6380,7 +6425,7 @@
         to: 'target Astra selector',
         flowId: 'flow id',
         scope: 'active_flow|all',
-        inputRoles: ['prompt|first_frame|last_frame|ref|reference_video|video_edit|source_image|subject_ref|style_ref|upscale|none'],
+        inputRoles: ['prompt|first_frame|last_frame|ref|reference_video|video_edit|video_extend|source_image|subject_ref|style_ref|upscale|none'],
         relations: ['input|sequence_next|candidate_of|reverse_prompt'],
         limit: 'maximum links'
       },
@@ -7239,7 +7284,7 @@
   }
 
   function allowedInputRoles() {
-    return new Set(['prompt', 'first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'source_image', 'subject_ref', 'style_ref', 'upscale', 'none']);
+    return new Set(['prompt', 'first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'video_extend', 'source_image', 'subject_ref', 'style_ref', 'upscale', 'none']);
   }
 
   function isReferenceFanoutInputRole(inputRole) {
@@ -7368,16 +7413,16 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.19';
+    const AURALIS_VERSION = 'Auralis v1.20';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 WS / MiniMax H3 视频模型，支持文生视频、首尾帧图生视频和参考图/参考视频生视频，提供 480p/768p、5–15 秒及多种横竖画幅参数。',
-      '新增视频“超清处理”：可从单个或多选视频的右键菜单一键调用 WaveSpeed Video Upscaler，按源尺寸自动升至 1080p、2K 或 4K，也支持主控指定目标分辨率。',
-      '主控新增 upscaleVideo 画布操作，超清结果会作为新视频 Astra 与源视频建立关联；本地或缓存视频在提交前自动上传，避免 WaveSpeed 无法读取 file/blob 素材。'
+      '新增 WS / Seedance 2.5 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频、视频编辑与视频延长；支持 480p/720p/1080p、4–30 秒及多种横竖画幅。',
+      '主控输入区新增“停止”按钮，可中止公司 API 请求或本地 Codex 当前回合；停止期间会显示明确状态，并阻止已取消操作继续执行。',
+      '完善视频输入连线与 WaveSpeed 上传：新增 video_extend 角色，本地或缓存图片/视频会在提交前重新上传，模型参数与不支持的 4K 请求由主控和界面一致校验。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9100,19 +9145,23 @@
     const VIDEO_MODELS = [
       'rg-seedance-2-fast',
       'rg-seedance-2',
+      'ws-seedance-2.5',
       'ws-seedance-2-fast',
       'ws-seedance-2',
       'ws-minimax-h3'
     ];
     const SEEDANCE2_DURATION_MIN = 4;
     const SEEDANCE2_DURATION_MAX = 15;
+    const SEEDANCE25_DURATION_MAX = 30;
     const VIDEO_REFERENCE_IMAGE_MAX_DIMENSION = 2048;
     const VIDEO_REFERENCE_IMAGE_JPEG_QUALITY = 0.9;
     const PLANNER_SEGMENT_COUNT_MIN = 1;
     const PLANNER_SEGMENT_COUNT_MAX = 30;
     const PLANNER_VIDEO_RESOLUTIONS = ['720p', '1080p'];
+    const SEEDANCE25_VIDEO_RESOLUTIONS = ['480p', '720p', '1080p'];
     const PLANNER_IMAGE_ASPECT_RATIOS = ['1:1', '16:9', '9:16'];
     const PLANNER_VIDEO_ASPECT_RATIOS = PLANNER_IMAGE_ASPECT_RATIOS;
+    const SEEDANCE25_VIDEO_ASPECT_RATIOS = ['16:9', '9:16', '4:3', '3:4', '1:1', '21:9'];
     const PLANNER_IMAGE_RESOLUTIONS = ['1080', '2k', '4k'];
     const OUTPAINT_DEFAULT_PROMPT = 'outpaint模式，按图片的画风、视角、构图填充空白部分。';
     const OUTPAINT_RATIOS = Object.freeze([
@@ -9139,6 +9188,7 @@
     const VIDEO_MODEL_COMPACT_LABELS = Object.freeze({
       'rg-seedance-2-fast': 'RG/S2F',
       'rg-seedance-2': 'RG/S2',
+      'ws-seedance-2.5': 'WS/S2.5',
       'ws-seedance-2-fast': 'WS/S2F',
       'ws-seedance-2': 'WS/S2',
       'ws-minimax-h3': 'WS/H3'
@@ -9176,6 +9226,7 @@
     const VIDEO_MODEL_REGISTRY = {
       'rg-seedance-2-fast': { provider: 'company', requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-fast-video-edit', family: 'seedance2-fast' },
       'rg-seedance-2': { provider: 'company', requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
+      'ws-seedance-2.5': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'ws-seedance-2-fast': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast' },
       'ws-seedance-2': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2' },
       'ws-minimax-h3': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3 },
@@ -9189,7 +9240,11 @@
       'bytedance/seedance-2.0-fast/video-edit': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/video-edit', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast', canonical: 'ws-seedance-2-fast' },
       'wavespeed-ai/minimax-h3/image-to-video': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3, canonical: 'ws-minimax-h3' },
       'wavespeed-ai/minimax-h3/text-to-video': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3, canonical: 'ws-minimax-h3' },
-      'wavespeed-ai/minimax-h3/reference-to-video': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3, canonical: 'ws-minimax-h3' }
+      'wavespeed-ai/minimax-h3/reference-to-video': { provider: 'wavespeed', endpointModel: 'wavespeed-ai/minimax-h3/image-to-video', imageEndpointModel: 'wavespeed-ai/minimax-h3/image-to-video', textEndpointModel: 'wavespeed-ai/minimax-h3/text-to-video', referenceEndpointModel: 'wavespeed-ai/minimax-h3/reference-to-video', family: 'minimax-h3', videoModes: ['text', 'image', 'reference'], videoResolutions: ['480p', '768p'], videoAspectRatios: ['16:9', '9:16', '1:1', '4:3', '3:4', '21:9', '9:21'], durationMin: 5, durationMax: 15, maxReferenceImages: 9, maxReferenceVideos: 3, canonical: 'ws-minimax-h3' },
+      'bytedance/seedance-2.5/image-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', canonical: 'ws-seedance-2.5' },
+      'bytedance/seedance-2.5/text-to-video': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', canonical: 'ws-seedance-2.5' },
+      'bytedance/seedance-2.5/video-edit': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', canonical: 'ws-seedance-2.5' },
+      'bytedance/seedance-2.5/video-extend': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', canonical: 'ws-seedance-2.5' }
     };
     const MODEL_LABELS = {
       'local-codex/app-server': '跟随 Codex App Server',
@@ -9209,6 +9264,7 @@
       'rg-seedance-2': 'RG / Seedance 2',
       'ws-seedance-2-fast': 'WS / Seedance 2 Fast',
       'ws-seedance-2': 'WS / Seedance 2',
+      'ws-seedance-2.5': 'WS / Seedance 2.5',
       'ws-minimax-h3': 'WS / MiniMax H3'
     };
     const MODEL_ALIASES = Object.freeze({
@@ -9241,7 +9297,9 @@
       seedancefast: 'rg-seedance-2-fast',
       sd2: 'rg-seedance-2',
       seedance2: 'rg-seedance-2',
-      seedance: 'rg-seedance-2'
+      seedance: 'rg-seedance-2',
+      sd25: 'ws-seedance-2.5',
+      seedance25: 'ws-seedance-2.5'
     });
     const MUSIC_MODELS = ['mureka-ai/mureka-v9/generate-bgm'];
     const DEFAULT_LLM_TIMEOUT_MS = 180000;
@@ -9297,6 +9355,7 @@
       prompt: 'Prompt',
       reference_video: '视频参考',
       video_edit: '视频编辑',
+      video_extend: '视频延长',
       ref: '参考',
       source_image: '原图修改',
       annotation: '标注',
@@ -10017,6 +10076,7 @@
     const uid = (prefix = 'id') => `${prefix}_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
     const controllerOperationContextByProjectId = new Map();
     const controllerExecutionQueues = new Map();
+    const controllerChatRunsByProjectId = new Map();
     const localCodexBridgeRuntime = {
       socket: null,
       status: 'idle',
@@ -12383,6 +12443,7 @@
       $('elevenLabsVoiceIdInput').value = state.settings.elevenLabsVoiceId || '';
       $('musicModelInput').value = state.settings.musicModel || MUSIC_MODELS[0];
       $('aspectSelect').value = state.settings.aspectRatio;
+      $('durationInput').max = String(videoDurationMaximum(state.settings.videoModel));
       $('durationInput').value = state.settings.duration;
       $('preferenceInput').value = state.settings.preferences;
       $('notificationEnabledInput').checked = !!state.settings.notificationsEnabled;
@@ -14826,7 +14887,7 @@
       if (link.relation === 'reverse_prompt' || link.visualStyle === 'dashed' || link.inputRole === 'derived_prompt') return 'reference';
       const target = to || nodeById(link.toNodeId || link.to_astra_id);
       if (target && (target.role === 'genImage' || target.role === 'genVideo')) return 'media';
-      if (['first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'source_image', 'subject_ref', 'style_ref'].includes(link.inputRole || link.input_role)) return 'media';
+      if (['first_frame', 'last_frame', 'ref', 'reference_video', 'video_edit', 'video_extend', 'source_image', 'subject_ref', 'style_ref'].includes(link.inputRole || link.input_role)) return 'media';
       return link.kind || 'prompt';
     }
 
@@ -18738,12 +18799,12 @@
         </label>
         <label>视频分辨率
           <select data-planner-field="videoResolution">
-            ${plannerSelectOptions(plannerVideoResolutionOptions(), normalizePlannerVideoResolution(fields.videoResolution))}
+            ${plannerSelectOptions(plannerVideoResolutionOptions(currentProject()?.runtime?.videoModel), normalizePlannerVideoResolution(fields.videoResolution, currentProject()?.runtime?.videoModel))}
           </select>
         </label>
         <label>视频比例
           <select data-planner-field="videoAspectRatio">
-            ${plannerSelectOptions(PLANNER_VIDEO_ASPECT_RATIOS, fields.videoAspectRatio)}
+            ${plannerSelectOptions(plannerVideoAspectRatioOptions(currentProject()?.runtime?.videoModel), normalizePlannerVideoAspectRatio(fields.videoAspectRatio, '1:1', currentProject()?.runtime?.videoModel))}
           </select>
         </label>
         <label>图片比例
@@ -18760,7 +18821,7 @@
           <input type="number" min="${PLANNER_SEGMENT_COUNT_MIN}" max="${PLANNER_SEGMENT_COUNT_MAX}" step="1" value="${escapeHtml(fields.segmentCount)}" data-planner-field="segmentCount">
         </label>
         <label>片段时长
-          <input type="number" min="${SEEDANCE2_DURATION_MIN}" max="${SEEDANCE2_DURATION_MAX}" step="1" value="${escapeHtml(fields.segmentDurationSeconds)}" data-planner-field="segmentDurationSeconds">
+          <input type="number" min="${SEEDANCE2_DURATION_MIN}" max="${videoDurationMaximum(currentProject()?.runtime?.videoModel)}" step="1" value="${escapeHtml(fields.segmentDurationSeconds)}" data-planner-field="segmentDurationSeconds">
         </label>
       </div>`;
     }
@@ -19343,10 +19404,11 @@
     }
 
     function clampSeedance2Duration(value, options = {}) {
-      const numeric = Number(value);
-      if (options.allowZero && (!Number.isFinite(numeric) || numeric <= 0)) return 0;
-      const rounded = Math.round(Number.isFinite(numeric) ? numeric : SEEDANCE2_DURATION_MIN);
-      return Math.min(SEEDANCE2_DURATION_MAX, Math.max(SEEDANCE2_DURATION_MIN, rounded));
+      return clampVideoDuration(value, options.model, options);
+    }
+
+    function videoDurationMaximum(model = currentProject()?.runtime?.videoModel || state.settings.videoModel) {
+      return videoDurationRange(model).max;
     }
 
     function parseTimeToSeconds(value) {
@@ -19641,6 +19703,7 @@
         image_to_video: '\u56fe\u751f\u89c6\u9891\uff08\u9996\u5e27\uff09',
         image_to_video_first_last_frame: '\u9996\u5c3e\u5e27\u89c6\u9891',
         video_edit: '\u89c6\u9891\u7f16\u8f91',
+        video_extend: '\u89c6\u9891\u5ef6\u957f',
         planned_image: 'StarFlow \u56fe\u50cf\u5360\u4f4d',
         planned_first_frame: 'StarFlow \u4ec5\u9996\u5e27',
         planned_first_last_frame: 'StarFlow \u9996\u5c3e\u5e27',
@@ -21304,7 +21367,7 @@
       const fromVideo = isVideoAstra(from);
       if (isVideoPromptInputTarget(to)) {
         if (fromImage) return ['first_frame', 'last_frame', 'ref'];
-        if (fromVideo) return ['reference_video', 'video_edit'];
+        if (fromVideo) return ['reference_video', 'video_edit', 'video_extend'];
         if (fromPrompt) return ['context'];
         return [];
       }
@@ -21367,6 +21430,10 @@
         编辑视频: 'video_edit',
         video_edit: 'video_edit',
         edit_video: 'video_edit',
+        视频延长: 'video_extend',
+        延长视频: 'video_extend',
+        video_extend: 'video_extend',
+        extend_video: 'video_extend',
         首帧: 'first_frame',
         尾帧: 'last_frame',
         参考: 'ref',
@@ -21880,8 +21947,86 @@
       renderAgentStatus();
     }
 
+    function controllerChatRuns(project = currentProject()) {
+      return project?.id ? [...(controllerChatRunsByProjectId.get(project.id) || [])] : [];
+    }
+
+    function beginControllerChatRun(project, mode) {
+      if (!project?.id) return null;
+      const run = {
+        id: uid('controller_run'),
+        mode,
+        projectId: project.id,
+        controller: mode === 'api' ? new AbortController() : null,
+        requestId: '',
+        threadId: '',
+        turnId: '',
+        stopRequested: false,
+        stopping: false
+      };
+      const runs = controllerChatRunsByProjectId.get(project.id) || new Set();
+      runs.add(run);
+      controllerChatRunsByProjectId.set(project.id, runs);
+      if (isProjectActive(project)) renderSendAction();
+      return run;
+    }
+
+    function finishControllerChatRun(run, project = projectById(run?.projectId)) {
+      if (!run || !project?.id) return;
+      const runs = controllerChatRunsByProjectId.get(project.id);
+      runs?.delete(run);
+      if (!runs?.size) controllerChatRunsByProjectId.delete(project.id);
+      if (isProjectActive(project)) renderSendAction();
+    }
+
+    function activeLocalCodexTurn(project = currentProject()) {
+      const messages = arrayFrom(project?.messages);
+      for (let index = messages.length - 1; index >= 0; index -= 1) {
+        const message = messages[index];
+        if (message.source === 'local-codex' && message.status === 'streaming' && message.turnId) {
+          return {
+            requestId: String(message.requestId || ''),
+            threadId: String(message.threadId || ''),
+            turnId: String(message.turnId)
+          };
+        }
+      }
+      return null;
+    }
+
+    function controllerStoppedError() {
+      const error = new Error('主控处理已停止。');
+      error.name = 'AbortError';
+      error.code = 'controller_stopped';
+      return error;
+    }
+
+    function isControllerStoppedError(error) {
+      return error?.code === 'controller_stopped' || (error?.name === 'AbortError' && /停止|abort/i.test(String(error?.message || '')));
+    }
+
+    function throwIfControllerRunStopped(runOrSignal) {
+      const signal = runOrSignal?.signal || runOrSignal?.controller?.signal || runOrSignal;
+      const stopped = runOrSignal?.stopRequested === true || signal?.aborted === true;
+      if (stopped) throw controllerStoppedError();
+    }
+
     function renderSendAction() {
       $('sendBtn').textContent = '发送';
+      const project = currentProject();
+      const runs = controllerChatRuns(project);
+      const localTurn = activeLocalCodexTurn(project);
+      const active = runs.length > 0 || !!localTurn;
+      const stopping = runs.some(run => run.stopping || run.stopRequested);
+      const button = $('stopControllerBtn');
+      const label = $('stopControllerLabel');
+      if (!button) return;
+      button.hidden = !active;
+      button.disabled = !active || stopping;
+      button.classList.toggle('stopping', stopping);
+      button.title = stopping ? '正在停止主控处理' : '停止主控处理';
+      button.setAttribute('aria-label', button.title);
+      if (label) label.textContent = stopping ? '停止中' : '停止';
     }
 
     function toggleIseeMode() {
@@ -22526,7 +22671,7 @@
       return project.pendingControllerIntent;
     }
 
-    async function runPendingControllerIntent(intent, userText = '', project = currentProject()) {
+    async function runPendingControllerIntent(intent, userText = '', project = currentProject(), options = {}) {
       if (!intent) return null;
       if (intent.action === 'controllerOperationPlan') {
         const plan = intent.operationPlan;
@@ -22535,7 +22680,7 @@
           addMessage('system', '待确认的画布操作已经失效，请重新说明要处理的 Astra 和动作。');
           return null;
         }
-        return executeControllerOperationPlan(plan, { confirmed: true, project });
+        return executeControllerOperationPlan(plan, { confirmed: true, project, signal: options.signal });
       }
       clearPendingControllerIntent(project);
       addMessage('system', '这个待确认操作暂时不能自动执行。请重新说明要处理的 Astra 和动作。');
@@ -22761,7 +22906,8 @@
       });
       const content = await chatCompletion(project.runtime.llmModel, [{ role: 'user', content: prompt }], {
         temperature: 0.1,
-        telemetry: 'controller'
+        telemetry: 'controller',
+        signal: options.signal
       });
       const parsed = parseStructuredJsonObject(content);
       if (!parsed || typeof parsed !== 'object') return { ok: false, plan: null, issues: [{ severity: 'error', message: 'Operation planner did not return JSON.' }] };
@@ -23240,7 +23386,8 @@
       const content = await chatCompletion(project.runtime.llmModel, [{ role: 'user', content: prompt }], {
         maxTokens: 900,
         temperature: 0.05,
-        telemetry: 'controller'
+        telemetry: 'controller',
+        signal: options.signal
       });
       return normalizeControllerIntentClassification(parseStructuredJsonObject(content));
     }
@@ -23293,7 +23440,7 @@
       if (activePendingControllerIntent(project)) return false;
       if (asksForInternalImplementationInfo(text)) return false;
       let attemptedPlanner = false;
-      const controllerOptions = { selectedNodeIds, visualContext: localContext.visualContext };
+      const controllerOptions = { selectedNodeIds, visualContext: localContext.visualContext, signal: localContext.signal };
       try {
         updateApiStatus('busy');
         setAgentStatus('busy', 'intent', '理解指令中', `正在调用 ${project.runtime.llmModel}`, project);
@@ -23302,6 +23449,7 @@
           try {
             intentClassification = await classifyControllerIntent(text, {}, project, controllerOptions);
           } catch (error) {
+            if (isControllerStoppedError(error)) throw error;
             console.warn('Controller intent classifier failed; skipping operation planner.', error);
             intentClassification = null;
           }
@@ -23328,10 +23476,12 @@
           addMessage('system', '这次没有生成可执行画布动作，所以画布没有改变。', { project });
           return true;
         }
-        const result = await executeControllerOperationPlan(planned.plan, { project });
+        throwIfControllerRunStopped(localContext.signal);
+        const result = await executeControllerOperationPlan(planned.plan, { project, signal: localContext.signal });
         if (result?.requiresConfirmation) return true;
         return true;
       } catch (error) {
+        if (isControllerStoppedError(error)) return true;
         console.warn('Controller ops planner failed.', error);
         if (attemptedPlanner) {
           addMessage('system', `画布操作规划失败：${error.message}`, { project });
@@ -23344,17 +23494,17 @@
       }
     }
 
-    async function handlePendingControllerReply(text) {
-      const project = currentProject();
+    async function handlePendingControllerReply(text, options = {}) {
+      const project = options.project || currentProject();
       const pending = activePendingControllerIntent(project);
       if (!pending) return false;
       try {
         updateApiStatus('busy');
         setAgentStatus('busy', 'intent', '确认操作中', `正在调用 ${project.runtime.llmModel}`, project);
-        const classification = await classifyControllerIntent(text, { pendingIntentId: pending.id }, project);
+        const classification = await classifyControllerIntent(text, { pendingIntentId: pending.id }, project, { signal: options.signal });
         if (classification?.intent !== 'confirmation') return false;
         if (classification.pendingAction === 'confirm') {
-          await runPendingControllerIntent(pending, text, project);
+          await runPendingControllerIntent(pending, text, project, { signal: options.signal });
           return true;
         }
         if (classification.pendingAction === 'cancel') {
@@ -23370,6 +23520,7 @@
         addMessage('agent', classification.question || classification.userVisibleSummary || '我不确定你是否要执行这个待确认操作，请明确说确认、取消，或说明要怎么改。', { project });
         return true;
       } catch (error) {
+        if (isControllerStoppedError(error)) return true;
         console.warn('Pending controller confirmation failed.', error);
         addMessage('agent', '我没确认是否执行这个待确认操作。请明确说确认、取消，或说明要怎么改。', { project });
         return true;
@@ -23444,6 +23595,7 @@
       let pendingOperationResult = null;
       try {
         for (const op of validation.plan.ops) {
+          throwIfControllerRunStopped(options.signal);
           if (mayAutoLayoutCreatedAstra && controllerOperationStartsLongRunningWork(op)) {
             const positions = compactImplicitControllerPlanAstra(applied, beforeNodeIds, autoLayoutPositionsByNodeId, project);
             if (positions.length) {
@@ -23459,11 +23611,13 @@
             opId: op.id,
             op: op.op,
             requestId: options.requestId || '',
-            resultsByOpId
+            resultsByOpId,
+            signal: options.signal
           }, async () => {
             const operationBefore = captureControllerRollbackComparableState(project);
             const operationResult = await executeControllerOperation(op, project);
             pendingOperationResult = operationResult;
+            throwIfControllerRunStopped(options.signal);
             captureControllerRollbackAfterDelta(operationBefore, project, rollbackAfterState, operationResult);
             verifyControllerOperationResult(op, operationResult, project);
             return operationResult;
@@ -23492,6 +23646,7 @@
         }
         return { ok: true, batchId, planId, applied, issues: [] };
       } catch (error) {
+        const interrupted = isControllerStoppedError(error);
         const rolledBack = shouldRollbackFailedControllerOperation(activeOperation, validation.plan);
         let rollbackScope = 'none';
         if (rolledBack) {
@@ -23515,7 +23670,7 @@
           scheduleSave({ project });
         }
         refreshProjectSurface(project);
-        if (options.silent !== true) {
+        if (options.silent !== true && !interrupted) {
           const prefix = error.rollbackConflicts
             ? '操作计划已局部回滚，用户后续改动已保留'
             : (rolledBack ? '操作计划已回滚' : '操作计划失败，已保留当前画布');
@@ -23523,6 +23678,7 @@
         }
         return {
           ok: false,
+          interrupted,
           batchId,
           planId,
           applied,
@@ -27765,7 +27921,7 @@
       return parts;
     }
 
-    async function retryIseeVisualUnderstandingWithCompression(request, firstDetail, project = currentProject()) {
+    async function retryIseeVisualUnderstandingWithCompression(request, firstDetail, project = currentProject(), options = {}) {
       addMessage('system', 'I see 视觉理解内容超出模型输出长度，正在自动压缩后重试。', { project });
       setAgentStatus('busy', 'vision', 'I see 自动压缩中', `正在调用 ${request.model} 压缩重试`, project);
       const compactContent = await buildCompactIseeVisionContent(request);
@@ -27773,14 +27929,15 @@
         maxTokens: 7000,
         temperature: 0,
         timeoutMs: MEDIA_PROMPT_TIMEOUT_MS,
-        returnDetail: true
+        returnDetail: true,
+        signal: options.signal
       });
       retry.retryOf = 'isee_length_first_attempt';
       retry.firstAttempt = reversePromptResponseMeta(firstDetail);
       return retry;
     }
 
-    async function runIseeVisualUnderstanding(request, project = currentProject()) {
+    async function runIseeVisualUnderstanding(request, project = currentProject(), options = {}) {
       updateApiStatus('busy');
       setAgentStatus('busy', 'vision', 'I see 视觉理解中', `正在调用 ${request.model}`, project);
       const content = await buildIseeVisionContent(request);
@@ -27788,10 +27945,11 @@
         maxTokens: 3200,
         temperature: 0.2,
         timeoutMs: MEDIA_PROMPT_TIMEOUT_MS,
-        returnDetail: true
+        returnDetail: true,
+        signal: options.signal
       });
       if (isLengthLimitedChatDetail(detail)) {
-        detail = await retryIseeVisualUnderstandingWithCompression(request, detail, project);
+        detail = await retryIseeVisualUnderstandingWithCompression(request, detail, project, options);
       }
       if (!detail.content) throw emptyChatResponseError(detail, 'I see 视觉理解');
       const result = normalizeContent(detail.content).trim();
@@ -27845,9 +28003,71 @@
       ].filter(Boolean).join('\n');
     }
 
-    async function sendLocalCodexChat({ text, project, selectedNodeIds = [] }) {
+    async function interruptLocalCodexTurn(project, turn = {}) {
+      const turnId = String(turn.turnId || '');
+      if (!project?.id || !turnId) return false;
+      const response = await fetchWithTimeout(localCodexApiUrl(`auras/${encodeURIComponent(project.id)}/interrupt`), {
+        method: 'POST',
+        headers: localCodexAuthHeaders(),
+        body: JSON.stringify({
+          requestId: uid('codex_interrupt'),
+          turnId
+        })
+      }, 10000);
+      if (!response.ok) throw new Error(await responseErrorText(response));
+      const interrupted = await response.json();
+      if (localCodexTurnStillStreaming(project, turnId)) {
+        handleLocalCodexEvent({
+          type: 'codex.event',
+          eventId: 0,
+          auraId: project.id,
+          requestId: interrupted.requestId || turn.requestId || '',
+          threadId: interrupted.threadId || turn.threadId || '',
+          turnId,
+          method: 'turn/completed',
+          createdAt: new Date().toISOString(),
+          params: { turn: { id: turnId, status: 'interrupted', error: null } }
+        });
+      }
+      return true;
+    }
+
+    async function stopControllerChat() {
+      const project = currentProject();
+      if (!project) return false;
+      const runs = controllerChatRuns(project);
+      const localTurn = activeLocalCodexTurn(project);
+      const localPending = runs.some(run => run.mode === 'local-codex');
+      if (!runs.length && !localTurn) return false;
+      runs.forEach(run => {
+        run.stopRequested = true;
+        run.stopping = true;
+        if (run.mode === 'api' && !run.controller.signal.aborted) run.controller.abort();
+      });
+      renderSendAction();
+      setAgentStatus('busy', 'stopping', '正在停止主控', '等待当前请求结束。', project);
+      try {
+        if (localTurn) await interruptLocalCodexTurn(project, localTurn);
+        addMessage('system', localTurn
+          ? '已停止本地 Codex 本轮处理。'
+          : localPending
+            ? '已请求停止本地 Codex；如果本轮已创建，会在取得 turn 后立即中断。'
+            : '已停止 API 主控处理。', { project });
+        settleAgentStatus(project);
+        return true;
+      } catch (error) {
+        runs.forEach(run => { run.stopping = false; });
+        renderSendAction();
+        setAgentStatus('fail', 'stopping', '停止主控失败', error.message, project);
+        addMessage('system', `停止主控失败：${error.message}`, { project });
+        return false;
+      }
+    }
+
+    async function sendLocalCodexChat({ text, project, selectedNodeIds = [], controllerRun = null }) {
       if (!state.settings.localCodexUrl || !state.settings.localCodexToken) {
         addMessage('system', '本地 Codex Bridge 尚未配置。请用 Auralis 启动器打开，或在设置里填写 Bridge URL 和 Token。', { project });
+        finishControllerChatRun(controllerRun, project);
         return false;
       }
       if (localCodexBridgeRuntime.status !== 'connected') await connectLocalCodexBridge({ force: true });
@@ -27855,16 +28075,20 @@
         $('chatInput').value = text;
         renderSendAction();
         addMessage('system', '本地 Codex Bridge 当前不可用。消息已保留在输入框，Bridge 恢复后可直接重试。', { project });
+        finishControllerChatRun(controllerRun, project);
         return false;
       }
       const requestId = uid('codex_turn');
+      if (controllerRun) controllerRun.requestId = requestId;
       let input;
       try {
         input = await buildLocalCodexTurnInput(text, project, selectedNodeIds);
+        throwIfControllerRunStopped(controllerRun);
       } catch (error) {
         $('chatInput').value = text;
         renderSendAction();
-        addMessage('system', `准备引用素材失败：${error.message}`, { project });
+        addMessage('system', isControllerStoppedError(error) ? '发送已停止，消息未交给本地 Codex。' : `准备引用素材失败：${error.message}`, { project });
+        finishControllerChatRun(controllerRun, project);
         return false;
       }
       try {
@@ -27884,6 +28108,7 @@
         const started = await response.json();
         const turnId = String(started.turnId || '');
         const threadId = String(started.threadId || '');
+        if (controllerRun) Object.assign(controllerRun, { turnId, threadId });
         const earlyAgentMessages = (project.messages || []).filter(message => (
           message.role === 'agent'
           && message.source === 'local-codex'
@@ -27924,14 +28149,22 @@
         if (!earlyAgentMessages.length && !terminalActivity) {
           setAgentStatus('busy', isMobsAura(project) ? 'mobs' : 'codex', 'Codex 执行中', isMobsAura(project) ? 'The Mobs 正在操作这个 Aura' : '本地 Codex 正在操作这个 Aura', project);
         }
+        if (controllerRun?.stopRequested && turnId && !terminalActivity) {
+          await interruptLocalCodexTurn(project, { requestId, threadId, turnId });
+          addMessage('system', '已停止本地 Codex 本轮处理。', { project });
+        }
+        finishControllerChatRun(controllerRun, project);
         renderSendAction();
         return true;
       } catch (error) {
-        $('chatInput').value = text;
+        if (!controllerRun?.stopRequested) $('chatInput').value = text;
         renderSendAction();
-        setAgentStatus('fail', 'codex', 'Codex 连接失败', error.message, project);
-        addMessage('system', `本地 Codex 发送失败：${error.message}。消息已保留在输入框。`, { project });
-        connectLocalCodexBridge({ force: true });
+        if (!isControllerStoppedError(error) && !controllerRun?.stopRequested) {
+          setAgentStatus('fail', 'codex', 'Codex 连接失败', error.message, project);
+          addMessage('system', `本地 Codex 发送失败：${error.message}。消息已保留在输入框。`, { project });
+          connectLocalCodexBridge({ force: true });
+        }
+        finishControllerChatRun(controllerRun, project);
         return false;
       }
     }
@@ -28034,7 +28267,10 @@
         saveLargeSelectionConfirmation(text, selectedNodeIds, project);
         return;
       }
-      if (localCodexMode) return sendLocalCodexChat({ text, project, selectedNodeIds });
+      if (localCodexMode) {
+        const controllerRun = beginControllerChatRun(project, 'local-codex');
+        return sendLocalCodexChat({ text, project, selectedNodeIds, controllerRun });
+      }
       if (isMobsAura(project)) {
         addMessage('system', 'The Mobs Aura 需要在“设置 → 模式”里选择本地 Codex 后才能发送；画布内容仍可正常查看和编辑。', { project });
         return;
@@ -28046,16 +28282,19 @@
       clearLargeSelectionConfirmation(project, { render: false });
       addMessage('user', text, { project });
       trackTelemetryControllerMessage(text);
+      const controllerRun = beginControllerChatRun(project, 'api');
       let visualContext = null;
       if (iseeRequest) {
         try {
-          visualContext = await runIseeVisualUnderstanding(iseeRequest, project);
+          visualContext = await runIseeVisualUnderstanding(iseeRequest, project, { signal: controllerRun.controller.signal });
         } catch (error) {
-          $('chatInput').value = text;
-          renderSendAction();
-          setAgentStatus('fail', 'vision', 'I see 视觉理解失败', error.message, project);
-          addMessage('system', `I see 视觉理解失败：${error.message}`, { project });
+          if (!isControllerStoppedError(error)) {
+            $('chatInput').value = text;
+            setAgentStatus('fail', 'vision', 'I see 视觉理解失败', error.message, project);
+            addMessage('system', `I see 视觉理解失败：${error.message}`, { project });
+          }
           updateApiStatus();
+          finishControllerChatRun(controllerRun, project);
           return;
         }
       }
@@ -28064,18 +28303,22 @@
         addActivity('settings', runtimeMessage, 'ok', {}, project);
         addMessage('system', runtimeMessage, { project });
         if (project?.agent?.kind === 'busy') settleAgentStatus(project);
+        finishControllerChatRun(controllerRun, project);
         return;
       }
       if (asksForInternalImplementationInfo(text)) {
         addMessage('agent', INTERNAL_INFO_REDIRECT, { project });
         if (project?.agent?.kind === 'busy') settleAgentStatus(project);
+        finishControllerChatRun(controllerRun, project);
         return;
       }
-      if (await handlePendingControllerReply(text)) {
+      if (await handlePendingControllerReply(text, { project, signal: controllerRun.controller.signal })) {
+        finishControllerChatRun(controllerRun, project);
         return;
       }
-      const controllerContext = { project, selectedNodeIds, visualContext };
+      const controllerContext = { project, selectedNodeIds, visualContext, signal: controllerRun.controller.signal };
       if (await tryRunControllerOperations(text, controllerContext)) {
+        finishControllerChatRun(controllerRun, project);
         return;
       }
       const deliveryPolicy = controllerChatDeliveryPolicy(text, controllerContext);
@@ -28093,18 +28336,21 @@
       try {
         updateApiStatus('busy');
         setAgentStatus('busy', 'chat', 'LLM 思考中', `正在调用 ${project.runtime.llmModel}`, project);
-        const content = await chatCompletion(project.runtime.llmModel, messages, { telemetry: 'controller' });
+        const content = await chatCompletion(project.runtime.llmModel, messages, { telemetry: 'controller', signal: controllerRun.controller.signal });
         if (content && content.trim()) {
           addAgentMessage(content, { userText: text, project, deliveryPolicy });
         } else {
           addMessage('system', '模型没有返回正文。可以重试，或换一个主 LLM。', { project });
         }
       } catch (error) {
-        setAgentStatus('fail', 'chat', '对话请求失败', error.message, project);
-        addMessage('system', `请求失败：${error.message}`, { project });
+        if (!isControllerStoppedError(error)) {
+          setAgentStatus('fail', 'chat', '对话请求失败', error.message, project);
+          addMessage('system', `请求失败：${error.message}`, { project });
+        }
       } finally {
         updateApiStatus();
         if (project?.agent?.kind === 'busy') settleAgentStatus(project);
+        finishControllerChatRun(controllerRun, project);
       }
     }
 
@@ -29036,7 +29282,8 @@
         });
         const content = await chatCompletion(project.runtime.llmModel, [{ role: 'user', content: prompt }], {
           temperature: 0.45,
-          telemetry: 'controller'
+          telemetry: 'controller',
+          signal: controllerOperationContext(project)?.signal
         });
         const drafts = parsePromptDraftResponse(content);
         const applied = applyPromptDraftsToTargets(promptTargets, drafts, run, request, project);
@@ -29047,6 +29294,10 @@
         finishActionRun(run, 'completed', { astraIds: applied.updatedIds, summary }, project);
         return applied;
       } catch (error) {
+        if (isControllerStoppedError(error)) {
+          finishActionRun(run, 'interrupted', { astraIds: promptTargets.map(node => node.id), error: error.message }, project);
+          throw error;
+        }
         setAgentStatus('fail', 'prompt', '批量写 Prompt 失败', error.message, project);
         addMessage('system', `批量写 Prompt 失败：${error.message}`, { project });
         finishActionRun(run, 'failed', { astraIds: promptTargets.map(node => node.id), error: error.message }, project);
@@ -29113,7 +29364,8 @@
         });
         const content = await chatCompletion(project.runtime.llmModel, [{ role: 'user', content: prompt }], {
           temperature: 0.35,
-          telemetry: 'controller'
+          telemetry: 'controller',
+          signal: controllerOperationContext(project)?.signal
         });
         const updates = parseTextRewriteResponse(content);
         const applied = applyTextRewriteUpdates(textTargets, updates, run, request, project);
@@ -29124,6 +29376,10 @@
         finishActionRun(run, 'completed', { astraIds: applied.updatedIds, summary }, project);
         return applied;
       } catch (error) {
+        if (isControllerStoppedError(error)) {
+          finishActionRun(run, 'interrupted', { astraIds: textTargets.map(node => node.id), error: error.message }, project);
+          throw error;
+        }
         setAgentStatus('fail', 'text', '改写文本 Astra 失败', error.message, project);
         addMessage('system', `改写文本 Astra 失败：${error.message}`, { project });
         finishActionRun(run, 'failed', { astraIds: textTargets.map(node => node.id), error: error.message }, project);
@@ -29318,7 +29574,8 @@
       const response = await fetchWithTimeout(`${trimSlash(llmBaseUrl())}/chat/completions`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(chatCompletionBody(chatRequestModel(model), messages, bodyOptions))
+        body: JSON.stringify(chatCompletionBody(chatRequestModel(model), messages, bodyOptions)),
+        signal: options.signal
       }, options.timeoutMs ?? DEFAULT_LLM_TIMEOUT_MS);
       if (!response.ok) throw new Error(await responseErrorText(response));
       const json = await response.json();
@@ -29332,7 +29589,8 @@
       const response = await fetchWithTimeout(`${trimSlash(state.settings.baseUrl || BASE_URL)}/chat/completions`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${state.settings.apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(chatCompletionBody(companyChatRequestModel(model), messages, options))
+        body: JSON.stringify(chatCompletionBody(companyChatRequestModel(model), messages, options)),
+        signal: options.signal
       }, options.timeoutMs ?? DEFAULT_LLM_TIMEOUT_MS);
       if (!response.ok) throw new Error(await responseErrorText(response));
       const json = await response.json();
@@ -29383,14 +29641,20 @@
     async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_LLM_TIMEOUT_MS) {
       const duration = Math.max(1000, Number(timeoutMs) || DEFAULT_LLM_TIMEOUT_MS);
       const controller = new AbortController();
+      const externalSignal = options.signal;
+      const forwardAbort = () => controller.abort(externalSignal?.reason);
+      if (externalSignal?.aborted) throw controllerStoppedError();
+      externalSignal?.addEventListener('abort', forwardAbort, { once: true });
       const timer = setTimeout(() => controller.abort(), duration);
       try {
         return await fetch(url, { ...options, signal: controller.signal });
       } catch (error) {
+        if (error?.name === 'AbortError' && externalSignal?.aborted) throw controllerStoppedError();
         if (error?.name === 'AbortError') throw new Error(`请求超时（${Math.round(duration / 1000)} 秒）。可以重试，或换一个更轻的模型/更小的批量。`);
         throw error;
       } finally {
         clearTimeout(timer);
+        externalSignal?.removeEventListener('abort', forwardAbort);
       }
     }
 
@@ -29760,7 +30024,9 @@
       try {
         updateApiStatus('busy');
         setAgentStatus('busy', 'creative', '生成创意 Brief 中', `正在调用 ${state.settings.analysisModel}`, project);
-        const result = await companyChatCompletion(state.settings.analysisModel, [{ role: 'user', content }]);
+        const result = await companyChatCompletion(state.settings.analysisModel, [{ role: 'user', content }], {
+          signal: controllerOperationContext(project)?.signal
+        });
         const parsed = parseCreativeBriefResponse(ensureContent(result, '素材理解'));
         updateNode(node.id, { status: 'completed', content: parsed.creativeBrief, summary: parsed.creativeBrief, meta: { ...(node.meta || {}), rawCreativeBriefResponse: parsed.raw } }, project);
         updateNode(styleNode.id, { status: 'completed', content: parsed.styleLock, summary: parsed.styleLock, meta: { ...(styleNode.meta || {}), sourceCreativeBriefNodeId: node.id } }, project);
@@ -29783,6 +30049,10 @@
         finishActionRun(run, 'completed', { astraIds: [node.id, styleNode.id, videoNode.id, ...shotNodes.map(shot => shot.id)], summary: `创意 Brief、画风锁、视频锁和 ${shotNodes.length} 段脚本已生成` }, project);
         return { node, styleNode, videoNode, shotNodes };
       } catch (error) {
+        if (isControllerStoppedError(error)) {
+          finishActionRun(run, 'interrupted', { astraIds: [node.id, styleNode.id, videoNode.id], error: error.message }, project);
+          throw error;
+        }
         updateNode(node.id, { status: 'failed', error: error.message }, project);
         updateNode(styleNode.id, { status: 'failed', error: error.message }, project);
         updateNode(videoNode.id, { status: 'failed', error: error.message }, project);
@@ -30085,6 +30355,7 @@
           if (resolvedExecution.firstFrameNodeId) addAstraLink(resolvedExecution.firstFrameNodeId, promptPick.nodeId, { relation: 'input', inputRole: 'first_frame', actionRunId: run?.id, project });
           if (resolvedExecution.lastFrameNodeId) addAstraLink(resolvedExecution.lastFrameNodeId, promptPick.nodeId, { relation: 'input', inputRole: 'last_frame', actionRunId: run?.id, project });
           if (resolvedExecution.editVideoNodeId) addAstraLink(resolvedExecution.editVideoNodeId, promptPick.nodeId, { relation: 'input', inputRole: 'video_edit', actionRunId: run?.id, project });
+          if (resolvedExecution.extendVideoNodeId) addAstraLink(resolvedExecution.extendVideoNodeId, promptPick.nodeId, { relation: 'input', inputRole: 'video_extend', actionRunId: run?.id, project });
           resolvedExecution.referenceNodeIds.forEach(refId => addAstraLink(refId, promptPick.nodeId, { relation: 'input', inputRole: 'ref', actionRunId: run?.id, project }));
           (resolvedExecution.referenceVideoNodeIds || []).forEach(refId => addAstraLink(refId, promptPick.nodeId, { relation: 'input', inputRole: 'reference_video', actionRunId: run?.id, project }));
         }
@@ -30138,12 +30409,15 @@
     }
 
     async function generateVideoAsset(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
+      if (resolvedExecution?.mode === 'video_extend' && mediaModelFamily(model, 'video') !== 'seedance2.5') {
+        throw new Error(`${modelDisplayLabel(model)} 不支持视频延长；请切换到 WS / Seedance 2.5。`);
+      }
       if (shouldUseWaveSpeedMedia(model, 'video')) return waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution, project);
       try {
         return await videoGeneration(model, prompt, nodeId, resolvedExecution, project);
       } catch (endpointError) {
         const refs = videoReferenceNodesForExecution(resolvedExecution, project);
-        const referenceParts = (await Promise.all([refs.editVideo, refs.first, refs.last, ...refs.refs, ...refs.referenceVideos]
+        const referenceParts = (await Promise.all([refs.editVideo, refs.extendVideo, refs.first, refs.last, ...refs.refs, ...refs.referenceVideos]
           .filter(Boolean)
           .map(mediaPromptContentPart))).flat();
         const messages = [{
@@ -30245,10 +30519,19 @@
       return waveSpeedUploadMediaAsset(node, project);
     }
 
-    async function waveSpeedUploadMediaAsset(node, project = currentProject()) {
+    async function waveSpeedUploadMediaAsset(node, project = currentProject(), options = {}) {
       if (!node) return '';
       requireWaveSpeedKey();
-      const asset = await blobForAssetUpload(node);
+      let asset = null;
+      if (options.prepareVideoImage) {
+        const preparedUrl = await videoImageRequestUrlForAsset(node);
+        if (preparedUrl) {
+          const blob = /^data:/i.test(preparedUrl) ? dataUriToBlob(preparedUrl) : await fetchAssetBlob(preparedUrl);
+          asset = { blob, mime: blob.type || node.mime || 'image/jpeg' };
+        }
+      } else {
+        asset = await blobForAssetUpload(node);
+      }
       if (!asset?.blob) throw new Error('WaveSpeed media upload failed: local media cache is missing.');
       const form = new FormData();
       const ext = extensionFromMime(asset.mime || node.mime || '', node.title || '');
@@ -30296,15 +30579,16 @@
 
     function videoReferenceNodesForExecution(resolvedExecution = null, project = currentProject()) {
       const editVideo = nodeById(resolvedExecution?.editVideoNodeId, project) || null;
-      const first = editVideo ? null : nodeById(resolvedExecution?.firstFrameNodeId, project) || null;
-      const last = editVideo ? null : nodeById(resolvedExecution?.lastFrameNodeId, project) || null;
+      const extendVideo = nodeById(resolvedExecution?.extendVideoNodeId, project) || null;
+      const first = editVideo || extendVideo ? null : nodeById(resolvedExecution?.firstFrameNodeId, project) || null;
+      const last = editVideo || extendVideo ? null : nodeById(resolvedExecution?.lastFrameNodeId, project) || null;
       const refs = (resolvedExecution?.referenceNodeIds || [])
         .map(id => nodeById(id, project))
         .filter(node => node && isImageAstra(node) && node.id !== first?.id && node.id !== last?.id);
       const referenceVideos = (resolvedExecution?.referenceVideoNodeIds || [])
         .map(id => nodeById(id, project))
-        .filter(node => node && isVideoAstra(node) && node.id !== editVideo?.id);
-      return { first, last, refs, referenceVideos, editVideo };
+        .filter(node => node && isVideoAstra(node) && node.id !== editVideo?.id && node.id !== extendVideo?.id);
+      return { first, last, refs, referenceVideos, editVideo, extendVideo };
     }
 
     async function apiJson(path, body) {
@@ -30594,7 +30878,7 @@
         videoModel: $('settingsVideoSelect').value,
         musicModel: $('musicModelInput').value.trim() || MUSIC_MODELS[0],
         aspectRatio: $('aspectSelect').value,
-        duration: clampSeedance2Duration($('durationInput').value || 5),
+        duration: clampSeedance2Duration($('durationInput').value || 5, { model: $('settingsVideoSelect').value }),
         preferences: $('preferenceInput').value.trim(),
         notificationsEnabled: !!$('notificationEnabledInput')?.checked,
         telemetryWebhookUrl: '',
@@ -30819,20 +31103,23 @@
       return config.endpointModel || model || 'google/nano-banana-pro/text-to-image';
     }
 
-    function waveSpeedVideoExecutionMode(hasSourceImage, hasSourceVideo = false, hasReferences = false) {
+    function waveSpeedVideoExecutionMode(hasSourceImage, hasSourceVideo = false, hasReferences = false, mode = '') {
+      if (mode === 'video_extend') return 'extend';
+      if (mode === 'video_edit') return 'edit';
       if (hasSourceVideo) return 'edit';
       if (hasSourceImage) return 'image';
       if (hasReferences) return 'reference';
       return 'text';
     }
 
-    function resolveWaveSpeedVideoModel(model, hasSourceImage, hasSourceVideo = false, hasReferences = false) {
+    function resolveWaveSpeedVideoModel(model, hasSourceImage, hasSourceVideo = false, hasReferences = false, mode = '') {
       const config = mediaModelConfig(model, 'video');
-      const mode = waveSpeedVideoExecutionMode(hasSourceImage, hasSourceVideo, hasReferences);
-      if (Array.isArray(config.videoModes) && !config.videoModes.includes(mode)) {
-        const label = mode === 'edit' ? '视频编辑' : mode === 'reference' ? '参考生视频' : mode === 'image' ? '图生视频' : '文生视频';
+      const executionMode = waveSpeedVideoExecutionMode(hasSourceImage, hasSourceVideo, hasReferences, mode);
+      if (Array.isArray(config.videoModes) && !config.videoModes.includes(executionMode)) {
+        const label = executionMode === 'extend' ? '视频延长' : executionMode === 'edit' ? '视频编辑' : executionMode === 'reference' ? '参考生视频' : executionMode === 'image' ? '图生视频' : '文生视频';
         throw new Error(`${modelDisplayLabel(model)} 的 WaveSpeed 接口不支持${label}。`);
       }
+      if (mode === 'video_extend' && config.extendEndpointModel) return config.extendEndpointModel;
       if (hasSourceVideo && config.editEndpointModel) return config.editEndpointModel;
       if (hasReferences && config.referenceEndpointModel) return config.referenceEndpointModel;
       if (hasSourceImage && config.imageEndpointModel) return config.imageEndpointModel;
@@ -31024,6 +31311,77 @@
     async function buildWaveSpeedVideoRequest(model, prompt, resolvedExecution = null, project = currentProject()) {
       const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
       const references = videoReferenceNodesForExecution(resolvedExecution, project);
+      const generationPrompt = [prompt, '无口播 无BGM 只有音效'].filter(Boolean).join('\n');
+      const mode = resolvedExecution?.mode || (references.editVideo ? 'video_edit' : references.extendVideo ? 'video_extend' : references.first ? 'image_to_video' : 'text_to_video');
+      const config = mediaModelConfig(model, 'video');
+
+      if (config.family === 'seedance2.5') {
+        if (mode === 'image_to_video_first_last_frame' || mode === 'image_to_video') {
+          if (!references.first) throw new Error('Seedance 2.5 图生视频需要首帧图片。');
+          if (references.refs.length || references.referenceVideos.length) {
+            throw new Error('Seedance 2.5 图生视频接口不接收额外参考图或参考视频；请改用文生视频参考输入，或移除这些连线。');
+          }
+          const sourceImageUrl = await waveSpeedUploadMediaAsset(references.first, project, { prepareVideoImage: true });
+          const lastImageUrl = await waveSpeedUploadMediaAsset(references.last, project, { prepareVideoImage: true });
+          return {
+            endpointModel: resolveWaveSpeedVideoModel(model, true, false, false, mode),
+            body: {
+              prompt: generationPrompt,
+              image: sourceImageUrl,
+              ...(lastImageUrl ? { last_image: lastImageUrl } : {}),
+              resolution: mediaSettings.videoResolution,
+              duration: videoDurationForMediaSettings(mediaSettings, model),
+              generate_audio: true
+            }
+          };
+        }
+        if (mode === 'video_edit') {
+          if (!references.editVideo) throw new Error('Seedance 2.5 视频编辑需要一条“视频编辑”源视频连线。');
+          if (references.referenceVideos.length) throw new Error('Seedance 2.5 视频编辑接口不接收额外参考视频。');
+          const video = await waveSpeedUploadMediaAsset(references.editVideo, project);
+          const referenceImages = (await Promise.all(references.refs.map(node => waveSpeedUploadMediaAsset(node, project, { prepareVideoImage: true })))).filter(Boolean);
+          return {
+            endpointModel: resolveWaveSpeedVideoModel(model, false, true, false, mode),
+            body: {
+              prompt: generationPrompt,
+              video,
+              ...(referenceImages.length ? { reference_images: referenceImages } : {}),
+              resolution: mediaSettings.videoResolution,
+              generate_audio: true
+            }
+          };
+        }
+        if (mode === 'video_extend') {
+          if (!references.extendVideo) throw new Error('Seedance 2.5 视频延长需要一条“视频延长”源视频连线。');
+          if (references.refs.length || references.referenceVideos.length) throw new Error('Seedance 2.5 视频延长接口不接收额外参考图或参考视频。');
+          const video = await waveSpeedUploadMediaAsset(references.extendVideo, project);
+          return {
+            endpointModel: resolveWaveSpeedVideoModel(model, false, true, false, mode),
+            body: {
+              prompt: generationPrompt,
+              video,
+              resolution: mediaSettings.videoResolution,
+              duration: videoDurationForMediaSettings(mediaSettings, model),
+              generate_audio: true
+            }
+          };
+        }
+        const referenceImageUrls = (await Promise.all(references.refs.map(node => waveSpeedUploadMediaAsset(node, project, { prepareVideoImage: true })))).filter(Boolean);
+        const referenceVideoUrls = (await Promise.all(references.referenceVideos.map(node => waveSpeedUploadMediaAsset(node, project)))).filter(Boolean);
+        return {
+          endpointModel: resolveWaveSpeedVideoModel(model, false, false, referenceImageUrls.length > 0 || referenceVideoUrls.length > 0, 'text_to_video'),
+          body: {
+            prompt: generationPrompt,
+            ...(referenceImageUrls.length ? { reference_images: referenceImageUrls } : {}),
+            ...(referenceVideoUrls.length ? { reference_videos: referenceVideoUrls } : {}),
+            aspect_ratio: mediaSettings.videoAspectRatio,
+            resolution: mediaSettings.videoResolution,
+            duration: videoDurationForMediaSettings(mediaSettings, model),
+            generate_audio: true
+          }
+        };
+      }
+
       const editVideoUrl = await waveSpeedVideoRequestUrlForAsset(references.editVideo, project);
       const sourceImageUrl = await videoImageRequestUrlForAsset(references.first);
       const lastImageUrl = await videoImageRequestUrlForAsset(references.last);
@@ -31031,8 +31389,6 @@
       const referenceVideoUrls = (await Promise.all(references.referenceVideos.map(node => waveSpeedVideoRequestUrlForAsset(node, project)))).filter(Boolean);
       const hasReferences = referenceImageUrls.length > 0 || referenceVideoUrls.length > 0;
       const endpointModel = resolveWaveSpeedVideoModel(model, !!sourceImageUrl, !!editVideoUrl, hasReferences);
-      const config = mediaModelConfig(model, 'video');
-      const generationPrompt = [prompt, '无口播 无BGM 只有音效'].filter(Boolean).join('\n');
       if (config.family === 'minimax-h3') {
         if (sourceImageUrl && hasReferences) throw new Error('WS / MiniMax H3 不能在一次请求里混用首帧图生视频和参考生视频；请只保留一种输入模式。');
         if (lastImageUrl && !sourceImageUrl) throw new Error('WS / MiniMax H3 的尾帧必须和首帧一起用于图生视频。');
@@ -31076,12 +31432,12 @@
 
     async function waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
       requireWaveSpeedKey();
-      const { endpointModel, body } = await buildWaveSpeedVideoRequest(model, prompt, resolvedExecution, project);
+      const request = await buildWaveSpeedVideoRequest(model, prompt, resolvedExecution, project);
       return waveSpeedSubmitAndPoll({
-        model: endpointModel,
+        model: request.endpointModel,
         preferred: 'video',
         nodeId,
-        body
+        body: request.body
       });
     }
 
@@ -31615,6 +31971,7 @@
       pushEntry(nodeById(resolvedExecution.firstFrameNodeId, project), { alias: 'first_frame', mediaKind: 'image', inputRole: 'first_frame' });
       pushEntry(nodeById(resolvedExecution.lastFrameNodeId, project), { alias: 'last_frame', mediaKind: 'image', inputRole: 'last_frame' });
       pushEntry(nodeById(resolvedExecution.editVideoNodeId, project), { alias: 'video_edit', mediaKind: 'video', inputRole: 'video_edit' });
+      pushEntry(nodeById(resolvedExecution.extendVideoNodeId, project), { alias: 'video_extend', mediaKind: 'video', inputRole: 'video_extend' });
       (resolvedExecution.sourceImageNodeIds || []).forEach((id, index) => {
         pushEntry(nodeById(id, project), { alias: index ? `source_image_${index + 1}` : 'source_image', mediaKind: 'image', inputRole: 'source_image' });
       });
@@ -31637,6 +31994,7 @@
       if (alias === 'last_frame') return '[Last frame image]';
       if (alias === 'source_image') return '[Source image]';
       if (alias === 'video_edit') return '[Video edit source]';
+      if (alias === 'video_extend') return '[Video extend source]';
       if (String(alias || '').startsWith('source_image_')) return `[Source image ${String(alias).split('_').at(-1)}]`;
       const match = String(alias || '').match(/_(\d+)$/);
       const number = match ? Number(match[1]) : index;
@@ -32406,6 +32764,8 @@
       const inputOwners = [promptNodeId, target?.id].filter(Boolean);
       const editInput = firstLinkedVideoInputForRoles(inputOwners, ['video_edit'], false, project);
       const linkedEditVideo = editInput && assetDisplayUrl(editInput) ? editInput : null;
+      const extendInput = firstLinkedVideoInputForRoles(inputOwners, ['video_extend'], false, project);
+      const linkedExtendVideo = extendInput && assetDisplayUrl(extendInput) ? extendInput : null;
       const referenceVideoInputs = inputOwners.flatMap(ownerId => linkedVideoInputsForRoles(ownerId, ['reference_video'], false, project));
       const linkedReferenceVideos = referenceVideoInputs.filter(node => assetDisplayUrl(node));
       const firstInput = firstLinkedImageInputForRoles(inputOwners, ['first_frame'], false, project);
@@ -32420,6 +32780,9 @@
       const editMentionIds = new Set((promptPick.mentionBindings || [])
         .filter(binding => binding.inputRole === 'video_edit')
         .map(binding => binding.nodeId));
+      const extendMentionIds = new Set((promptPick.mentionBindings || [])
+        .filter(binding => binding.inputRole === 'video_extend')
+        .map(binding => binding.nodeId));
       const firstFrameMentionIds = new Set((promptPick.mentionBindings || [])
         .filter(binding => binding.inputRole === 'first_frame')
         .map(binding => binding.nodeId));
@@ -32427,10 +32790,11 @@
         .filter(binding => binding.inputRole === 'last_frame')
         .map(binding => binding.nodeId));
       const editVideo = linkedEditVideo || mentionedVideos.find(node => editMentionIds.has(node.id)) || null;
+      const extendVideo = editVideo ? null : linkedExtendVideo || mentionedVideos.find(node => extendMentionIds.has(node.id)) || null;
       const mentionedFirst = mentionedImages.find(node => firstFrameMentionIds.has(node.id)) || null;
       const mentionedLast = mentionedImages.find(node => lastFrameMentionIds.has(node.id)) || null;
-      const first = editVideo ? null : linkedFirst || mentionedFirst || null;
-      const last = editVideo ? null : linkedLast || mentionedLast || null;
+      const first = editVideo || extendVideo ? null : linkedFirst || mentionedFirst || null;
+      const last = editVideo || extendVideo ? null : linkedLast || mentionedLast || null;
       const linkedRefs = inputOwners
         .flatMap(ownerId => linkedImageInputsForRoles(ownerId, ['ref', 'style_ref', 'subject_ref'], true, project))
         .map(node => node.id);
@@ -32438,13 +32802,13 @@
         .map(node => node.id)
         .filter(id => id !== first?.id && id !== last?.id);
       const mentionVideoRefs = mentionedVideos
-        .filter(node => node.id !== editVideo?.id)
+        .filter(node => node.id !== editVideo?.id && node.id !== extendVideo?.id)
         .map(node => node.id);
       const referenceVideoNodeIds = [...new Set([
         ...mentionVideoRefs,
         ...linkedReferenceVideos.map(node => node.id)
-      ].filter(id => id !== editVideo?.id))];
-      const mode = editVideo ? 'video_edit' : first && last ? 'image_to_video_first_last_frame' : first ? 'image_to_video' : 'text_to_video';
+      ].filter(id => id !== editVideo?.id && id !== extendVideo?.id))];
+      const mode = editVideo ? 'video_edit' : extendVideo ? 'video_extend' : first && last ? 'image_to_video_first_last_frame' : first ? 'image_to_video' : 'text_to_video';
       return {
         mode,
         model,
@@ -32452,17 +32816,19 @@
         firstFrameNodeId: first?.id || '',
         lastFrameNodeId: last?.id || '',
         editVideoNodeId: editVideo?.id || '',
+        extendVideoNodeId: extendVideo?.id || '',
         referenceVideoNodeIds,
         referenceNodeIds: [...new Set([
           ...mentionRefs,
           ...linkedRefs.filter(id => !mentionRefs.includes(id))
         ].filter(id => id !== first?.id && id !== last?.id))],
-        inputNodeIds: [...new Set([editVideo?.id, first?.id, last?.id, ...mentionRefs, ...linkedRefs, ...referenceVideoNodeIds].filter(Boolean))],
+        inputNodeIds: [...new Set([editVideo?.id, extendVideo?.id, first?.id, last?.id, ...mentionRefs, ...linkedRefs, ...referenceVideoNodeIds].filter(Boolean))],
         mentionBindings: promptPick.mentionBindings || [],
         mediaMentionNodeIds: promptPick.mentionNodeIds || [],
         mediaSettings,
         missingInputRoles: [
           editInput && !linkedEditVideo ? 'video_edit' : '',
+          extendInput && !linkedExtendVideo ? 'video_extend' : '',
           referenceVideoInputs.some(node => !assetDisplayUrl(node)) ? 'reference_video' : '',
           firstInput && !linkedFirst ? 'first_frame' : '',
           lastInput && !linkedLast ? 'last_frame' : '',
@@ -32812,7 +33178,13 @@
           updateApiStatus('busy');
           setAgentStatus('busy', 'analysis', '素材快速理解中', `正在调用 ${state.settings.analysisModel}`, project);
         }
-        const detail = await companyChatCompletion(state.settings.analysisModel, [{ role: 'user', content }], { maxTokens: 12000, temperature: 0.2, timeoutMs: MEDIA_PROMPT_TIMEOUT_MS, returnDetail: true });
+        const detail = await companyChatCompletion(state.settings.analysisModel, [{ role: 'user', content }], {
+          maxTokens: 12000,
+          temperature: 0.2,
+          timeoutMs: MEDIA_PROMPT_TIMEOUT_MS,
+          returnDetail: true,
+          signal: controllerOperationContext(project)?.signal
+        });
         if (!detail.content) throw emptyChatResponseError(detail, '素材理解');
         const liveNode = nodeById(node.id, project);
         if (!liveNode) {
@@ -32840,6 +33212,10 @@
         finishActionRun(run, 'completed', { astraIds: [node.id, brief?.id].filter(Boolean), summary: '上传素材理解完成' }, project);
         return { node: updatedNode, brief, analysis };
       } catch (error) {
+        if (isControllerStoppedError(error)) {
+          finishActionRun(run, 'interrupted', { astraIds: [node.id], error: error.message }, project);
+          throw error;
+        }
         if (!nodeById(node.id, project)) {
           finishActionRun(run, 'completed', { summary: 'Media deleted; skipped analysis error.' }, project);
           return;
@@ -33525,6 +33901,8 @@
         return deriveReferenceVideoPromptForMedia({ video: target, prompt, mode: referencePromptModeForMedia(target), project });
       }));
       const failed = settled.filter(item => item.status === 'rejected');
+      const stopped = failed.find(item => isControllerStoppedError(item.reason));
+      if (stopped) throw stopped.reason;
       if (failed.length) {
         finishActionRun(run, 'failed', {
           astraIds: prompts.map(node => node.id),
@@ -33588,7 +33966,7 @@
             lastReversePromptRequest: requestMeta
           }
         }, project);
-        const detail = await reverseImagePromptCompletion(content);
+        const detail = await reverseImagePromptCompletion(content, project);
         if (!detail.content) throw emptyChatResponseError(detail, '图片 Prompt 反推');
         const parsed = parseReferenceImagePromptResponse(detail.content);
         const applied = applyReferenceImagePromptResponse(parsed, prompt, project);
@@ -33616,14 +33994,15 @@
       }
     }
 
-    async function reverseImagePromptCompletion(content) {
+    async function reverseImagePromptCompletion(content, project = currentProject()) {
       const first = await companyChatCompletion(REVERSE_PROMPT_MODEL, [{ role: 'user', content }], {
         maxTokens: 12000,
         temperature: 0.2,
         timeoutMs: MEDIA_PROMPT_TIMEOUT_MS,
         returnDetail: true,
         responseFormat: { type: 'json_object' },
-        reasoningEffort: 'low'
+        reasoningEffort: 'low',
+        signal: controllerOperationContext(project)?.signal
       });
       if (first.content || first.finishReason !== 'length') return first;
       const compactContent = compactReverseImagePromptContent(content);
@@ -33633,7 +34012,8 @@
         timeoutMs: MEDIA_PROMPT_TIMEOUT_MS,
         returnDetail: true,
         responseFormat: { type: 'json_object' },
-        reasoningEffort: 'low'
+        reasoningEffort: 'low',
+        signal: controllerOperationContext(project)?.signal
       });
       retry.retryOf = 'length_empty_first_attempt';
       retry.firstAttempt = reversePromptResponseMeta(first);
@@ -33754,7 +34134,7 @@
             lastReversePromptRequest: requestMeta
           }
         }, project);
-        const detail = await companyChatCompletion(REVERSE_PROMPT_MODEL, [{ role: 'user', content }], { maxTokens: 12000, temperature: 0.2, timeoutMs: MEDIA_PROMPT_TIMEOUT_MS, responseFormat: { type: 'json_object' }, reasoningEffort: 'low', returnDetail: true });
+        const detail = await companyChatCompletion(REVERSE_PROMPT_MODEL, [{ role: 'user', content }], { maxTokens: 12000, temperature: 0.2, timeoutMs: MEDIA_PROMPT_TIMEOUT_MS, responseFormat: { type: 'json_object' }, reasoningEffort: 'low', returnDetail: true, signal: controllerOperationContext(project)?.signal });
         if (!detail.content) throw emptyChatResponseError(detail, '视频 Prompt 反推');
         const parsed = parseReferenceVideoPromptResponse(detail.content);
         applyReferenceVideoPromptResponse(parsed, [prompt], project);
@@ -33821,7 +34201,7 @@
             lastReversePromptRequest: requestMeta
           }
         }, project);
-        const detail = await companyChatCompletion(REVERSE_PROMPT_MODEL, [{ role: 'user', content }], { maxTokens: 12000, temperature: 0.1, timeoutMs: MEDIA_PROMPT_TIMEOUT_MS, responseFormat: { type: 'json_object' }, reasoningEffort: 'low', returnDetail: true });
+        const detail = await companyChatCompletion(REVERSE_PROMPT_MODEL, [{ role: 'user', content }], { maxTokens: 12000, temperature: 0.1, timeoutMs: MEDIA_PROMPT_TIMEOUT_MS, responseFormat: { type: 'json_object' }, reasoningEffort: 'low', returnDetail: true, signal: controllerOperationContext(project)?.signal });
         if (!detail.content) throw emptyChatResponseError(detail, '视频 Prompt 反推');
         const parsed = parseReferenceVideoPromptResponse(detail.content);
         applyReferenceVideoPromptResponse(parsed, [prompt], project);
@@ -35198,7 +35578,7 @@
         state.settings.videoModel = canonicalModelValue($('settingsVideoSelect').value);
         state.settings.musicModel = $('musicModelInput').value.trim() || MUSIC_MODELS[0];
         state.settings.aspectRatio = $('aspectSelect').value;
-        state.settings.duration = clampSeedance2Duration($('durationInput').value || 5);
+        state.settings.duration = clampSeedance2Duration($('durationInput').value || 5, { model: state.settings.videoModel });
         state.settings.preferences = $('preferenceInput').value.trim();
         state.settings.notificationsEnabled = !!$('notificationEnabledInput')?.checked;
         state.settings.telemetryWebhookUrl = '';
@@ -35230,6 +35610,7 @@
       };
       $('downloadBtn').onclick = downloadPackage;
       $('sendBtn').onclick = sendChat;
+      $('stopControllerBtn').onclick = stopControllerChat;
       $('chatInput').oninput = () => {
         renderSendAction();
         updateControllerMentionMenuForChat($('chatInput'));
@@ -35586,6 +35967,7 @@
       plannerImageResolutionOptions,
       plannerVideoResolutionOptions,
       plannerVideoAspectRatioOptions,
+      clampSeedance2Duration,
       waveSpeedVideoDuration,
       waveSpeedImageResolution,
       sizeForAspect,
@@ -35625,6 +36007,8 @@
       handleLocalCodexEvent,
       handleLocalCodexOperationRequest,
       sendLocalCodexChat,
+      stopControllerChat,
+      renderSendAction,
       executeLocalCodexCanvasOperation,
       localCodexAuraContext,
       localCodexNodeSnapshot,
@@ -35632,6 +36016,7 @@
       saveLocalCodexOperationReceipt,
       nodeContentRevisionHash,
       localCodexBridgeRuntime,
+      controllerChatRunsByProjectId,
       mobsControllerProfileRuntime,
       syncMobsControllerProfileUI,
       refreshMobsControllerProfileStatus,

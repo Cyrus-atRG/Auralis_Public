@@ -1,0 +1,48 @@
+{
+    "schemaVersion":  2,
+    "platform":  "macos-arm64",
+    "releaseVersion":  "Auralis v1.20",
+    "publishedAt":  "2026-08-10T11:36:14.4436465Z",
+    "changelog":  [
+                      "新增 WS / Seedance 2.5 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频、视频编辑与视频延长；支持 480p/720p/1080p、4–30 秒及多种横竖画幅。",
+                      "主控输入区新增“停止”按钮，可中止公司 API 请求或本地 Codex 当前回合；停止期间会显示明确状态，并阻止已取消操作继续执行。",
+                      "完善视频输入连线与 WaveSpeed 上传：新增 video_extend 角色，本地或缓存图片/视频会在提交前重新上传，模型参数与不支持的 4K 请求由主控和界面一致校验。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.20",
+                           "url":  "Auralis.html",
+                           "size":  1834670,
+                           "sha256":  "6f4dded98bdf09692ae12c2729dd93444149e7e6a90c2b289359d5cd73b891a7",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.20",
+                           "url":  "auralis-runtime-macos-arm64.zip",
+                           "size":  38856129,
+                           "sha256":  "1c8787c3109763a2d06c61f44a6a52af473005710785f0204c5c50fc7504c20a",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.20",
+                           "url":  "auralis-controller-packs-macos-arm64.zip",
+                           "size":  24721,
+                           "sha256":  "241021ed7a25fb6f8fd96bab89d8465b4661518ad8bc2c5b8b2a032bbef504e1",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.18.0",
+                           "url":  "auralis-launcher-macos-arm64.zip",
+                           "size":  38895429,
+                           "sha256":  "f66e7a6b0207d6d497dcc86877bd4a3ba718246e8cb5b145b728fd2ba2a01377",
+                           "format":  "zip",
+                           "executableSize":  176,
+                           "executableSha256":  "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
+                           "bundleSha256":  "aec9aec592b6a8b33561e2f6442335fd2962021799cbbd34680c8f52b4216278"
+                       }
+                   ]
+}

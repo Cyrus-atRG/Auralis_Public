@@ -1,35 +1,35 @@
 {
     "schemaVersion":  2,
-    "releaseVersion":  "Auralis v1.19",
-    "publishedAt":  "2026-08-05T09:13:50.5627321Z",
+    "releaseVersion":  "Auralis v1.20",
+    "publishedAt":  "2026-08-10T11:36:02.0923473Z",
     "changelog":  [
-                      "新增 WS / MiniMax H3 视频模型，支持文生视频、首尾帧图生视频和参考图/参考视频生视频，提供 480p/768p、5–15 秒及多种横竖画幅参数。",
-                      "新增视频“超清处理”：可从单个或多选视频的右键菜单一键调用 WaveSpeed Video Upscaler，按源尺寸自动升至 1080p、2K 或 4K，也支持主控指定目标分辨率。",
-                      "主控新增 upscaleVideo 画布操作，超清结果会作为新视频 Astra 与源视频建立关联；本地或缓存视频在提交前自动上传，避免 WaveSpeed 无法读取 file/blob 素材。"
+                      "新增 WS / Seedance 2.5 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频、视频编辑与视频延长；支持 480p/720p/1080p、4–30 秒及多种横竖画幅。",
+                      "主控输入区新增“停止”按钮，可中止公司 API 请求或本地 Codex 当前回合；停止期间会显示明确状态，并阻止已取消操作继续执行。",
+                      "完善视频输入连线与 WaveSpeed 上传：新增 video_extend 角色，本地或缓存图片/视频会在提交前重新上传，模型参数与不支持的 4K 请求由主控和界面一致校验。"
                   ],
     "components":  [
                        {
                            "id":  "html",
-                           "version":  "Auralis v1.19",
+                           "version":  "Auralis v1.20",
                            "url":  "Auralis.html",
-                           "size":  1813080,
-                           "sha256":  "382f8358b645932609351d20f869584051b5c19b1a913d9a6f58b949d0c0cf19",
+                           "size":  1834670,
+                           "sha256":  "6f4dded98bdf09692ae12c2729dd93444149e7e6a90c2b289359d5cd73b891a7",
                            "format":  "file"
                        },
                        {
                            "id":  "runtime",
-                           "version":  "Auralis v1.19",
+                           "version":  "Auralis v1.20",
                            "url":  "auralis-runtime-windows-x64.zip",
                            "size":  33640840,
-                           "sha256":  "25f236aca48678334163cae86f282377ce07818f5c34c0341eef6fffeb91efbe",
+                           "sha256":  "2d791c1a94fdd3b10dd6272748f632410fe9f6b761e0052b60d5e3c81057dfe5",
                            "format":  "zip"
                        },
                        {
                            "id":  "controller-packs",
-                           "version":  "Auralis v1.19",
+                           "version":  "Auralis v1.20",
                            "url":  "auralis-controller-packs.zip",
                            "size":  22380,
-                           "sha256":  "9b94120385d77170329eaf469495b68843699348fed70cf11bc92835d3c6bd53",
+                           "sha256":  "13716f2bc2e0f90ef57a6329e278ba3446092beb8ea745643b17992027134e30",
                            "format":  "zip"
                        },
                        {
@@ -37,7 +37,7 @@
                            "version":  "1.17.0",
                            "url":  "Auralis Launcher.exe",
                            "size":  119808,
-                           "sha256":  "75e4fd1a154b885bc05fb3324d794c1542648a9efad8f7b7d29fcad522920016",
+                           "sha256":  "625dc33424c9732c52309ecdd3d029fea8d787be8bf32d240c25f014d3e81bfc",
                            "format":  "file"
                        }
                    ]
