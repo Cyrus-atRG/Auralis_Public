@@ -1,44 +1,44 @@
 {
-    "schemaVersion":  2,
-    "releaseVersion":  "Auralis v1.20",
-    "publishedAt":  "2026-08-10T11:36:02.0923473Z",
-    "changelog":  [
-                      "新增 WS / Seedance 2.5 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频、视频编辑与视频延长；支持 480p/720p/1080p、4–30 秒及多种横竖画幅。",
-                      "主控输入区新增“停止”按钮，可中止公司 API 请求或本地 Codex 当前回合；停止期间会显示明确状态，并阻止已取消操作继续执行。",
-                      "完善视频输入连线与 WaveSpeed 上传：新增 video_extend 角色，本地或缓存图片/视频会在提交前重新上传，模型参数与不支持的 4K 请求由主控和界面一致校验。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "Auralis v1.20",
-                           "url":  "Auralis.html",
-                           "size":  1834670,
-                           "sha256":  "6f4dded98bdf09692ae12c2729dd93444149e7e6a90c2b289359d5cd73b891a7",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "Auralis v1.20",
-                           "url":  "auralis-runtime-windows-x64.zip",
-                           "size":  33640840,
-                           "sha256":  "2d791c1a94fdd3b10dd6272748f632410fe9f6b761e0052b60d5e3c81057dfe5",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "Auralis v1.20",
-                           "url":  "auralis-controller-packs.zip",
-                           "size":  22380,
-                           "sha256":  "13716f2bc2e0f90ef57a6329e278ba3446092beb8ea745643b17992027134e30",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "launcher",
-                           "version":  "1.17.0",
-                           "url":  "Auralis Launcher.exe",
-                           "size":  119808,
-                           "sha256":  "625dc33424c9732c52309ecdd3d029fea8d787be8bf32d240c25f014d3e81bfc",
-                           "format":  "file"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "releaseVersion": "Auralis v1.21",
+  "publishedAt": "2026-08-28T14:13:33.0974972Z",
+  "changelog": [
+    "新增 WS / Gemini Omni 1.1 Flash 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频生视频与视频编辑，并按输入自动路由对应接口。",
+    "补齐 Omni 模型参数与输入约束：支持 360p/720p/1080p/4K、16:9/9:16 与 3–10 秒；参考模式最多接收 10 张图片、3 段不超过 3 秒的视频，并阻止互斥模式混用。",
+    "升级 WaveSpeed 素材上传为预签名对象存储流程：保留文件名与 MIME 类型，限制单文件 200 MiB，本地 media bridge 与浏览器回退路径均会校验上传票据且不向存储地址泄露 API Key。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "Auralis v1.21",
+      "url": "Auralis.html",
+      "size": 1842581,
+      "sha256": "ada31107ccc5aefa407a3ac662d4060a020d92031df05b9421e696f4abf1f0b9",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "Auralis v1.21",
+      "url": "auralis-runtime-windows-x64.zip",
+      "size": 34683074,
+      "sha256": "1402f9dc10bb832ac5b64a1b8215eae63b63f4a86aa11b5df858c3e927c4511c",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "Auralis v1.21",
+      "url": "auralis-controller-packs.zip",
+      "size": 23094,
+      "sha256": "7f3d281d4d5b8b6a3c6f5d8e0ff64619b002d8ba04edec8a0e19f3f0640db8f9",
+      "format": "zip"
+    },
+    {
+      "id": "launcher",
+      "version": "1.17.0",
+      "url": "Auralis Launcher.exe",
+      "size": 119808,
+      "sha256": "e23aea3632524f8d708a88576288eda49d1407eb905b7a66a5a7c71b45af098c",
+      "format": "file"
+    }
+  ]
 }

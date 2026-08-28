@@ -1,48 +1,48 @@
 {
-    "schemaVersion":  2,
-    "platform":  "macos-arm64",
-    "releaseVersion":  "Auralis v1.20",
-    "publishedAt":  "2026-08-10T11:36:14.4436465Z",
-    "changelog":  [
-                      "新增 WS / Seedance 2.5 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频、视频编辑与视频延长；支持 480p/720p/1080p、4–30 秒及多种横竖画幅。",
-                      "主控输入区新增“停止”按钮，可中止公司 API 请求或本地 Codex 当前回合；停止期间会显示明确状态，并阻止已取消操作继续执行。",
-                      "完善视频输入连线与 WaveSpeed 上传：新增 video_extend 角色，本地或缓存图片/视频会在提交前重新上传，模型参数与不支持的 4K 请求由主控和界面一致校验。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "Auralis v1.20",
-                           "url":  "Auralis.html",
-                           "size":  1834670,
-                           "sha256":  "6f4dded98bdf09692ae12c2729dd93444149e7e6a90c2b289359d5cd73b891a7",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "Auralis v1.20",
-                           "url":  "auralis-runtime-macos-arm64.zip",
-                           "size":  38856129,
-                           "sha256":  "1c8787c3109763a2d06c61f44a6a52af473005710785f0204c5c50fc7504c20a",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "Auralis v1.20",
-                           "url":  "auralis-controller-packs-macos-arm64.zip",
-                           "size":  24721,
-                           "sha256":  "241021ed7a25fb6f8fd96bab89d8465b4661518ad8bc2c5b8b2a032bbef504e1",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "launcher",
-                           "version":  "1.18.0",
-                           "url":  "auralis-launcher-macos-arm64.zip",
-                           "size":  38895429,
-                           "sha256":  "f66e7a6b0207d6d497dcc86877bd4a3ba718246e8cb5b145b728fd2ba2a01377",
-                           "format":  "zip",
-                           "executableSize":  176,
-                           "executableSha256":  "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
-                           "bundleSha256":  "aec9aec592b6a8b33561e2f6442335fd2962021799cbbd34680c8f52b4216278"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "platform": "macos-arm64",
+  "releaseVersion": "Auralis v1.21",
+  "publishedAt": "2026-08-28T14:13:41.6490583Z",
+  "changelog": [
+    "新增 WS / Gemini Omni 1.1 Flash 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频生视频与视频编辑，并按输入自动路由对应接口。",
+    "补齐 Omni 模型参数与输入约束：支持 360p/720p/1080p/4K、16:9/9:16 与 3–10 秒；参考模式最多接收 10 张图片、3 段不超过 3 秒的视频，并阻止互斥模式混用。",
+    "升级 WaveSpeed 素材上传为预签名对象存储流程：保留文件名与 MIME 类型，限制单文件 200 MiB，本地 media bridge 与浏览器回退路径均会校验上传票据且不向存储地址泄露 API Key。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "Auralis v1.21",
+      "url": "Auralis.html",
+      "size": 1842581,
+      "sha256": "ada31107ccc5aefa407a3ac662d4060a020d92031df05b9421e696f4abf1f0b9",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "Auralis v1.21",
+      "url": "auralis-runtime-macos-arm64.zip",
+      "size": 38856457,
+      "sha256": "4db760f308de332ab11fe696997f03f3c4247d6a3109a6b883dfb0da3fa7dc9d",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "Auralis v1.21",
+      "url": "auralis-controller-packs-macos-arm64.zip",
+      "size": 24721,
+      "sha256": "212bbc56ce61b7923b1e78cd2425b37e7952d60a6b1b0e918770b4915795d0cb",
+      "format": "zip"
+    },
+    {
+      "id": "launcher",
+      "version": "1.18.0",
+      "url": "auralis-launcher-macos-arm64.zip",
+      "size": 38895427,
+      "sha256": "3855fb0fc3688e1e006e0b3fc163f8b561ae6e1c061eacef8a0631e444fb2d89",
+      "format": "zip",
+      "executableSize": 176,
+      "executableSha256": "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
+      "bundleSha256": "af19f40d8ebce9ddaed1d532fc3de0173280d4ec90d44ed4230147ef55875f0f"
+    }
+  ]
 }
