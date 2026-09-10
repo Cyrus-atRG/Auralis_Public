@@ -7413,16 +7413,16 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.21';
+    const AURALIS_VERSION = 'Auralis v1.22';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 WS / Gemini Omni 1.1 Flash 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频生视频与视频编辑，并按输入自动路由对应接口。',
-      '补齐 Omni 模型参数与输入约束：支持 360p/720p/1080p/4K、16:9/9:16 与 3–10 秒；参考模式最多接收 10 张图片、3 段不超过 3 秒的视频，并阻止互斥模式混用。',
-      '升级 WaveSpeed 素材上传为预签名对象存储流程：保留文件名与 MIME 类型，限制单文件 200 MiB，本地 media bridge 与浏览器回退路径均会校验上传票据且不向存储地址泄露 API Key。'
+      '新增 WaveSpeed GPT Image 2.5 Flare（GIF）和 Sunburst（GIS），支持文生图、参考图生图、改图与扩图。',
+      '默认素材理解模型升级为 Gemini 3.8 Flash，原 3.5 Flash 设置自动迁移；图片与视频反推同步升级。',
+      '调整图像模型列表：GIF、GIS 排在 WS GI2 前，移除 SD5P、R4.1P 和 C3S。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9130,7 +9130,7 @@
       aura: '\u5207\u6362\u5230 Aura \u5916\u89c2',
       caelum: '\u5207\u6362\u5230 Caelum \u5916\u89c2'
     };
-    const LLM_MODELS = ['claude-opus-4-8', 'deepseek-v4-pro', 'gemini-3.5-flash', 'gemini-3.1-pro-preview', 'gpt-5.5'];
+    const LLM_MODELS = ['claude-opus-4-8', 'deepseek-v4-pro', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gpt-5.5'];
     const LOCAL_CODEX_MODELS = ['local-codex/app-server'];
     const LEGACY_LOCAL_CODEX_MODELS = new Set(['local-codex/gpt-5.5']);
     const CHAT_TEMPERATURE_UNSUPPORTED_MODELS = new Set(['claude-opus-4-8']);
@@ -9141,8 +9141,8 @@
       { value: 'xhigh', label: '极高' },
       { value: 'inherit', label: '跟随 Codex 配置' }
     ];
-    const ANALYSIS_MODELS = ['gemini-3.5-flash', 'gemini-3.1-pro-preview', 'gemini-3-pro-preview'];
-    const IMAGE_MODELS = ['rg-gpt-image-2', 'rg-nano-banana-2', 'rg-nano-banana-pro', 'rg-seedream-5-pro', 'ws-gpt-image-2', 'ws-nano-banana-pro', 'ws-flux-2-max', 'ws-cosmos-3-super', 'ws-krea-v2-large', 'ws-recraft-v4.1-pro', 'ws-midjourney'];
+    const ANALYSIS_MODELS = ['gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gemini-3-pro-preview'];
+    const IMAGE_MODELS = ['rg-gpt-image-2', 'rg-nano-banana-2', 'rg-nano-banana-pro', 'ws-gpt-image-2.5-flare', 'ws-gpt-image-2.5-sunburst', 'ws-gpt-image-2', 'ws-nano-banana-pro', 'ws-flux-2-max', 'ws-krea-v2-large', 'ws-midjourney'];
     const VIDEO_MODELS = [
       'rg-seedance-2-fast',
       'rg-seedance-2',
@@ -9179,6 +9179,8 @@
       'rg-gpt-image-2': 'RG/GI2',
       'rg-nano-banana-2': 'RG/NB2',
       'rg-nano-banana-pro': 'RG/NBP',
+      'ws-gpt-image-2.5-flare': 'WS/GIF',
+      'ws-gpt-image-2.5-sunburst': 'WS/GIS',
       'ws-gpt-image-2': 'WS/GI2',
       'ws-nano-banana-pro': 'WS/NBP',
       'ws-flux-2-max': 'WS/F2M',
@@ -9197,6 +9199,14 @@
       'ws-gemini-omni-1.1-flash': 'WS/Omni 1.1F'
     });
     const IMAGE_MODEL_REGISTRY = {
+      'ws-gpt-image-2.5-sunburst': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-sunburst/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-sunburst/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16 },
+      'openai/gpt-image-2.5-sunburst': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-sunburst/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-sunburst/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16, canonical: 'ws-gpt-image-2.5-sunburst' },
+      'openai/gpt-image-2.5-sunburst/text-to-image': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-sunburst/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-sunburst/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16, canonical: 'ws-gpt-image-2.5-sunburst' },
+      'openai/gpt-image-2.5-sunburst/edit': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-sunburst/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-sunburst/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16, canonical: 'ws-gpt-image-2.5-sunburst' },
+      'ws-gpt-image-2.5-flare': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-flare/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-flare/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16 },
+      'openai/gpt-image-2.5-flare': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-flare/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-flare/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16, canonical: 'ws-gpt-image-2.5-flare' },
+      'openai/gpt-image-2.5-flare/text-to-image': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-flare/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-flare/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16, canonical: 'ws-gpt-image-2.5-flare' },
+      'openai/gpt-image-2.5-flare/edit': { provider: 'wavespeed', endpointModel: 'openai/gpt-image-2.5-flare/text-to-image', editEndpointModel: 'openai/gpt-image-2.5-flare/edit', bodyKind: 'gpt-image-2.5', imageModes: ['text', 'reference', 'edit'], maxImageInputs: 16, canonical: 'ws-gpt-image-2.5-flare' },
       'rg-seedream-5-pro': { provider: 'company', endpoint: 'images', requestModel: 'doubao-seedream-5-0-pro-260628', bodyKind: 'seedream', imageInputField: 'image', maxImageInputs: 10, imageResolutions: ['1080', '2k'] },
       'rg-gpt-image-2': { provider: 'company', endpoint: 'images', editEndpoint: 'images', requestModel: 'gpt-image-2' },
       'rg-nano-banana-2': { provider: 'company', endpoint: 'chat', requestModel: 'gemini-3.1-flash-image' },
@@ -9280,6 +9290,8 @@
       'rg-nano-banana-2': 'RG / Nano Banana 2',
       'rg-nano-banana-flash': 'RG / Nano Banana 2',
       'rg-nano-banana-pro': 'RG / Nano Banana Pro',
+      'ws-gpt-image-2.5-flare': 'WS / GPT Image 2.5 Flare',
+      'ws-gpt-image-2.5-sunburst': 'WS / GPT Image 2.5 Sunburst',
       'ws-gpt-image-2': 'WS / GPT Image 2',
       'ws-nano-banana-pro': 'WS / Nano Banana Pro',
       'ws-flux-2-max': 'WS / Flux 2 Max',
@@ -9296,6 +9308,12 @@
       'ws-gemini-omni-1.1-flash': 'WS / Gemini Omni 1.1 Flash'
     };
     const MODEL_ALIASES = Object.freeze({
+      gis: 'ws-gpt-image-2.5-sunburst',
+      wsgis: 'ws-gpt-image-2.5-sunburst',
+      gptimage25sunburst: 'ws-gpt-image-2.5-sunburst',
+      gif: 'ws-gpt-image-2.5-flare',
+      wsgif: 'ws-gpt-image-2.5-flare',
+      gptimage25flare: 'ws-gpt-image-2.5-flare',
       sd5p: 'rg-seedream-5-pro',
       seedream5: 'rg-seedream-5-pro',
       seedream50pro: 'rg-seedream-5-pro',
@@ -9337,7 +9355,7 @@
     const DEFAULT_LLM_TIMEOUT_MS = 180000;
     const IMAGE_GENERATION_TIMEOUT_MS = 600000;
     const MEDIA_PROMPT_TIMEOUT_MS = 120000;
-    const REVERSE_PROMPT_MODEL = 'gemini-3.5-flash';
+    const REVERSE_PROMPT_MODEL = 'gemini-3.8-flash';
 
     const TYPE_LABELS = {
       input: '输入',
@@ -10014,7 +10032,7 @@
         elevenLabsApiKey: '',
         elevenLabsVoiceId: '',
         llmModel: 'gpt-5.5',
-        analysisModel: 'gemini-3.5-flash',
+        analysisModel: 'gemini-3.8-flash',
         imageModel: 'ws-gpt-image-2',
         videoModel: 'ws-seedance-2-fast',
         musicModel: 'mureka-ai/mureka-v9/generate-bgm',
@@ -16318,6 +16336,7 @@
     function outpaintModelForSource(source) {
       const raw = String(source?.model || source?.generation?.model || source?.meta?.model || '').trim();
       const model = canonicalModelValue(raw);
+      if (mediaModelConfig(model, 'image').bodyKind === 'gpt-image-2.5') return model;
       if (/gpt-image-2/i.test(raw) || /gpt-image-2/i.test(model)) {
         return mediaModelProvider(model, 'image') === 'wavespeed' ? 'ws-gpt-image-2' : 'rg-gpt-image-2';
       }
@@ -31297,6 +31316,22 @@
           seed: -1,
           enable_base64_output: false,
           ...(referenceImages[0] ? { sref: referenceImages[0] } : {})
+        };
+      }
+      if (config.bodyKind === 'gpt-image-2.5') {
+        const inputCount = imageInputNodeIdsForExecution(resolvedExecution).length + outpaintReferenceDataUrlsForExecution(resolvedExecution).length;
+        if (inputCount > config.maxImageInputs) throw new Error(`${modelDisplayLabel(model)} 最多支持 ${config.maxImageInputs} 张输入图片。`);
+        if (executionMode !== 'text' && !inputCount) throw new Error(`${modelDisplayLabel(model)} 的${executionMode === 'edit' ? '改图' : '参考图生图'}需要至少一张输入图片。`);
+        const images = executionMode === 'text' ? [] : await waveSpeedImageInputUrlsForExecution(resolvedExecution, project);
+        return {
+          prompt,
+          ...(images.length ? { images } : {}),
+          aspect_ratio: mediaSettings.imageAspectRatio,
+          resolution: waveSpeedImageResolution(mediaSettings.imageResolution),
+          quality: 'medium',
+          output_format: 'png',
+          enable_sync_mode: false,
+          enable_base64_output: false
         };
       }
       if (config.bodyKind === 'flux-2-max') {

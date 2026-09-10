@@ -1,35 +1,35 @@
 {
   "schemaVersion": 2,
-  "releaseVersion": "Auralis v1.21",
-  "publishedAt": "2026-08-28T14:13:33.0974972Z",
+  "releaseVersion": "Auralis v1.22",
+  "publishedAt": "2026-09-10T03:57:29.6232501Z",
   "changelog": [
-    "新增 WS / Gemini Omni 1.1 Flash 视频模型，覆盖文生视频、首尾帧图生视频、参考图/参考视频生视频与视频编辑，并按输入自动路由对应接口。",
-    "补齐 Omni 模型参数与输入约束：支持 360p/720p/1080p/4K、16:9/9:16 与 3–10 秒；参考模式最多接收 10 张图片、3 段不超过 3 秒的视频，并阻止互斥模式混用。",
-    "升级 WaveSpeed 素材上传为预签名对象存储流程：保留文件名与 MIME 类型，限制单文件 200 MiB，本地 media bridge 与浏览器回退路径均会校验上传票据且不向存储地址泄露 API Key。"
+    "新增 WaveSpeed GPT Image 2.5 Flare（GIF）和 Sunburst（GIS），支持文生图、参考图生图、改图与扩图。",
+    "默认素材理解模型升级为 Gemini 3.8 Flash，原 3.5 Flash 设置自动迁移；图片与视频反推同步升级。",
+    "调整图像模型列表：GIF、GIS 排在 WS GI2 前，移除 SD5P、R4.1P 和 C3S。"
   ],
   "components": [
     {
       "id": "html",
-      "version": "Auralis v1.21",
+      "version": "Auralis v1.22",
       "url": "Auralis.html",
-      "size": 1842581,
-      "sha256": "ada31107ccc5aefa407a3ac662d4060a020d92031df05b9421e696f4abf1f0b9",
+      "size": 1846329,
+      "sha256": "585843d8f24596753ec694d83be47439c35a6b6c7470b295a80752b728efe7a9",
       "format": "file"
     },
     {
       "id": "runtime",
-      "version": "Auralis v1.21",
+      "version": "Auralis v1.22",
       "url": "auralis-runtime-windows-x64.zip",
       "size": 34683074,
-      "sha256": "1402f9dc10bb832ac5b64a1b8215eae63b63f4a86aa11b5df858c3e927c4511c",
+      "sha256": "914eaec922c2d8d819c1fb9005442b99fd7b8928eae794ce3f00c4517262f3f6",
       "format": "zip"
     },
     {
       "id": "controller-packs",
-      "version": "Auralis v1.21",
+      "version": "Auralis v1.22",
       "url": "auralis-controller-packs.zip",
       "size": 23094,
-      "sha256": "7f3d281d4d5b8b6a3c6f5d8e0ff64619b002d8ba04edec8a0e19f3f0640db8f9",
+      "sha256": "2e07dd71ec68e4e54f1fc88d9f828ca60df80197b08925905f2fe1fe8a34d95f",
       "format": "zip"
     },
     {
@@ -37,7 +37,7 @@
       "version": "1.17.0",
       "url": "Auralis Launcher.exe",
       "size": 119808,
-      "sha256": "e23aea3632524f8d708a88576288eda49d1407eb905b7a66a5a7c71b45af098c",
+      "sha256": "9b528cc3acc4a73e92d845233fc9cbee814ad85bd64f7ef4f9e5405fc43e24da",
       "format": "file"
     }
   ]
