@@ -1,38 +1,37 @@
 {
   "schemaVersion": 2,
-  "releaseVersion": "1.1.0",
-  "publishedAt": "2026-10-13T07:43:30.1562987Z",
+  "releaseVersion": "1.1.1",
+  "publishedAt": "2026-10-13T10:26:39.0463817Z",
   "changelog": [
-    "各环节拥有独立的 Agent 会话、输入草稿和运行状态；切换页面可接着之前的讨论，后台任务继续执行。",
-    "Agent 只接收当前环节需要的已保存文档；上游文档有变更时，在下一条用户消息前自动附上修改位置。",
-    "各环节采用专属系统提示词和创作指导，并沿用全局 official／自定义提示词设置。",
-    "主控支持公司 API 与 Codex 切换，可分别选择公司模型和 Codex 推理强度。",
-    "新建短剧默认使用 RG GPT Image 2 生图、RG Seedance 2.5 生视频，保留已有项目的模型选择。",
-    "首页项目支持右键重命名、复制和删除；删除前二次确认，复制时保留内容和素材并建立独立项目。"
+    "参考与灵感中的图片支持命名后导入资产库；制作 Agent 可查看并复用已有资产。",
+    "修复素材解析未读取共享公司 API 配置的问题；在设置中保存后，已打开的素材窗口也能使用最新地址和 Key。",
+    "共享 API 设置保留未保存的输入，避免旧窗口覆盖新配置；缺少地址或 Key 时明确提示填写位置。",
+    "Agent 可在当前环节修改、排序、删除和恢复设定、资产与视频计划，并调整名称、描述和生成参数；候选采用与视频生成仍由用户确认。",
+    "设定卡新增删除入口，历史内容和已有分集引用保留；聊天输入支持 Enter 换行、Ctrl+Enter 或 ⌘+Enter 发送。"
   ],
   "components": [
     {
       "id": "html",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "url": "AuralisDrama.html",
-      "size": 4323,
-      "sha256": "db8beada2e3e7ad4dc65887c7bd598c64d82ca33e4b46543ac87c9faf3bf6572",
+      "size": 4387,
+      "sha256": "f73f7597d1915c6222de8446f75b59d1326e582a5f637d107936846b8e14bc91",
       "format": "file"
     },
     {
       "id": "runtime",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "url": "auralis-drama-runtime-windows-x64.zip",
-      "size": 35294439,
-      "sha256": "904d3d0599c92eff097514737a491867bec3367242110454f77da362a3d6143f",
+      "size": 35304001,
+      "sha256": "1de4c8363b2eb7d96eda92e9bafeaa4a78d59fa9dfa866ceb1207068a361bc00",
       "format": "zip"
     },
     {
       "id": "controller-packs",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "url": "auralis-drama-controller-packs.zip",
       "size": 25836,
-      "sha256": "1c8576ffe8ea9d9b262890936b0a5b2b3bac65e5e4ff74c18004182ec70e86a0",
+      "sha256": "a74ab62b74c8aa5c7b73585bbeace144a85c257e17ed4aa3117c30b63cdbf761",
       "format": "zip"
     }
   ]
