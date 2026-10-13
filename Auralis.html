@@ -5627,7 +5627,7 @@
     },
     upscaleVideo: {
       target: 'selector for video Astra with media assets',
-      targetResolution: '720p|1080p|2k|4k optional; default derives from the source video resolution'
+      targetResolution: '1080p|2k|4k optional; default derives from the source video resolution'
     },
     promoteMediaCandidate: {
       target: 'selector'
@@ -5884,7 +5884,7 @@
       notes: ['Use for requests like gi2 and nbp each make two versions.', 'Use for requests like generate two videos from this prompt by setting models to the current video model and variantsPerModel to the requested count.', 'Use payload.mediaSettings for one-off aspect ratio, image resolution, video resolution, or duration overrides.']
     }),
     upscaleVideo: operationPlannerHint({
-      intent: 'Upscale one or more existing video Astra with WaveSpeed video-upscaler-pro.',
+      intent: 'Upscale one or more existing video Astra with ByteDance video-upscaler via WaveSpeed.',
       target: 'Use selected or explicitly referenced Luna video Astra with readable assets.',
       notes: ['Omit targetResolution unless the user requests a specific output size: 720/768-class sources default to 1080p, 1080-class sources default to 2k, and larger sources default to 4k.', 'Each source produces one completed Luna.genVideo Astra connected from the source with inputRole upscale.']
     }),
@@ -6626,8 +6626,8 @@
           const withoutAssets = targets.filter(node => node.hasAsset !== true);
           if (withoutAssets.length) fail(`upscaleVideo target must have video assets: ${withoutAssets.map(astraLabel).join(', ')}.`);
         }
-        if (payload.targetResolution !== undefined && !new Set(['720p', '1080p', '2k', '4k']).has(String(payload.targetResolution).toLowerCase())) {
-          fail('upscaleVideo payload.targetResolution must be 720p, 1080p, 2k, or 4k.');
+        if (payload.targetResolution !== undefined && !new Set(['1080p', '2k', '4k']).has(String(payload.targetResolution).toLowerCase())) {
+          fail('upscaleVideo payload.targetResolution must be 1080p, 2k, or 4k.');
         }
         break;
       case 'promoteMediaCandidate':
@@ -7413,16 +7413,18 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.22';
+    const AURALIS_VERSION = 'Auralis v1.23';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 WaveSpeed GPT Image 2.5 Flare（GIF）和 Sunburst（GIS），支持文生图、参考图生图、改图与扩图。',
-      '默认素材理解模型升级为 Gemini 3.8 Flash，原 3.5 Flash 设置自动迁移；图片与视频反推同步升级。',
-      '调整图像模型列表：GIF、GIS 排在 WS GI2 前，移除 SD5P、R4.1P 和 C3S。'
+      'Windows 启动器新增并列的自由画布、短剧工作台入口，分别查看版本、更新日志并独立更新。',
+      '自由画布与短剧共享 RG、WaveSpeed 和 ElevenLabs API 配置。',
+      '新增 RG Seedance 2.5，支持参考图、首尾帧、视频编辑与延长；短剧支持 RG 生图和生视频。',
+      '短剧设置新增全局提示词编辑、official / 自定义切换及含素材的自动备份恢复。',
+      '自由画布超清升级为 ByteDance，支持 1080p、2K 和 4K。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9102,7 +9104,7 @@
     ].join('');
     // AURALIS_TUTORIAL_EMBED_END
     const WAVESPEED_URL = 'https://api.wavespeed.ai/api/v3';
-    const VIDEO_UPSCALER_MODEL = 'wavespeed-ai/video-upscaler-pro';
+    const VIDEO_UPSCALER_MODEL = 'bytedance/video-upscaler';
     const WAVESPEED_UPLOAD_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
     const WAVESPEED_UPLOAD_MAX_BYTES = 200 * 1024 * 1024;
     const FEISHU_FEEDBACK_OPEN_ID = 'ou_8363b77c5b8f7885b48bc6429c528281';
@@ -9146,6 +9148,7 @@
     const VIDEO_MODELS = [
       'rg-seedance-2-fast',
       'rg-seedance-2',
+      'rg-seedance-2.5',
       'ws-seedance-2.5',
       'ws-seedance-2-fast',
       'ws-seedance-2',
@@ -9190,6 +9193,7 @@
       'ws-midjourney': 'WS/MJ'
     });
     const VIDEO_MODEL_COMPACT_LABELS = Object.freeze({
+      'rg-seedance-2.5': 'RG/S2.5',
       'rg-seedance-2-fast': 'RG/S2F',
       'rg-seedance-2': 'RG/S2',
       'ws-seedance-2.5': 'WS/S2.5',
@@ -9261,6 +9265,7 @@
       'google/gemini-omni-1.1-flash/image-to-video': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, canonical: 'ws-gemini-omni-1.1-flash' },
       'google/gemini-omni-1.1-flash/reference-to-video': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, endpointModel: 'google/gemini-omni-1.1-flash/reference-to-video', canonical: 'ws-gemini-omni-1.1-flash' },
       'google/gemini-omni-1.1-flash/video-edit': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, endpointModel: 'google/gemini-omni-1.1-flash/video-edit', canonical: 'ws-gemini-omni-1.1-flash' },
+      'rg-seedance-2.5': { provider: 'company', requestModel: 'doubao-seedance-2-5-260628', bodyKind: 'doubao-seedance', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'rg-seedance-2-fast': { provider: 'company', requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-fast-video-edit', family: 'seedance2-fast' },
       'rg-seedance-2': { provider: 'company', requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
       'ws-seedance-2.5': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
@@ -9299,6 +9304,7 @@
       'ws-krea-v2-large': 'WS / Krea V2 Large',
       'ws-recraft-v4.1-pro': 'WS / Recraft V4.1 Pro',
       'ws-midjourney': 'WS / Midjourney',
+      'rg-seedance-2.5': 'RG / Seedance 2.5',
       'rg-seedance-2-fast': 'RG / Seedance 2 Fast',
       'rg-seedance-2': 'RG / Seedance 2',
       'ws-seedance-2-fast': 'WS / Seedance 2 Fast',
@@ -9348,6 +9354,9 @@
       sd2: 'rg-seedance-2',
       seedance2: 'rg-seedance-2',
       seedance: 'rg-seedance-2',
+      rgs25: 'rg-seedance-2.5',
+      rgseedance25: 'rg-seedance-2.5',
+      doubaoseedance25260628: 'rg-seedance-2.5',
       sd25: 'ws-seedance-2.5',
       seedance25: 'ws-seedance-2.5'
     });
@@ -11141,6 +11150,21 @@
       return next;
     }
 
+    async function syncSharedApiSettings(save = false) {
+      if (embeddedCanvasHost || !state.settings.localMediaToken) return;
+      const fields = ['baseUrl', 'apiKey', 'wavespeedApiKey', 'elevenLabsApiKey'];
+      const settings = Object.fromEntries(fields.map(key => [key, state.settings[key] || '']));
+      const root = String(state.settings.localMediaUrl || LOCAL_MEDIA_URL).replace(/\/$/, '');
+      const response = await fetch(root + '/shared-api', {
+        method: 'POST', headers: { ...localMediaAuthHeaders(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings, missingOnly: !save }), signal: AbortSignal.timeout(20000)
+      });
+      if (!response.ok) throw new Error('共享 API 配置保存失败，请连接启动器本地工具后重试。');
+      const shared = await response.json();
+      for (const key of fields) if (Object.hasOwn(shared, key)) state.settings[key] = shared[key];
+      return shared;
+    }
+
     async function loadState() {
       const saved = await dbGet('app-state');
       if (saved) {
@@ -11463,6 +11487,7 @@
     }
 
     function scheduleSave(options = {}) {
+      if (embeddedCanvasHost?.id === currentProject()?.id) embeddedCanvasHost.changed?.();
       const saveOptions = { ...options };
       if (!saveOptions.quiet) $('saveStatus').innerHTML = '<span>●</span><span>保存中</span>';
       clearTimeout(state.saveTimer);
@@ -12409,12 +12434,16 @@
     }
 
     function activeImageModels(settings = state.settings) {
+      const embedded = currentProject()?.embeddedMediaModels;
+      if (embedded) return IMAGE_MODELS.filter(model => embedded.includes(model));
       return hasWaveSpeedApiKey(settings)
         ? IMAGE_MODELS
         : IMAGE_MODELS.filter(model => mediaModelProvider(model, 'image') !== 'wavespeed');
     }
 
     function activeVideoModels(settings = state.settings) {
+      const embedded = currentProject()?.embeddedMediaModels;
+      if (embedded) return VIDEO_MODELS.filter(model => embedded.includes(model));
       return hasWaveSpeedApiKey(settings)
         ? VIDEO_MODELS
         : VIDEO_MODELS.filter(model => mediaModelProvider(model, 'video') !== 'wavespeed');
@@ -15447,7 +15476,7 @@
       const actions = [
         canRetryNode(node) ? '<button class="small-btn" data-action="retry">重试</button>' : '',
         renderAstraQuickActions(node),
-        node.assetState === 'candidate' && !shouldRenderInlinePromote(node) ? '<button class="small-btn" data-action="promote">\u8f6c\u6b63</button>' : ''
+        node.assetState === 'candidate' && !shouldRenderInlinePromote(node) ? '<button class="small-btn" data-action="promote">' + (node.meta?.dramaVersionId ? '通过' : '\u8f6c\u6b63') + '</button>' : ''
       ].filter(Boolean).join('');
       return actions || controls ? `<div class="card-foot">${controls}<div class="card-foot-actions">${actions}</div></div>` : '';
     }
@@ -16172,6 +16201,7 @@
       if (type === 'generationControl') {
         const result = updatePromptGenerationControl(id, activeMenu?.field, action);
         renderContextMenu();
+        if (mediaPromptNodeForReview(nodeById(state.mediaViewerNodeId))?.id === id) renderMediaViewer();
         return result;
       }
       if (type === 'organize') return organizeSelectedAstra(action);
@@ -16696,7 +16726,7 @@
           </div>
         </div>
         <div class="media-prompt-editor">
-          ${promptText
+          ${promptText || (promptNode && node.meta?.dramaVersionId)
             ? `<textarea class="media-prompt-textarea" ${promptEditorAttrs} spellcheck="false">${escapeHtml(promptText)}</textarea>`
             : `<div class="media-prompt-empty">\u4e0a\u6e38 Prompt \u5df2\u5220\u9664\u6216\u672a\u627e\u5230</div>`}
           <div class="media-prompt-actions">
@@ -16722,7 +16752,7 @@
 
     function openMediaViewer(id) {
       const node = nodeById(id);
-      if (!node || !assetDisplayUrl(node)) return;
+      if (!node || (!assetDisplayUrl(node) && !node.meta?.dramaPlaceholder)) return;
       markGeneratedMediaViewed(id);
       state.mediaViewerNodeId = id;
       state.mediaViewerBatchNodeIds = mediaViewerBatchForOpening(id);
@@ -16831,7 +16861,7 @@
           }
         }
         const assetUrl = node ? assetDisplayUrl(node) : '';
-        if (!node || !assetUrl || !(node.mime?.startsWith('image/') || node.mime?.startsWith('video/'))) {
+        if (!node || (!assetUrl && !node.meta?.dramaPlaceholder) || !(node.mime?.startsWith('image/') || node.mime?.startsWith('video/'))) {
           if (state.mediaViewerNodeId && !node) state.mediaViewerNodeId = '';
           root.innerHTML = '';
           return;
@@ -16848,7 +16878,9 @@
         const segmentAttrs = Number.isFinite(segmentStart) && Number.isFinite(segmentEnd)
           ? ` data-segment-start="${segmentStart}" data-segment-end="${segmentEnd}"`
           : '';
-        const media = node.mime.startsWith('image/')
+        const media = node.meta?.dramaPlaceholder
+          ? '<div class="drama-video-empty" role="status">' + escapeHtml(node.meta.dramaPlaceholder) + '</div>'
+          : node.mime.startsWith('image/')
           ? `<img src="${assetUrl}" alt="${escapeHtml(node.title)}" data-media-viewer-image draggable="false">`
           : `<video src="${assetUrl}" controls controlsList="nodownload" autoplay playsinline${segmentAttrs}></video>`;
         const nav = hasBatchNav
@@ -19802,7 +19834,7 @@
       const generationMode = generationModeLabel(node);
       const parameterText = generationParameterText(node);
       const promoteAction = shouldRenderInlinePromote(node)
-        ? '<button type="button" class="small-btn candidate-promote-inline" data-action="promote">\u8f6c\u6b63</button>'
+        ? '<button type="button" class="small-btn candidate-promote-inline" data-action="promote">' + (node.meta?.dramaVersionId ? '通过' : '\u8f6c\u6b63') + '</button>'
         : '';
       if (!meta.prompt && !meta.promptNodeId && !meta.assetId && !meta.segmentId && !meta.sourceImageId && !node.mediaAnalysis?.summary && !hasReferenceTiming && !generationMode && !parameterText && !promoteAction) return '';
       const promptNode = meta.promptNodeId ? currentProject().nodes.find(n => n.id === meta.promptNodeId) : null;
@@ -21522,6 +21554,7 @@
     }
 
     function isGeneratedReviewMedia(node) {
+      if (node?.meta?.dramaPlaceholder && node.role === 'genVideo') return true;
       return !!node
         && ['genImage', 'genVideo'].includes(node.role)
         && nodeHasAsset(node)
@@ -21564,6 +21597,7 @@
     }
 
     function isPreviewableMediaNode(node) {
+      if (node?.meta?.dramaPlaceholder && node.role === 'genVideo') return true;
       return !!node
         && nodeHasAsset(node)
         && !!assetDisplayUrl(node)
@@ -25533,9 +25567,9 @@
 
     function normalizeVideoUpscaleTargetResolution(value) {
       const normalized = String(value || '').trim().toLowerCase();
-      const aliases = { '720': '720p', '1080': '1080p', '2k': '2k', '4k': '4k' };
+      const aliases = { '1080': '1080p', '2k': '2k', '4k': '4k' };
       const target = aliases[normalized] || normalized;
-      return new Set(['720p', '1080p', '2k', '4k']).has(target) ? target : '';
+      return new Set(['1080p', '2k', '4k']).has(target) ? target : '';
     }
 
     function videoUpscaleDimensionsFromMetadata(node) {
@@ -30291,7 +30325,7 @@
           content: generatedMediaContent(media.raw, prompt),
           summary: '图片生成完成',
           generation: resolvedExecution,
-          meta: { prompt, promptNodeId: promptPick.nodeId, sourceNodeId: promptPick.nodeId, sourceImageNodeId: resolvedExecution.sourceImageNodeId || '', promptKey: promptPick.promptKey, candidateOfNodeId: official?.id || '', ...cached.meta, ...generationPromptSourceMeta(promptSnapshot, project) }
+          meta: { prompt, promptNodeId: promptPick.nodeId, sourceNodeId: promptPick.nodeId, sourceImageNodeId: resolvedExecution.sourceImageNodeId || '', promptKey: promptPick.promptKey, candidateOfNodeId: official?.id || '', ...cached.meta, ...generationPromptSourceMeta(promptSnapshot, project), ...(media.workbenchMeta || {}) }
         }, project);
         if (official) addAstraLink(node.id, official.id, { relation: 'candidate_of', inputRole: 'none', visualStyle: 'dashed', actionRunId: run?.id, project });
         addActivity('image', '图片生成完成', 'ok', {}, project);
@@ -30465,6 +30499,8 @@
         throw new Error(`${modelDisplayLabel(model)} 不支持视频延长；请切换到 WS / Seedance 2.5。`);
       }
       if (shouldUseWaveSpeedMedia(model, 'video')) return waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution, project);
+      // This asynchronous route must never resubmit a failed/pending task through chat.
+      if (mediaModelConfig(canonicalModelValue(model), 'video').bodyKind === 'doubao-seedance') return videoGeneration(model, prompt, nodeId, resolvedExecution, project);
       try {
         return await videoGeneration(model, prompt, nodeId, resolvedExecution, project);
       } catch (endpointError) {
@@ -30487,6 +30523,7 @@
 
     async function videoGeneration(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
       const body = await buildVideoGenerationBody(model, prompt, resolvedExecution, project);
+      if (mediaModelConfig(canonicalModelValue(model), 'video').bodyKind === 'doubao-seedance') return companySeedanceVideoGeneration(body, nodeId);
       const usesSoraVideoApi = isRgSeedanceSoraRequestModel(body.model);
       const response = await apiJson(usesSoraVideoApi ? '/videos' : '/video/generations', body);
       const taskId = extractTaskId(response);
@@ -30506,6 +30543,8 @@
     }
 
     async function buildVideoGenerationBody(model, prompt, resolvedExecution = null, project = currentProject()) {
+      model = canonicalModelValue(model);
+      if (mediaModelConfig(model, 'video').bodyKind === 'doubao-seedance') return buildCompanySeedanceVideoBody(model, prompt, resolvedExecution, project);
       const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
       const references = videoReferenceNodesForExecution(resolvedExecution, project);
       const editVideoUrl = await videoRequestUrlForAsset(references.editVideo);
@@ -30557,6 +30596,63 @@
         body.reference_videos = referenceVideoUrls;
       }
       return body;
+    }
+
+    async function buildCompanySeedanceVideoBody(model, prompt, resolvedExecution = null, project = currentProject()) {
+      const settings = mediaSettingsForExecution(resolvedExecution, project);
+      const refs = videoReferenceNodesForExecution(resolvedExecution, project);
+      if (refs.last && !refs.first) throw new Error('RG/S2.5 使用尾帧时也需要首帧。');
+      if ((refs.first || refs.last) && (refs.refs.length || refs.referenceVideos.length)) throw new Error('RG/S2.5 的首尾帧与参考素材不能混用；请保留一种输入方式。');
+      const sourceVideo = refs.editVideo || refs.extendVideo;
+      const videos = [sourceVideo, ...refs.referenceVideos].filter(Boolean);
+      if (refs.refs.length > 30 || videos.length > 10) throw new Error('RG/S2.5 最多支持 30 张参考图、10 段参考视频。');
+      const content = [{ type: 'text', text: prompt }];
+      for (const [node, role] of [[refs.first, 'first_frame'], [refs.last, 'last_frame'], ...refs.refs.map(node => [node, 'reference_image'])]) {
+        if (!node) continue;
+        const url = await videoImageRequestUrlForAsset(node);
+        if (!url) throw new Error(`参考图「${node.title || node.id}」缺少可用素材。`);
+        content.push({ type: 'image_url', image_url: { url }, role });
+      }
+      for (const node of videos) {
+        const remote = normalizeMediaUrl(node.meta?.remoteAssetUrl || node.assetUrl || '');
+        if (!/^https?:\/\//i.test(remote) && !state.settings.wavespeedApiKey) throw new Error('RG/S2.5 参考视频需要公网链接；本地视频请先在设置填写 WaveSpeed Key，用于上传素材。');
+        const url = /^https?:\/\//i.test(remote) ? remote : await waveSpeedUploadMediaAsset(node, project);
+        content.push({ type: 'video_url', video_url: { url }, role: 'reference_video' });
+      }
+      const metadata = {
+        content,
+        resolution: normalizePlannerVideoResolution(settings.videoResolution, model),
+        ratio: refs.first || sourceVideo ? 'adaptive' : normalizePlannerVideoAspectRatio(settings.videoAspectRatio, '1:1', model),
+        duration: refs.editVideo ? -1 : videoDurationForMediaSettings(settings, model),
+        generate_audio: true,
+        watermark: false
+      };
+      if (sourceVideo || refs.refs.length || videos.length) metadata.omni_reference_task_type = refs.editVideo ? 'edit' : refs.extendVideo ? 'extend' : 'reference';
+      // Do not send top-level seconds: the gateway would override edit duration=-1.
+      return { model: mediaModelRequestModel(model, 'video'), prompt, metadata };
+    }
+
+    async function companySeedanceVideoGeneration(body, nodeId) {
+      const submitted = await apiJson('/videos', body);
+      const taskId = extractTaskId(submitted);
+      if (!taskId) throw new Error('RG/S2.5 未返回 task id。');
+      // The gateway's /videos status can be "unknown" while its raw task is running.
+      for (let attempt = 0; attempt < 450; attempt++) {
+        const json = await apiGetJson(`/video/generations/${encodeURIComponent(taskId)}`);
+        const task = json?.data || json;
+        const status = generationResponseStatus(json);
+        if (generationStatusFailed(status) || status === 'failure') {
+          throw new Error(task?.data?.error?.message || task?.fail_reason || task?.error?.message || `RG/S2.5 任务失败：${status} (${taskId})`);
+        }
+        if (generationStatusSucceeded(status)) {
+          const media = mediaFromGenerationResponse(json, 'video');
+          if (!media.url) throw new Error(`RG/S2.5 任务完成，但没有返回视频 URL：${taskId}`);
+          return { ...media, raw: JSON.stringify(json, null, 2) };
+        }
+        if (nodeId) updateNode(nodeId, { progressText: generationProgressText(json, attempt) });
+        await wait(4000);
+      }
+      throw new Error(`RG/S2.5 等待超过 30 分钟，任务可能仍在生成：${taskId}`);
     }
 
     async function videoRequestUrlForAsset(node) {
@@ -31723,6 +31819,7 @@
     }
 
     async function generateImageAsset(model, prompt, resolvedExecution = null, nodeId = '', project = currentProject()) {
+      if (embeddedCanvasHost?.id === project.id && embeddedCanvasHost.generateImage) return embeddedCanvasHost.generateImage({model, prompt, execution: resolvedExecution, nodeId});
       if (shouldUseWaveSpeedMedia(model, 'image')) return waveSpeedImageGeneration(model, prompt, resolvedExecution, nodeId, project);
       if (hasImageInputsForExecution(resolvedExecution) && supportsExplicitImageEdit(model)) {
         try { return await imageEditGeneration(model, prompt, true, resolvedExecution, project); }
@@ -35765,6 +35862,7 @@
         state.settings.telemetryUsageWebhookUrl = state.settings.telemetryUsageWebhookUrl || TELEMETRY_USAGE_WEBHOOK_URL;
         state.settings.telemetryFeedbackWebhookUrl = state.settings.telemetryFeedbackWebhookUrl || TELEMETRY_FEEDBACK_WEBHOOK_URL;
         state.settings.launcherConfigVersion = state.settings.launcherConfigVersion || '';
+        try { await syncSharedApiSettings(true); } catch (error) { $('apiTestResult').textContent = error.message; return; }
         let notificationPermission = browserNotificationPermission();
         if (state.settings.notificationsEnabled) {
           primeNotificationAudio();
@@ -35931,10 +36029,19 @@
     }
 
     async function boot() {
+      let launcherTarget = '';
+      try {
+        const encoded = new URLSearchParams(location.hash.slice(1)).get('auralis_config');
+        const config = encoded ? JSON.parse(decodeURIComponent(escape(atob(encoded.replace(/-/g, '+').replace(/_/g, '/'))))) : {};
+        if (config.launchTarget === 'http://127.0.0.1:17887') launcherTarget = config.launchTarget;
+      } catch (_) {}
       await loadState();
+      try { await syncSharedApiSettings(); } catch (_) {}
+      if (launcherTarget) { location.replace(launcherTarget); return; }
       applyUserLayoutPreferences();
       requestPersistentStorage();
       bindEvents();
+      window.addEventListener('focus', () => { if (!$('settingsModal')?.classList.contains('open')) syncSharedApiSettings().then(() => syncSettingsUI()).catch(() => {}); });
       render();
       if (state.settings.llmMode === 'local-codex') connectLocalCodexBridge();
       scheduleAuralisUpdateChecks();
@@ -36119,6 +36226,7 @@
       collectBackupAssetIds,
       backupAssetFileName,
       videoGeneration,
+      generateVideoAsset,
       buildVideoGenerationBody,
       mediaFromGenerationResponse,
       generationResponseStatus,
@@ -36201,6 +36309,87 @@
       syncMobsControllerProfileUI,
       refreshMobsControllerProfileStatus,
       resetMobsControllerProfile
+    };
+
+    // Stable adapter used by the standalone drama sub-canvas.
+    let embeddedCanvasHost = null;
+    window.AuralisCanvas = {
+      mount(data, host = null) {
+        embeddedCanvasHost = host ? { ...host, id: data.id } : null;
+        const project = defaultProject(data.title || '制作前置');
+        project.id = data.id;
+        project.nodes = (data.nodes || []).map(normalizeNode);
+        project.links = data.links || [];
+        project.embeddedMediaModels = data.allowedModels;
+        project.embeddedJobs = data.jobs || [];
+        if (data.imageGeneration) project.runtime.imageModel = data.imageGeneration.model;
+        state.projects = [project]; state.currentProjectId = project.id;
+        state.settings.llmMode = 'api'; state.settings.apiKey = ''; state.settings.wavespeedApiKey = '';
+        render(); return project.id;
+      },
+      updateCanvasNodes(nodes, removedIds = []) {
+        if (!nodes.length && !removedIds.length) return;
+        const project = currentProject();
+        project.nodes = project.nodes.filter(n => !removedIds.includes(n.id));
+        project.links = project.links.filter(l => !removedIds.includes(l.fromNodeId) && !removedIds.includes(l.toNodeId));
+        const added = [], changed = [];
+        for (const patch of nodes) {
+          const node = nodeById(patch.id, project);
+          if (node) { Object.assign(node, patch); normalizeNode(node); changed.push(node.id); }
+          else {
+            const normalized = normalizeNode(patch);
+            const size = astraPlacementDimensions(normalized);
+            Object.assign(normalized, findFreePosition(size.width, size.height, normalized.x, normalized.y, { project }));
+            project.nodes.push(normalized); added.push(patch.id);
+          }
+        }
+        if (removedIds.length && !removeRenderedNodes(removedIds, project)) { render(); return; }
+        if (changed.length || added.length) refreshProjectSurface(project, {nodeIds: changed, addedNodeIds: added});
+      },
+      snapshot() { const p = currentProject(); return { id: p?.id, nodes: p?.nodes || [], links: p?.links || [], jobs: p?.embeddedJobs || [] }; },
+      openMedia(id, batchIds = [id]) {
+        state.selectedNodeIds = batchIds;
+        openMediaViewer(id);
+      },
+      mediaReview() {
+        const node = nodeById(state.mediaViewerNodeId);
+        if (!node) return null;
+        const prompt = mediaPromptNodeForReview(node);
+        return { node, prompt, batchIds: [...state.mediaViewerBatchNodeIds], settings: prompt ? promptGenerationSettings(prompt) : null,
+          inputs: prompt ? upstreamInputsFor(prompt.id).map(item => item.node) : [] };
+      },
+      syncMedia(data) {
+        const project = currentProject();
+        if (!project || project.id !== data.id) return;
+        const incomingIds = new Set(data.nodes.map(n => n.id));
+        project.nodes = project.nodes.filter(n => incomingIds.has(n.id));
+        project.links = project.links.filter(l => incomingIds.has(l.fromNodeId) && incomingIds.has(l.toNodeId));
+        project.embeddedJobs = data.jobs || [];
+        const added = new Set();
+        for (const incoming of data.nodes) {
+          const existing = nodeById(incoming.id);
+          if (!existing) { project.nodes.push(normalizeNode(incoming)); added.add(incoming.id); }
+          else if (incoming.meta?.dramaVersionId) {
+            existing.meta = { ...existing.meta, ...incoming.meta };
+            existing.assetState = incoming.assetState;
+          }
+        }
+        // Preserve unsaved prompt edits and their reference links while new results arrive.
+        project.links.push(...data.links.filter(link => added.has(link.toNodeId)));
+        state.mediaViewerBatchNodeIds = data.batchIds;
+      },
+      setMediaReferences(ids) {
+        const review = this.mediaReview(), project = currentProject();
+        if (!review?.prompt || !project) return;
+        project.links = project.links.filter(link => link.toNodeId !== review.prompt.id);
+        uniqueIds(ids).forEach(id => {
+          const node = nodeById(id);
+          if (!node?.meta?.dramaRef) return;
+          project.links.push({ id: `review-${review.prompt.id}-${id}`, fromNodeId: id, toNodeId: review.prompt.id,
+            relation: 'input', inputRole: node.mime?.startsWith('audio/') ? 'reference_audio' : node.mime?.startsWith('video/') ? 'reference_video' : 'ref' });
+        });
+        renderMediaViewer();
+      }
     };
 
     window.__auralisReady = boot();

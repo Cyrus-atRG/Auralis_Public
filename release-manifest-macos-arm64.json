@@ -1,48 +1,50 @@
 {
-  "schemaVersion": 2,
-  "platform": "macos-arm64",
-  "releaseVersion": "Auralis v1.22",
-  "publishedAt": "2026-09-10T03:57:43.2739633Z",
-  "changelog": [
-    "新增 WaveSpeed GPT Image 2.5 Flare（GIF）和 Sunburst（GIS），支持文生图、参考图生图、改图与扩图。",
-    "默认素材理解模型升级为 Gemini 3.8 Flash，原 3.5 Flash 设置自动迁移；图片与视频反推同步升级。",
-    "调整图像模型列表：GIF、GIS 排在 WS GI2 前，移除 SD5P、R4.1P 和 C3S。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "Auralis v1.22",
-      "url": "Auralis.html",
-      "size": 1846329,
-      "sha256": "585843d8f24596753ec694d83be47439c35a6b6c7470b295a80752b728efe7a9",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "Auralis v1.22",
-      "url": "auralis-runtime-macos-arm64.zip",
-      "size": 38856457,
-      "sha256": "bc7fe84c68448ca3b5bd22ec7c3e585f98b9a773b80b7277b5fbf175a6f6e6d6",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "Auralis v1.22",
-      "url": "auralis-controller-packs-macos-arm64.zip",
-      "size": 24721,
-      "sha256": "d48713e13b7af7eaa0f955952943f287ef00745c4236a56e0562a0ac78689474",
-      "format": "zip"
-    },
-    {
-      "id": "launcher",
-      "version": "1.18.0",
-      "url": "auralis-launcher-macos-arm64.zip",
-      "size": 38895427,
-      "sha256": "9e9def25f1fc026f45e6557a8c84bb346d1977763cef6b481d8dbca19fee9102",
-      "format": "zip",
-      "executableSize": 176,
-      "executableSha256": "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
-      "bundleSha256": "af19f40d8ebce9ddaed1d532fc3de0173280d4ec90d44ed4230147ef55875f0f"
-    }
-  ]
+    "schemaVersion":  2,
+    "platform":  "macos-arm64",
+    "releaseVersion":  "Auralis v1.23",
+    "publishedAt":  "2026-10-13T04:09:12.6685784Z",
+    "changelog":  [
+                      "Windows 启动器新增并列的自由画布、短剧工作台入口，分别查看版本、更新日志并独立更新。",
+                      "自由画布与短剧共享 RG、WaveSpeed 和 ElevenLabs API 配置。",
+                      "新增 RG Seedance 2.5，支持参考图、首尾帧、视频编辑与延长；短剧支持 RG 生图和生视频。",
+                      "短剧设置新增全局提示词编辑、official / 自定义切换及含素材的自动备份恢复。",
+                      "自由画布超清升级为 ByteDance，支持 1080p、2K 和 4K。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.23",
+                           "url":  "Auralis.html",
+                           "size":  1859085,
+                           "sha256":  "92f4db2260196c72d9f300bf07166e072477b386d49a24891fb4449dd61fc7ea",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.23",
+                           "url":  "auralis-runtime-macos-arm64.zip",
+                           "size":  38859113,
+                           "sha256":  "85d5c4a26c8cd80177fddc74154094903570993da99044f23012fa78d95f991e",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.23",
+                           "url":  "auralis-controller-packs-macos-arm64.zip",
+                           "size":  28190,
+                           "sha256":  "641f331a7dac57a0dc87e80623174061b7de544008583eee48e22e93559630d7",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.18.0",
+                           "url":  "auralis-launcher-macos-arm64.zip",
+                           "size":  38895429,
+                           "sha256":  "e18027ac8584d9bc59796a824d6d661d5a50f2de5405332fcd9bbaac492424ef",
+                           "format":  "zip",
+                           "executableSize":  176,
+                           "executableSha256":  "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
+                           "bundleSha256":  "aec9aec592b6a8b33561e2f6442335fd2962021799cbbd34680c8f52b4216278"
+                       }
+                   ]
 }

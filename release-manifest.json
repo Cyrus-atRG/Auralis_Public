@@ -1,44 +1,46 @@
 {
-  "schemaVersion": 2,
-  "releaseVersion": "Auralis v1.22",
-  "publishedAt": "2026-09-10T03:57:29.6232501Z",
-  "changelog": [
-    "新增 WaveSpeed GPT Image 2.5 Flare（GIF）和 Sunburst（GIS），支持文生图、参考图生图、改图与扩图。",
-    "默认素材理解模型升级为 Gemini 3.8 Flash，原 3.5 Flash 设置自动迁移；图片与视频反推同步升级。",
-    "调整图像模型列表：GIF、GIS 排在 WS GI2 前，移除 SD5P、R4.1P 和 C3S。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "Auralis v1.22",
-      "url": "Auralis.html",
-      "size": 1846329,
-      "sha256": "585843d8f24596753ec694d83be47439c35a6b6c7470b295a80752b728efe7a9",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "Auralis v1.22",
-      "url": "auralis-runtime-windows-x64.zip",
-      "size": 34683074,
-      "sha256": "914eaec922c2d8d819c1fb9005442b99fd7b8928eae794ce3f00c4517262f3f6",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "Auralis v1.22",
-      "url": "auralis-controller-packs.zip",
-      "size": 23094,
-      "sha256": "2e07dd71ec68e4e54f1fc88d9f828ca60df80197b08925905f2fe1fe8a34d95f",
-      "format": "zip"
-    },
-    {
-      "id": "launcher",
-      "version": "1.17.0",
-      "url": "Auralis Launcher.exe",
-      "size": 119808,
-      "sha256": "9b528cc3acc4a73e92d845233fc9cbee814ad85bd64f7ef4f9e5405fc43e24da",
-      "format": "file"
-    }
-  ]
+    "schemaVersion":  2,
+    "releaseVersion":  "Auralis v1.23",
+    "publishedAt":  "2026-10-13T04:08:42.8771060Z",
+    "changelog":  [
+                      "Windows 启动器新增并列的自由画布、短剧工作台入口，分别查看版本、更新日志并独立更新。",
+                      "自由画布与短剧共享 RG、WaveSpeed 和 ElevenLabs API 配置。",
+                      "新增 RG Seedance 2.5，支持参考图、首尾帧、视频编辑与延长；短剧支持 RG 生图和生视频。",
+                      "短剧设置新增全局提示词编辑、official / 自定义切换及含素材的自动备份恢复。",
+                      "自由画布超清升级为 ByteDance，支持 1080p、2K 和 4K。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.23",
+                           "url":  "Auralis.html",
+                           "size":  1859085,
+                           "sha256":  "92f4db2260196c72d9f300bf07166e072477b386d49a24891fb4449dd61fc7ea",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.23",
+                           "url":  "auralis-runtime-windows-x64.zip",
+                           "size":  33643813,
+                           "sha256":  "b0123dad3b8d470d363991d343f800870fc7f0b644c0432cd95541674830f42c",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.23",
+                           "url":  "auralis-controller-packs.zip",
+                           "size":  25094,
+                           "sha256":  "3dfbe2122be97fb11b07913a9d32ece10bba1894c7d7cfb2642af09ed7afd2d0",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.18.0",
+                           "url":  "Auralis Launcher.exe",
+                           "size":  124928,
+                           "sha256":  "b8b1f48e60082327cf46b4d5137f5347b59cadd48a67adb2f0d79838d608b2c8",
+                           "format":  "file"
+                       }
+                   ]
 }
