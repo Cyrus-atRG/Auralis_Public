@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Auralis · 短剧工作台</title>
     <link rel="stylesheet" href="/style.css" />
-  <script>const AURALIS_VERSION = '1.0.0'; const AURALIS_CHANGELOG = Object.freeze(["短剧工作台加入 Windows 启动器，与自由画布分开启动、查看更新日志和更新。","直接共用 Auralis 的 RG、WaveSpeed 和 ElevenLabs API 配置，无需重复填写。","支持 RG 生图和生视频，包含 RG Seedance 2.5；可按片段设置模型、比例、清晰度和时长。","设置新增 16 处全局提示词编辑，所有短剧共用，支持 official 与自定义版本切换。","项目、图片、视频、声音和提示词自动增量备份；恢复前保留当前内容，更新不覆盖已有项目。","资产与视频支持详情预览、版本切换、参考查看、再次生成、多选引用与批量下载。"]);</script></head>
+  <script>const AURALIS_VERSION = '1.1.0'; const AURALIS_CHANGELOG = Object.freeze(["各环节拥有独立的 Agent 会话、输入草稿和运行状态；切换页面可接着之前的讨论，后台任务继续执行。","Agent 只接收当前环节需要的已保存文档；上游文档有变更时，在下一条用户消息前自动附上修改位置。","各环节采用专属系统提示词和创作指导，并沿用全局 official／自定义提示词设置。","主控支持公司 API 与 Codex 切换，可分别选择公司模型和 Codex 推理强度。","新建短剧默认使用 RG GPT Image 2 生图、RG Seedance 2.5 生视频，保留已有项目的模型选择。","首页项目支持右键重命名、复制和删除；删除前二次确认，复制时保留内容和素材并建立独立项目。"]);</script></head>
   <body>
     <aside id="rail">
       <a class="brand" href="/" aria-label="工作台首页"
@@ -40,6 +40,7 @@
       </div>
       <h3 id="agentRole">设定 Agent</h3>
       <p id="agentScope" class="muted"></p>
+      <button id="agentController" class="quiet agent-controller" data-preference="controller" type="button">主控：本地 Codex</button>
       <div
         id="agentStatus"
         class="agent-status"
