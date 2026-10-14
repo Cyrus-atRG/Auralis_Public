@@ -1,49 +1,49 @@
 {
-  "schemaVersion": 2,
-  "platform": "macos-arm64",
-  "releaseVersion": "Auralis v1.24",
-  "publishedAt": "2026-10-14T06:26:28.8196970Z",
-  "changelog": [
-    "自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
-    "短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。",
-    "短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。",
-    "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "Auralis v1.24",
-      "url": "Auralis.html",
-      "size": 1864283,
-      "sha256": "7165b03ce38e456dbc2fba3a2364036ede8229a4a26b208cf6f0ca4ac9f6cbe7",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "Auralis v1.24",
-      "url": "auralis-runtime-macos-arm64.zip",
-      "size": 38859231,
-      "sha256": "aa1854d0ce24177dd0244c08d17762b4470382f42fc664c92ce478f474ff3e6f",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "Auralis v1.24",
-      "url": "auralis-controller-packs-macos-arm64.zip",
-      "size": 28190,
-      "sha256": "4486560bd2c34e98703b6133994a4f835b7409c3c06ba99e7c4529c4d02d91f0",
-      "format": "zip"
-    },
-    {
-      "id": "launcher",
-      "version": "1.19.0",
-      "url": "auralis-launcher-macos-arm64.zip",
-      "size": 38898825,
-      "sha256": "a1605b3b73c0dccfdd46d41f20cd1602f184a3ad06a7c3293a3d74a2e59479d8",
-      "format": "zip",
-      "executableSize": 176,
-      "executableSha256": "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
-      "bundleSha256": "00bb44e3d12c032f867dca2127ed6567fc6089dda85f8aba0f12900a5a26ba59"
-    }
-  ]
+    "schemaVersion":  2,
+    "platform":  "macos-arm64",
+    "releaseVersion":  "Auralis v1.24",
+    "publishedAt":  "2026-10-14T07:06:47.8445295Z",
+    "changelog":  [
+                      "自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
+                      "短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。",
+                      "短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。",
+                      "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.24",
+                           "url":  "Auralis.html",
+                           "size":  1864283,
+                           "sha256":  "7165b03ce38e456dbc2fba3a2364036ede8229a4a26b208cf6f0ca4ac9f6cbe7",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.24",
+                           "url":  "auralis-runtime-macos-arm64.zip",
+                           "size":  38859231,
+                           "sha256":  "ced802d407a11301767755353bafd05c6ecf850898b6bbbcf1b75eab77112482",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.24",
+                           "url":  "auralis-controller-packs-macos-arm64.zip",
+                           "size":  28190,
+                           "sha256":  "847a79b8b48ab879ac3b7b0b2d4eef0a499d1cdbd6e9049283b483a9c3a65779",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.19.0",
+                           "url":  "auralis-launcher-macos-arm64.zip",
+                           "size":  38898826,
+                           "sha256":  "69ad140b2ee532523dd80ffa0b4647cea6dbe5a5a35fa96187afc7ee005ab26a",
+                           "format":  "zip",
+                           "executableSize":  176,
+                           "executableSha256":  "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
+                           "bundleSha256":  "73d967f7da99539e70b27574da7d4065e2cc05404b7b04be4e7cab14dbe32264"
+                       }
+                   ]
 }

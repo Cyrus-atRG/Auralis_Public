@@ -1,43 +1,43 @@
 {
-  "schemaVersion": 2,
-  "platform": "macos-arm64",
-  "releaseVersion": "1.2.0",
-  "publishedAt": "2026-10-14T06:26:29.8436216Z",
-  "changelog": [
-    "素材预览提速：首次打开与反复切换使用轻量预览窗口，参考图列表可横向滚动。",
-    "未采用的图片候选也能直接编辑，修改结果保留为新候选，已采用素材和分集引用保持不变。",
-    "发送梗概或文字分镜修改要求时，先保存本页草稿；Agent 结果不再被旧草稿遮住。",
-    "创作搭档运行中可继续追加文字和参考素材，沿用当前任务处理，聊天记录持续保留。",
-    "新增“本轮输入”查看入口，展示 Agent 使用的规范、作品和参考；精简重复上下文，多集创作按需读取前情。",
-    "图片、视频和配音任务在后台完成时，不再干扰 Agent 状态或造成无关编辑冲突；修复旧刷新响应覆盖新任务的问题。",
-    "短剧工作台新增版本更新提醒，可查看更新内容或忽略当前版本。",
-    "公司 API 的 GPT 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
-    "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新、共享 API 配置与便携包交付。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "1.2.0",
-      "url": "AuralisDrama.html",
-      "size": 5376,
-      "sha256": "2f8ee5d93ea7828b47e6e8d1e2aef8ee1ab2b7a3b34737065f34ab7e09581c12",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "1.2.0",
-      "url": "auralis-drama-runtime-macos-arm64.zip",
-      "size": 675007,
-      "sha256": "635c6251144f0f0a2e00b3b221cdbc16fd9c7989c20dda9c880ea22b1fd66875",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "1.2.0",
-      "url": "auralis-controller-packs-macos-arm64.zip",
-      "size": 28190,
-      "sha256": "4486560bd2c34e98703b6133994a4f835b7409c3c06ba99e7c4529c4d02d91f0",
-      "format": "zip"
-    }
-  ]
+    "schemaVersion":  2,
+    "platform":  "macos-arm64",
+    "releaseVersion":  "1.2.1",
+    "publishedAt":  "2026-10-14T07:06:48.7768761Z",
+    "changelog":  [
+                      "素材预览提速：首次打开与反复切换使用轻量预览窗口，参考图列表可横向滚动。",
+                      "未采用的图片候选也能直接编辑，修改结果保留为新候选，已采用素材和分集引用保持不变。",
+                      "发送梗概或文字分镜修改要求时，先保存本页草稿；Agent 结果不再被旧草稿遮住。",
+                      "创作搭档运行中可继续追加文字和参考素材，沿用当前任务处理，聊天记录持续保留。",
+                      "新增“本轮输入”查看入口，展示 Agent 使用的规范、作品和参考；精简重复上下文，多集创作按需读取前情。",
+                      "图片、视频和配音任务在后台完成时，不再干扰 Agent 状态或造成无关编辑冲突；修复旧刷新响应覆盖新任务的问题。",
+                      "短剧工作台新增版本更新提醒，可查看更新内容或忽略当前版本。",
+                      "公司 API 的 GPT 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
+                      "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新、共享 API 配置与便携包交付。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "1.2.1",
+                           "url":  "AuralisDrama.html",
+                           "size":  5376,
+                           "sha256":  "81e109af31d1560466030acbc097b184b536f8ae181cfe27bbd04529f2d1e37a",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "1.2.1",
+                           "url":  "auralis-drama-runtime-macos-arm64.zip",
+                           "size":  676619,
+                           "sha256":  "364ea11686cab4dbc573e69e42411f125679852924c47248065b0b3348d07fee",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "1.2.1",
+                           "url":  "auralis-controller-packs-macos-arm64.zip",
+                           "size":  28190,
+                           "sha256":  "847a79b8b48ab879ac3b7b0b2d4eef0a499d1cdbd6e9049283b483a9c3a65779",
+                           "format":  "zip"
+                       }
+                   ]
 }

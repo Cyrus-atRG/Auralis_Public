@@ -1,45 +1,45 @@
 {
-  "schemaVersion": 2,
-  "releaseVersion": "Auralis v1.24",
-  "publishedAt": "2026-10-14T06:26:20.1046846Z",
-  "changelog": [
-    "自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
-    "短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。",
-    "短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。",
-    "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "Auralis v1.24",
-      "url": "Auralis.html",
-      "size": 1864283,
-      "sha256": "7165b03ce38e456dbc2fba3a2364036ede8229a4a26b208cf6f0ca4ac9f6cbe7",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "Auralis v1.24",
-      "url": "auralis-runtime-windows-x64.zip",
-      "size": 34685862,
-      "sha256": "1581dd11a33a36446d809c1f7e95dbdcfbe126765c4f5e62767eb7994d542df9",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "Auralis v1.24",
-      "url": "auralis-controller-packs.zip",
-      "size": 25836,
-      "sha256": "fba50313d624a274240346f7da5d128cec4506b5b98f3b598a49a69c8ac06039",
-      "format": "zip"
-    },
-    {
-      "id": "launcher",
-      "version": "1.18.0",
-      "url": "Auralis Launcher.exe",
-      "size": 124928,
-      "sha256": "d39c146ebfc17b1982f3a55df7d4897ff3d90cff512a3b519e6c5b0929067007",
-      "format": "file"
-    }
-  ]
+    "schemaVersion":  2,
+    "releaseVersion":  "Auralis v1.24",
+    "publishedAt":  "2026-10-14T07:07:54.0863296Z",
+    "changelog":  [
+                      "自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
+                      "短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。",
+                      "短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。",
+                      "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.24",
+                           "url":  "Auralis.html",
+                           "size":  1864283,
+                           "sha256":  "7165b03ce38e456dbc2fba3a2364036ede8229a4a26b208cf6f0ca4ac9f6cbe7",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.24",
+                           "url":  "auralis-runtime-windows-x64.zip",
+                           "size":  33643935,
+                           "sha256":  "42424495197c97e792f7556f859e3a2da9ea9fd562b341244867d0bfa64b7b0b",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.24",
+                           "url":  "auralis-controller-packs.zip",
+                           "size":  25094,
+                           "sha256":  "05aa5734019a5721cbfb082d0124844a1831d9e4d79d06e3d4cc3e89515e6765",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.18.0",
+                           "url":  "Auralis Launcher.exe",
+                           "size":  124928,
+                           "sha256":  "f73442d5522397ff5e0d757cd6d4a7c21f7e171cd492c5bdc95afc5f2283b488",
+                           "format":  "file"
+                       }
+                   ]
 }
