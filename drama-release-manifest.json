@@ -1,37 +1,41 @@
 {
   "schemaVersion": 2,
-  "releaseVersion": "1.1.1",
-  "publishedAt": "2026-10-13T10:26:39.0463817Z",
+  "releaseVersion": "1.2.0",
+  "publishedAt": "2026-10-14T06:26:23.0512960Z",
   "changelog": [
-    "参考与灵感中的图片支持命名后导入资产库；制作 Agent 可查看并复用已有资产。",
-    "修复素材解析未读取共享公司 API 配置的问题；在设置中保存后，已打开的素材窗口也能使用最新地址和 Key。",
-    "共享 API 设置保留未保存的输入，避免旧窗口覆盖新配置；缺少地址或 Key 时明确提示填写位置。",
-    "Agent 可在当前环节修改、排序、删除和恢复设定、资产与视频计划，并调整名称、描述和生成参数；候选采用与视频生成仍由用户确认。",
-    "设定卡新增删除入口，历史内容和已有分集引用保留；聊天输入支持 Enter 换行、Ctrl+Enter 或 ⌘+Enter 发送。"
+    "素材预览提速：首次打开与反复切换使用轻量预览窗口，参考图列表可横向滚动。",
+    "未采用的图片候选也能直接编辑，修改结果保留为新候选，已采用素材和分集引用保持不变。",
+    "发送梗概或文字分镜修改要求时，先保存本页草稿；Agent 结果不再被旧草稿遮住。",
+    "创作搭档运行中可继续追加文字和参考素材，沿用当前任务处理，聊天记录持续保留。",
+    "新增“本轮输入”查看入口，展示 Agent 使用的规范、作品和参考；精简重复上下文，多集创作按需读取前情。",
+    "图片、视频和配音任务在后台完成时，不再干扰 Agent 状态或造成无关编辑冲突；修复旧刷新响应覆盖新任务的问题。",
+    "短剧工作台新增版本更新提醒，可查看更新内容或忽略当前版本。",
+    "公司 API 的 GPT 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
+    "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新、共享 API 配置与便携包交付。"
   ],
   "components": [
     {
       "id": "html",
-      "version": "1.1.1",
+      "version": "1.2.0",
       "url": "AuralisDrama.html",
-      "size": 4387,
-      "sha256": "f73f7597d1915c6222de8446f75b59d1326e582a5f637d107936846b8e14bc91",
+      "size": 5376,
+      "sha256": "2f8ee5d93ea7828b47e6e8d1e2aef8ee1ab2b7a3b34737065f34ab7e09581c12",
       "format": "file"
     },
     {
       "id": "runtime",
-      "version": "1.1.1",
+      "version": "1.2.0",
       "url": "auralis-drama-runtime-windows-x64.zip",
-      "size": 35304001,
-      "sha256": "1de4c8363b2eb7d96eda92e9bafeaa4a78d59fa9dfa866ceb1207068a361bc00",
+      "size": 35325023,
+      "sha256": "06c6f828792feeb66244d5c704fb39436181d3057dc307770af8ed090ec5496f",
       "format": "zip"
     },
     {
       "id": "controller-packs",
-      "version": "1.1.1",
+      "version": "1.2.0",
       "url": "auralis-drama-controller-packs.zip",
       "size": 25836,
-      "sha256": "a74ab62b74c8aa5c7b73585bbeace144a85c257e17ed4aa3117c30b63cdbf761",
+      "sha256": "fba50313d624a274240346f7da5d128cec4506b5b98f3b598a49a69c8ac06039",
       "format": "zip"
     }
   ]

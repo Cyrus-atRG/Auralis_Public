@@ -1,50 +1,49 @@
 {
-    "schemaVersion":  2,
-    "platform":  "macos-arm64",
-    "releaseVersion":  "Auralis v1.23",
-    "publishedAt":  "2026-10-13T04:09:12.6685784Z",
-    "changelog":  [
-                      "Windows 启动器新增并列的自由画布、短剧工作台入口，分别查看版本、更新日志并独立更新。",
-                      "自由画布与短剧共享 RG、WaveSpeed 和 ElevenLabs API 配置。",
-                      "新增 RG Seedance 2.5，支持参考图、首尾帧、视频编辑与延长；短剧支持 RG 生图和生视频。",
-                      "短剧设置新增全局提示词编辑、official / 自定义切换及含素材的自动备份恢复。",
-                      "自由画布超清升级为 ByteDance，支持 1080p、2K 和 4K。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "Auralis v1.23",
-                           "url":  "Auralis.html",
-                           "size":  1859085,
-                           "sha256":  "92f4db2260196c72d9f300bf07166e072477b386d49a24891fb4449dd61fc7ea",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "Auralis v1.23",
-                           "url":  "auralis-runtime-macos-arm64.zip",
-                           "size":  38859113,
-                           "sha256":  "85d5c4a26c8cd80177fddc74154094903570993da99044f23012fa78d95f991e",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "Auralis v1.23",
-                           "url":  "auralis-controller-packs-macos-arm64.zip",
-                           "size":  28190,
-                           "sha256":  "641f331a7dac57a0dc87e80623174061b7de544008583eee48e22e93559630d7",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "launcher",
-                           "version":  "1.18.0",
-                           "url":  "auralis-launcher-macos-arm64.zip",
-                           "size":  38895429,
-                           "sha256":  "e18027ac8584d9bc59796a824d6d661d5a50f2de5405332fcd9bbaac492424ef",
-                           "format":  "zip",
-                           "executableSize":  176,
-                           "executableSha256":  "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
-                           "bundleSha256":  "aec9aec592b6a8b33561e2f6442335fd2962021799cbbd34680c8f52b4216278"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "platform": "macos-arm64",
+  "releaseVersion": "Auralis v1.24",
+  "publishedAt": "2026-10-14T06:26:28.8196970Z",
+  "changelog": [
+    "自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
+    "短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。",
+    "短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。",
+    "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "Auralis v1.24",
+      "url": "Auralis.html",
+      "size": 1864283,
+      "sha256": "7165b03ce38e456dbc2fba3a2364036ede8229a4a26b208cf6f0ca4ac9f6cbe7",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "Auralis v1.24",
+      "url": "auralis-runtime-macos-arm64.zip",
+      "size": 38859231,
+      "sha256": "aa1854d0ce24177dd0244c08d17762b4470382f42fc664c92ce478f474ff3e6f",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "Auralis v1.24",
+      "url": "auralis-controller-packs-macos-arm64.zip",
+      "size": 28190,
+      "sha256": "4486560bd2c34e98703b6133994a4f835b7409c3c06ba99e7c4529c4d02d91f0",
+      "format": "zip"
+    },
+    {
+      "id": "launcher",
+      "version": "1.19.0",
+      "url": "auralis-launcher-macos-arm64.zip",
+      "size": 38898825,
+      "sha256": "a1605b3b73c0dccfdd46d41f20cd1602f184a3ad06a7c3293a3d74a2e59479d8",
+      "format": "zip",
+      "executableSize": 176,
+      "executableSha256": "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
+      "bundleSha256": "00bb44e3d12c032f867dca2127ed6567fc6089dda85f8aba0f12900a5a26ba59"
+    }
+  ]
 }

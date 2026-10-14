@@ -7413,18 +7413,17 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.23';
+    const AURALIS_VERSION = 'Auralis v1.24';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      'Windows 启动器新增并列的自由画布、短剧工作台入口，分别查看版本、更新日志并独立更新。',
-      '自由画布与短剧共享 RG、WaveSpeed 和 ElevenLabs API 配置。',
-      '新增 RG Seedance 2.5，支持参考图、首尾帧、视频编辑与延长；短剧支持 RG 生图和生视频。',
-      '短剧设置新增全局提示词编辑、official / 自定义切换及含素材的自动备份恢复。',
-      '自由画布超清升级为 ByteDance，支持 1080p、2K 和 4K。'
+      '自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。',
+      '短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。',
+      '短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。',
+      'Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9132,7 +9131,7 @@
       aura: '\u5207\u6362\u5230 Aura \u5916\u89c2',
       caelum: '\u5207\u6362\u5230 Caelum \u5916\u89c2'
     };
-    const LLM_MODELS = ['claude-opus-4-8', 'deepseek-v4-pro', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gpt-5.5'];
+    const LLM_MODELS = ['claude-opus-4-8', 'deepseek-v4-pro', 'gemini-3.8-flash', 'gemini-3.1-pro-preview', 'gpt-6.1-sol'];
     const LOCAL_CODEX_MODELS = ['local-codex/app-server'];
     const LEGACY_LOCAL_CODEX_MODELS = new Set(['local-codex/gpt-5.5']);
     const CHAT_TEMPERATURE_UNSUPPORTED_MODELS = new Set(['claude-opus-4-8']);
@@ -10026,6 +10025,7 @@
     const GENERATION_NOTIFICATION_SOUND_COOLDOWN_MS = 5000;
     const GENERATION_ERROR_NOTIFICATION_SOUND_COOLDOWN_MS = 1500;
 
+    const embeddedMediaViewer = window.parent !== window && new URLSearchParams(location.search).get('viewer') === '1';
     const state = {
       settings: {
         visualScheme: 'aura',
@@ -10040,7 +10040,7 @@
         wavespeedApiKey: '',
         elevenLabsApiKey: '',
         elevenLabsVoiceId: '',
-        llmModel: 'gpt-5.5',
+        llmModel: 'gpt-6.1-sol',
         analysisModel: 'gemini-3.8-flash',
         imageModel: 'ws-gpt-image-2',
         videoModel: 'ws-seedance-2-fast',
@@ -10322,6 +10322,10 @@
     function refreshProjectSurface(project, options = {}) {
       if (!project) return;
       syncActivePromptEditorDrafts();
+      if (embeddedMediaViewer) {
+        if (options.render !== false) render();
+        return;
+      }
       if (isProjectActive(project) && options.render !== false) {
         const addedNodeIds = uniqueIds(options.addedNodeIds);
         const nodeIds = uniqueIds(options.nodeIds);
@@ -11150,19 +11154,36 @@
       return next;
     }
 
-    async function syncSharedApiSettings(save = false) {
-      if (embeddedCanvasHost || !state.settings.localMediaToken) return;
-      const fields = ['baseUrl', 'apiKey', 'wavespeedApiKey', 'elevenLabsApiKey'];
+    const SHARED_API_FIELDS = ['baseUrl', 'apiKey', 'wavespeedApiKey', 'elevenLabsApiKey'];
+    async function syncSharedApiSettings(save = false, patch = null) {
+      if (embeddedCompanyTransport || embeddedCanvasHost || !state.settings.localMediaToken) return;
+      const fields = SHARED_API_FIELDS;
       const settings = Object.fromEntries(fields.map(key => [key, state.settings[key] || '']));
       const root = String(state.settings.localMediaUrl || LOCAL_MEDIA_URL).replace(/\/$/, '');
-      const response = await fetch(root + '/shared-api', {
-        method: 'POST', headers: { ...localMediaAuthHeaders(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings, missingOnly: !save }), signal: AbortSignal.timeout(20000)
-      });
-      if (!response.ok) throw new Error('共享 API 配置保存失败，请连接启动器本地工具后重试。');
-      const shared = await response.json();
+      const updates = [{ settings, missingOnly: true }];
+      if (save) updates.push({ settings: patch || settings, missingOnly: false });
+      let shared;
+      for (const update of updates) {
+        const response = await fetch(root + '/shared-api', {
+          method: 'POST', headers: { ...localMediaAuthHeaders(), 'Content-Type': 'application/json' },
+          body: JSON.stringify(update), signal: AbortSignal.timeout(20000)
+        });
+        if (!response.ok) throw new Error('共享 API 配置保存失败，请连接启动器本地工具后重试。');
+        shared = await response.json();
+      }
       for (const key of fields) if (Object.hasOwn(shared, key)) state.settings[key] = shared[key];
       return shared;
+    }
+
+    let workflowDiagnosticsRunning = false;
+    async function refreshCompanyApiSettings() {
+      // A diagnostic explicitly uses the currently edited form instead of the saved credentials.
+      if (workflowDiagnosticsRunning) return;
+      try { await syncSharedApiSettings(); }
+      catch (error) {
+        if (!state.settings.baseUrl || !state.settings.apiKey)
+          throw new Error('无法读取共享 API 配置，请在设置中填写并保存公司 API 地址和 Key。' + error.message);
+      }
     }
 
     async function loadState() {
@@ -11487,6 +11508,8 @@
     }
 
     function scheduleSave(options = {}) {
+      // Workbench preview drafts belong to the parent, never the standalone canvas database.
+      if (embeddedMediaViewer) return;
       if (embeddedCanvasHost?.id === currentProject()?.id) embeddedCanvasHost.changed?.();
       const saveOptions = { ...options };
       if (!saveOptions.quiet) $('saveStatus').innerHTML = '<span>●</span><span>保存中</span>';
@@ -11495,6 +11518,7 @@
     }
 
     async function saveState(options = {}) {
+      if (embeddedMediaViewer) return;
       const project = options.project || (options.projectId ? projectById(options.projectId) : null);
       if (project && !options.layoutOnly) project.updatedAt = new Date().toISOString();
       await flushPendingAssetWrites();
@@ -12358,6 +12382,12 @@
 
     function render() {
       syncActivePromptEditorDrafts({ suppressInlineBlur: true });
+      if (embeddedMediaViewer) {
+        renderContextMenu();
+        renderMentionMenu();
+        renderMediaViewer();
+        return;
+      }
       renderShellState();
       syncSettingsUI();
       renderProjects();
@@ -12494,6 +12524,7 @@
     }
 
     function syncSettingsUI() {
+      const draft = $('settingsModal')?.classList.contains('open') ? captureSettingsDraft() : null;
       const project = currentProject();
       state.settings.visualScheme = normalizeVisualScheme(state.settings.visualScheme);
       state.settings.llmModel = normalizeLlmModelForMode(state.settings.llmModel, state.settings.llmMode);
@@ -12530,9 +12561,23 @@
       $('auralisHeaderVersionLabel').textContent = AURALIS_DISPLAY_VERSION;
       updateApiStatus();
       updateBackupSettingsUI();
+      restoreSettingsDraft(draft);
     }
 
     let settingsModalReturnFocus = null;
+    let settingsModalDraft = null, settingsSharedBaseline = null;
+    function captureSettingsDraft() {
+      return Object.fromEntries([...$('settingsModal').querySelectorAll('input[id], select[id], textarea[id]')]
+        .map(input => [input.id, input.type === 'checkbox' ? input.checked : input.value]));
+    }
+    function restoreSettingsDraft(draft) {
+      for (const [id, value] of Object.entries(draft || {})) {
+        const input = $(id);
+        if (!input) continue;
+        if (input.type === 'checkbox') input.checked = value;
+        else if (input.tagName !== 'SELECT' || [...input.options].some(option => option.value === value)) input.value = value;
+      }
+    }
     let styleTestModalReturnFocus = null;
     let styleTestProjectId = '';
     let styleTestPromptIds = [];
@@ -12586,6 +12631,8 @@
       if (!modal) return;
       if (!modal.classList.contains('open')) settingsModalReturnFocus = document.activeElement;
       syncSettingsUI();
+      if (!settingsModalDraft) settingsSharedBaseline = Object.fromEntries(SHARED_API_FIELDS.map(key => [key, state.settings[key] || '']));
+      restoreSettingsDraft(settingsModalDraft);
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
       $('app').inert = true;
@@ -12593,9 +12640,10 @@
       refreshMobsControllerProfileStatus();
     }
 
-    function closeSettingsModal({ restoreFocus = true } = {}) {
+    function closeSettingsModal({ restoreFocus = true, discardDraft = false } = {}) {
       const modal = $('settingsModal');
       if (!modal?.classList.contains('open')) return false;
+      settingsModalDraft = discardDraft ? null : captureSettingsDraft();
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
       $('app').inert = false;
@@ -29648,6 +29696,7 @@
     }
 
     async function chatCompletion(model, messages, options = {}) {
+      if (state.settings.llmMode !== 'local-codex') await refreshCompanyApiSettings();
       requireLlmEndpoint();
       const headers = { 'Content-Type': 'application/json' };
       if (state.settings.llmMode === 'local-codex') headers.Authorization = `Bearer ${state.settings.localCodexToken || ''}`;
@@ -29671,15 +29720,21 @@
     }
 
     async function companyChatCompletion(model, messages, options = {}) {
-      requireCompanyApiKey();
-      const response = await fetchWithTimeout(`${trimSlash(state.settings.baseUrl || BASE_URL)}/chat/completions`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${state.settings.apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(chatCompletionBody(companyChatRequestModel(model), messages, options)),
-        signal: options.signal
-      }, options.timeoutMs ?? DEFAULT_LLM_TIMEOUT_MS);
-      if (!response.ok) throw new Error(await responseErrorText(response));
-      const json = await response.json();
+      const body = chatCompletionBody(companyChatRequestModel(model), messages, options);
+      let json;
+      if (embeddedCompanyTransport) {
+        json = await embeddedCompanyTransport(body, { signal: options.signal, timeoutMs: options.timeoutMs ?? DEFAULT_LLM_TIMEOUT_MS });
+      } else {
+        await refreshCompanyApiSettings();
+        requireCompanyApiKey();
+        const response = await fetchWithTimeout(`${trimSlash(state.settings.baseUrl || BASE_URL)}/chat/completions`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${state.settings.apiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body), signal: options.signal
+        }, options.timeoutMs ?? DEFAULT_LLM_TIMEOUT_MS);
+        if (!response.ok) throw new Error(await responseErrorText(response));
+        json = await response.json();
+      }
       const detail = extractChatContentDetail(json);
       trackTelemetryTokenUsage(detail.usage, options);
       return options.returnDetail ? detail : detail.content;
@@ -29698,6 +29753,7 @@
       if (mode === 'local-codex') {
         return LOCAL_CODEX_MODELS[0];
       }
+      if (value === 'gpt-5.5') return 'gpt-6.1-sol';
       if (LOCAL_CODEX_MODELS.includes(value) || LEGACY_LOCAL_CODEX_MODELS.has(value)) return companyLlmFallbackModel();
       return value || companyLlmFallbackModel();
     }
@@ -29764,7 +29820,7 @@
     }
 
     function requireCompanyApiKey() {
-      if (!state.settings.baseUrl && !BASE_URL) throw new Error('Company API URL is required.');
+      if (!state.settings.baseUrl && !BASE_URL) throw new Error('请在设置中填写并保存公司 API 地址；素材解析使用这份配置。');
       if (!state.settings.apiKey) throw new Error('请先在设置里填写公司 API Key；素材理解需要通过公司 API 调用 Gemini。');
     }
 
@@ -30765,6 +30821,7 @@
     }
 
     async function apiJson(path, body) {
+      await refreshCompanyApiSettings();
       requireApiKey();
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}${path}`, {
         method: 'POST',
@@ -30906,6 +30963,7 @@
     }
 
     async function downloadGenerationTaskContent(path, preferred, statusJson = null) {
+      await refreshCompanyApiSettings();
       requireApiKey();
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}${path}`, {
         method: 'GET',
@@ -30949,6 +31007,7 @@
     }
 
     async function apiGetJson(path) {
+      await refreshCompanyApiSettings();
       requireApiKey();
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}${path}`, {
         method: 'GET',
@@ -30980,7 +31039,7 @@
         const json = await response.json();
         const models = Array.isArray(json?.data) ? json.data : Array.isArray(json?.models) ? json.models : [];
         result.classList.add('ok');
-        result.textContent = models.length ? `连接成功，读取到 ${models.length} 个模型。` : '连接成功，但模型列表格式未知。';
+        result.textContent = (models.length ? `连接成功，读取到 ${models.length} 个模型。` : '连接成功，但模型列表格式未知。') + '请点击「保存设置」应用这份配置。';
       } catch (error) {
         result.classList.add('fail');
         result.textContent = `检查失败：${error.message}`;
@@ -31009,6 +31068,7 @@
       const result = $('apiTestResult');
       const button = $('workflowDiagnosticBtn');
       const previousSettings = { ...state.settings };
+      const saveButton = $('saveSettingsBtn'), wasSaveDisabled = saveButton.disabled;
       const rows = [];
       const renderRows = () => {
         const hasFailure = rows.some(row => row.status === 'FAIL');
@@ -31016,9 +31076,11 @@
         result.textContent = rows.map(row => `${row.status} ${row.label}: ${row.detail}`).join('\n');
       };
       button.disabled = true;
+      saveButton.disabled = true;
       result.className = 'settings-result';
       result.textContent = '正在运行流程诊断...';
       Object.assign(state.settings, settingsFromForm());
+      workflowDiagnosticsRunning = true;
       try {
         await pushDiagnostic(rows, renderRows, 'models', diagnoseModelsEndpoint);
         await pushDiagnostic(rows, renderRows, 'chat', diagnoseChatEndpoint);
@@ -31028,6 +31090,8 @@
         await pushDiagnostic(rows, renderRows, 'video polling', diagnoseVideoPollingConfig);
       } finally {
         Object.assign(state.settings, previousSettings);
+        workflowDiagnosticsRunning = false;
+        saveButton.disabled = wasSaveDisabled;
         button.disabled = false;
         renderRows();
       }
@@ -32044,6 +32108,7 @@
     }
 
     async function imageGeneration(model, prompt, withSize, resolvedExecution = null, project = currentProject()) {
+      await refreshCompanyApiSettings();
       requireApiKey();
       const body = await buildImageGenerationBody(model, prompt, withSize, resolvedExecution, project);
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}/images/generations`, {
@@ -32123,6 +32188,7 @@
     }
 
     async function imageEditGeneration(model, prompt, withSize, resolvedExecution = null, project = currentProject()) {
+      await refreshCompanyApiSettings();
       requireApiKey();
       const response = await fetch(`${trimSlash(state.settings.baseUrl)}/images/edits`, {
         method: 'POST',
@@ -35862,7 +35928,15 @@
         state.settings.telemetryUsageWebhookUrl = state.settings.telemetryUsageWebhookUrl || TELEMETRY_USAGE_WEBHOOK_URL;
         state.settings.telemetryFeedbackWebhookUrl = state.settings.telemetryFeedbackWebhookUrl || TELEMETRY_FEEDBACK_WEBHOOK_URL;
         state.settings.launcherConfigVersion = state.settings.launcherConfigVersion || '';
-        try { await syncSharedApiSettings(true); } catch (error) { $('apiTestResult').textContent = error.message; return; }
+        const sharedPatch = Object.fromEntries(SHARED_API_FIELDS.filter(key =>
+          state.settings[key] !== (settingsSharedBaseline?.[key] || '')).map(key => [key, state.settings[key] || '']));
+        let sharedSaved = false, sharedSaveError = '';
+        try { sharedSaved = !!await syncSharedApiSettings(true, sharedPatch); }
+        catch (error) { sharedSaveError = error.message; }
+        await saveState({ quiet: true, layoutOnly: true });
+        settingsModalDraft = null;
+        settingsSharedBaseline = Object.fromEntries(SHARED_API_FIELDS.map(key => [key, state.settings[key] || '']));
+        for (const key of SHARED_API_FIELDS) $(key + 'Input').value = state.settings[key] || '';
         let notificationPermission = browserNotificationPermission();
         if (state.settings.notificationsEnabled) {
           primeNotificationAudio();
@@ -35880,9 +35954,11 @@
         project.runtime.llmModel = state.settings.llmModel;
         project.runtime.imageModel = state.settings.imageModel;
         project.runtime.videoModel = state.settings.videoModel;
-        if (!keepSettingsOpenForNotification) closeSettingsModal();
+        if (!keepSettingsOpenForNotification) closeSettingsModal({ discardDraft: true });
         scheduleSave();
         render();
+        if (!sharedSaved && !embeddedCompanyTransport && (state.settings.baseUrl || state.settings.apiKey))
+          showInAppNotification({ title: '设置已保存到自由画布', body: (sharedSaveError ? sharedSaveError + ' ' : '') + '尚未同步到短剧工作台；请在工作台「设置 → 共享 API」填写同一份地址和 Key。', timeoutMs: 15000 });
         if (state.settings.llmMode === 'local-codex') connectLocalCodexBridge({ force: true });
         else closeLocalCodexBridge({ deliberate: true });
       };
@@ -36029,6 +36105,21 @@
     }
 
     async function boot() {
+      if (embeddedMediaViewer) {
+        applyVisualScheme();
+        window.addEventListener('keydown', event => {
+          if (handleMediaViewerKeydown(event)) return;
+          if (event.key === 'Escape') {
+            closeContextMenu();
+            closePromptMentionMenu();
+            closeMediaViewer();
+          }
+        });
+        document.addEventListener('pointerdown', event => {
+          if (!event.target.closest('[data-context-menu],[data-generation-control]')) closeContextMenu();
+        });
+        return;
+      }
       let launcherTarget = '';
       try {
         const encoded = new URLSearchParams(location.hash.slice(1)).get('auralis_config');
@@ -36312,9 +36403,15 @@
     };
 
     // Stable adapter used by the standalone drama sub-canvas.
-    let embeddedCanvasHost = null;
+    let embeddedCanvasHost = null, embeddedCompanyTransport = null;
     window.AuralisCanvas = {
+      setCompanyTransport(transport) { embeddedCompanyTransport = transport; },
       mount(data, host = null) {
+        if (embeddedMediaViewer) {
+          closeMediaViewer();
+          closeContextMenu();
+          closePromptMentionMenu();
+        }
         embeddedCanvasHost = host ? { ...host, id: data.id } : null;
         const project = defaultProject(data.title || '制作前置');
         project.id = data.id;
@@ -36351,6 +36448,7 @@
         state.selectedNodeIds = batchIds;
         openMediaViewer(id);
       },
+      closeMedia() { closeMediaViewer(); },
       mediaReview() {
         const node = nodeById(state.mediaViewerNodeId);
         if (!node) return null;
