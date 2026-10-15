@@ -30476,6 +30476,7 @@
         }
         updateNode(node.id, {
           status: 'completed',
+          ...(media.workbenchMeta ? { assetState: 'candidate' } : {}),
           assetUrl: cached.assetUrl,
           displayUrl: cached.displayUrl,
           mime: cached.mime,
@@ -30489,7 +30490,8 @@
             promptKey: promptPick.promptKey,
             candidateOfNodeId: official?.id || '',
             ...cached.meta,
-            ...generationPromptSourceMeta(promptSnapshot, project)
+            ...generationPromptSourceMeta(promptSnapshot, project),
+            ...(media.workbenchMeta || {})
           }
         }, project);
         addAstraLink(promptPick.nodeId, node.id, { relation: 'input', inputRole: 'prompt', actionRunId: run?.id, project });
@@ -30551,6 +30553,7 @@
     }
 
     async function generateVideoAsset(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
+      if (embeddedCanvasHost?.id === project.id && embeddedCanvasHost.generateVideo) return embeddedCanvasHost.generateVideo({model, prompt, execution: resolvedExecution, nodeId});
       if (resolvedExecution?.mode === 'video_extend' && mediaModelFamily(model, 'video') !== 'seedance2.5') {
         throw new Error(`${modelDisplayLabel(model)} 不支持视频延长；请切换到 WS / Seedance 2.5。`);
       }
@@ -30670,6 +30673,10 @@
         content.push({ type: 'image_url', image_url: { url }, role });
       }
       for (const node of videos) {
+        if (embeddedCanvasHost?.referenceUrl) {
+          content.push({ type: 'video_url', video_url: { url: embeddedCanvasHost.referenceUrl(node) }, role: 'reference_video' });
+          continue;
+        }
         const remote = normalizeMediaUrl(node.meta?.remoteAssetUrl || node.assetUrl || '');
         if (!/^https?:\/\//i.test(remote) && !state.settings.wavespeedApiKey) throw new Error('RG/S2.5 参考视频需要公网链接；本地视频请先在设置填写 WaveSpeed Key，用于上传素材。');
         const url = /^https?:\/\//i.test(remote) ? remote : await waveSpeedUploadMediaAsset(node, project);
@@ -30712,18 +30719,21 @@
     }
 
     async function videoRequestUrlForAsset(node) {
+      if (embeddedCanvasHost?.referenceUrl) return node ? embeddedCanvasHost.referenceUrl(node) : "";
       const remote = normalizeMediaUrl(node?.meta?.remoteAssetUrl || '');
       if (/^https?:\/\//i.test(remote)) return remote;
       return dataUrlForAsset(node);
     }
 
     async function waveSpeedVideoRequestUrlForAsset(node, project = currentProject()) {
+      if (embeddedCanvasHost?.referenceUrl) return node ? embeddedCanvasHost.referenceUrl(node) : "";
       const remote = normalizeMediaUrl(node?.meta?.remoteAssetUrl || '');
       if (/^https?:\/\//i.test(remote)) return remote;
       return waveSpeedUploadMediaAsset(node, project);
     }
 
     async function waveSpeedUploadMediaAsset(node, project = currentProject(), options = {}) {
+      if (embeddedCanvasHost?.referenceUrl) return node ? embeddedCanvasHost.referenceUrl(node) : "";
       if (!node) return '';
       requireWaveSpeedKey();
       let asset = null;
@@ -31410,6 +31420,7 @@
     }
 
     async function waveSpeedImageRequestUrlForAsset(node, project = currentProject()) {
+      if (embeddedCanvasHost?.referenceUrl) return node ? embeddedCanvasHost.referenceUrl(node) : "";
       const remote = providerReachableImageUrl(normalizeMediaUrl(node?.meta?.remoteAssetUrl || ''));
       const uploadedAt = Date.parse(node?.meta?.waveSpeedMediaUploadedAt || node?.meta?.waveSpeedMediaCreatedAt || '');
       const isTemporaryUpload = Number.isFinite(uploadedAt);
@@ -33374,6 +33385,7 @@
     }
 
     async function videoImageRequestUrlForAsset(node) {
+      if (embeddedCanvasHost?.referenceUrl) return node ? embeddedCanvasHost.referenceUrl(node) : "";
       const source = await dataUrlForAsset(node);
       if (!/^data:image\//i.test(source)) return source;
       try {
@@ -36406,6 +36418,19 @@
     let embeddedCanvasHost = null, embeddedCompanyTransport = null;
     window.AuralisCanvas = {
       setCompanyTransport(transport) { embeddedCompanyTransport = transport; },
+      videoExecution(promptId) {
+        const prompt = nodeById(promptId), settings = promptGenerationSettings(prompt);
+        return resolveVideoExecution({ nodeId: promptId, model: settings.model, mediaSettings: settings.mediaSettings }, currentProject(), []);
+      },
+      async videoRequest(model, prompt, execution, graph) {
+        const project = graph ? { ...currentProject(), nodes: graph.nodes, links: graph.links } : currentProject();
+        if (shouldUseWaveSpeedMedia(model, 'video')) {
+          const request = await buildWaveSpeedVideoRequest(model, prompt, execution, project);
+          return { endpoint: request.endpointModel, body: request.body };
+        }
+        const body = await buildVideoGenerationBody(model, prompt, execution, project);
+        return { endpoint: mediaModelConfig(canonicalModelValue(model), 'video').bodyKind === 'doubao-seedance' || isRgSeedanceSoraRequestModel(body.model) ? 'videos' : 'video/generations', body };
+      },
       mount(data, host = null) {
         if (embeddedMediaViewer) {
           closeMediaViewer();
@@ -36420,6 +36445,7 @@
         project.embeddedMediaModels = data.allowedModels;
         project.embeddedJobs = data.jobs || [];
         if (data.imageGeneration) project.runtime.imageModel = data.imageGeneration.model;
+        if (data.videoGeneration) project.runtime.videoModel = data.videoGeneration.model;
         state.projects = [project]; state.currentProjectId = project.id;
         state.settings.llmMode = 'api'; state.settings.apiKey = ''; state.settings.wavespeedApiKey = '';
         render(); return project.id;
@@ -36482,9 +36508,9 @@
         project.links = project.links.filter(link => link.toNodeId !== review.prompt.id);
         uniqueIds(ids).forEach(id => {
           const node = nodeById(id);
-          if (!node?.meta?.dramaRef) return;
+          if (!node?.meta?.dramaRef && !node?.meta?.dramaCanvasMedia) return;
           project.links.push({ id: `review-${review.prompt.id}-${id}`, fromNodeId: id, toNodeId: review.prompt.id,
-            relation: 'input', inputRole: node.mime?.startsWith('audio/') ? 'reference_audio' : node.mime?.startsWith('video/') ? 'reference_video' : 'ref' });
+            relation: 'input', inputRole: node.meta?.dramaCanvasInputRole || (node.mime?.startsWith('audio/') ? 'reference_audio' : node.mime?.startsWith('video/') ? 'reference_video' : 'ref') });
         });
         renderMediaViewer();
       }

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Auralis · 短剧工作台</title>
     <link rel="stylesheet" href="/style.css" />
-  <script>const AURALIS_VERSION = '1.2.1'; const AURALIS_CHANGELOG = Object.freeze(["素材预览提速：首次打开与反复切换使用轻量预览窗口，参考图列表可横向滚动。","未采用的图片候选也能直接编辑，修改结果保留为新候选，已采用素材和分集引用保持不变。","发送梗概或文字分镜修改要求时，先保存本页草稿；Agent 结果不再被旧草稿遮住。","创作搭档运行中可继续追加文字和参考素材，沿用当前任务处理，聊天记录持续保留。","新增“本轮输入”查看入口，展示 Agent 使用的规范、作品和参考；精简重复上下文，多集创作按需读取前情。","图片、视频和配音任务在后台完成时，不再干扰 Agent 状态或造成无关编辑冲突；修复旧刷新响应覆盖新任务的问题。","短剧工作台新增版本更新提醒，可查看更新内容或忽略当前版本。","公司 API 的 GPT 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。","Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新、共享 API 配置与便携包交付。"]);</script></head>
+  <script>const AURALIS_VERSION = '1.2.2'; const AURALIS_CHANGELOG = Object.freeze(["梗概、分镜和聊天输入支持草稿恢复，刷新或重新打开后可继续编辑；新草稿不影响已采用内容的后续制作。","创作搭档支持增量上下文、局部文字修改和流式回复，减少重复读取；可重置卡住的任务，并保留已有作品和聊天记录。","返回原梗概或分镜会话时保留已读资料记录；单项正文修改不再被无关资产或其他集编辑阻挡，相关内容变更仍会提示冲突。","Windows 会话保存遇到文件占用时自动重试；消息发出后保留发送回执，避免误报发送失败和重复追加。","上传参考图可在公共资产库和分集制作中复用；Agent 可读取轻量视觉参考，并在后台补充素材描述。","视频画布统一使用工作台的 API 设置，支持引用现有视频、生成新候选、保存画布和重新打开；新结果不会自动替换已采用版本。","生成结果下载显示进度和速度，网络中断后可继续下载；失败任务支持重试、恢复原任务或明确新建一次生成。","重新生成使用当前编辑的片段计划；批量提交防止重复点击，提交失败时保留选择，画布布局保存减少无关冲突。","增加候选撤销、回收站恢复和版本恢复，保留历史记录与分集引用；错误提示展示供应商返回的原因。","优化大项目保存、后台刷新和历史读取；图片缩略图、视频封面、分段播放、流式传输与上传复用减少等待和内存占用。","备份复用未变化的媒体文件，显示备份失败原因；本地服务断开后提供恢复提示，并附 Windows 性能诊断工具。"]);</script></head>
   <body>
     <aside id="rail">
       <a class="brand" href="/" aria-label="工作台首页"
@@ -14,14 +14,23 @@
       >
       <div id="navigation"></div>
       <div class="rail-bottom">
-        <span class="local-dot"></span> 本地项目
+        <div id="serviceStatus" data-state="connecting" role="status" aria-live="polite">
+          <span class="service-dot" aria-hidden="true"></span><span id="serviceLabel">正在连接后台</span>
+        </div>
         <button data-action="settings" aria-label="生成设置">设置</button>
       </div>
     </aside>
     <main>
+      <div id="serviceNotice" class="service-notice" role="alert" hidden>
+        <span id="serviceNoticeText"></span>
+        <button id="serviceRetry" type="button">重新连接</button>
+      </div>
       <div id="updateReminder" class="update-reminder" role="status" aria-live="polite" hidden>
         <span>短剧工作台有新版本，请前往启动器更新</span>
         <button id="updateReminderDismiss" type="button" title="关闭新版提醒" aria-label="关闭新版提醒">×</button>
+      </div>
+      <div id="backupNotice" class="backup-notice" role="status" hidden>
+        <span></span><button type="button" data-preference="backup">查看备份并重试</button>
       </div>
       <header id="header"></header>
       <nav id="stages" aria-label="制作阶段"></nav>
@@ -40,6 +49,7 @@
       <div class="assistant-heading">
         <span class="eyebrow">创作搭档</span
         ><span id="agentCompactStatus"></span
+        ><button id="agentReset" type="button" title="结束当前阶段的执行会话；保留作品与聊天，下次发送从当前资料重新开始">重置 Agent</button
         ><button id="agentToggle" aria-label="展开或收起创作搭档">−</button>
       </div>
       <h3 id="agentRole">设定 Agent</h3>
@@ -73,6 +83,7 @@
           placeholder="告诉它你想怎么改…"
           rows="4"
         ></textarea>
+        <p id="agentDraftStatus" class="editor-note" role="status" hidden>已恢复未发送的消息。</p>
         <div class="agent-actions">
           <button type="button" data-action="addReference" class="quiet">
             添加图片
@@ -84,7 +95,7 @@
       </form>
     </aside>
     <dialog id="dialog"><div id="dialogBody"></div></dialog>
-    <div id="toast" role="status"></div>
+    <div id="toast" role="status" popover="manual"></div>
     <div id="contextMenu" hidden></div>
     <input
       id="referenceFiles"
@@ -96,8 +107,10 @@
     />
     <script src="/update-reminder.js"></script>
     <script src="/app.js"></script>
+    <script src="/service-health.js"></script>
     <script src="/preferences.js"></script>
     <script src="/canvas-bridge.js"></script>
+    <script src="/clip-canvas.js"></script>
     <script src="/production-updates.js"></script>
     <script src="/asset-board.js"></script>
     <script src="/video-board.js"></script>
