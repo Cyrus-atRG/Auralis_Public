@@ -1,49 +1,50 @@
 {
-  "schemaVersion": 2,
-  "platform": "macos-arm64",
-  "releaseVersion": "Auralis v1.24",
-  "publishedAt": "2026-10-15T09:49:34.7984603Z",
-  "changelog": [
-    "自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。",
-    "短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。",
-    "短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。",
-    "Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "Auralis v1.24",
-      "url": "Auralis.html",
-      "size": 1866438,
-      "sha256": "63c1eccc989e9eaea93ef5d1bdd3ab2cec8f21a1b29388a0a7b1a96ec82bc18f",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "Auralis v1.24",
-      "url": "auralis-runtime-macos-arm64.zip",
-      "size": 38861493,
-      "sha256": "3f61e6811fbff319eec1ae52f409ec0ec6173bc08f17b31c946912e59c079edc",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "Auralis v1.24",
-      "url": "auralis-controller-packs-macos-arm64.zip",
-      "size": 28190,
-      "sha256": "633f05b3a0528f377ef0e3e14f87e646c905c0e9665cbef0f53a789919faae78",
-      "format": "zip"
-    },
-    {
-      "id": "launcher",
-      "version": "1.19.0",
-      "url": "auralis-launcher-macos-arm64.zip",
-      "size": 38898825,
-      "sha256": "541ba81c88d311c6ea8c1bec9d50ab26698c584decacd541b92b1bf645e153ad",
-      "format": "zip",
-      "executableSize": 176,
-      "executableSha256": "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
-      "bundleSha256": "00bb44e3d12c032f867dca2127ed6567fc6089dda85f8aba0f12900a5a26ba59"
-    }
-  ]
+    "schemaVersion":  2,
+    "platform":  "macos-arm64",
+    "releaseVersion":  "Auralis v1.25",
+    "publishedAt":  "2026-10-22T09:20:07.5097239Z",
+    "changelog":  [
+                      "RG Seedance 2.0 / 2.5 切换至公司多媒体平台；设置中新增多媒体 Token、平台入口和有效性检查，失效时自动提醒更新。",
+                      "参考图片和音频先上传再生成，改善多参考素材提交的稳定性；已提交任务保留状态，支持恢复查询，避免重复生成。",
+                      "修复视频详情页编辑提示词后播放被重置的问题，并改进新增参考与画布的同步。",
+                      "隐藏 RG Seedance 2.0 Fast 的新建入口，保留已有记录。",
+                      "Windows 启动器更新至 1.18.1，修复旧内置包覆盖新版本，以及旧版自由画布无法跳转至短剧工作台的问题。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.25",
+                           "url":  "Auralis.html",
+                           "size":  1893754,
+                           "sha256":  "92698520c6e7922f0d4c93a91b863b21d3f7b4e98c100ab3971b56437ed99c7d",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.25",
+                           "url":  "auralis-runtime-macos-arm64.zip",
+                           "size":  38868153,
+                           "sha256":  "5d53f7a6a1d077152685e1f5aaa661320b96388e2a2981c3aba2ec4354cb257d",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.25",
+                           "url":  "auralis-controller-packs-macos-arm64.zip",
+                           "size":  28190,
+                           "sha256":  "b263f392c6427aec4d7a414ae82098536719ea986c167685f930cda25d9c2a70",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.19.0",
+                           "url":  "auralis-launcher-macos-arm64.zip",
+                           "size":  38898826,
+                           "sha256":  "da532ca0b6f63fdf1bb75bffb45224725578f0070f83b026ebeb11ebf50f63be",
+                           "format":  "zip",
+                           "executableSize":  176,
+                           "executableSha256":  "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
+                           "bundleSha256":  "73d967f7da99539e70b27574da7d4065e2cc05404b7b04be4e7cab14dbe32264"
+                       }
+                   ]
 }

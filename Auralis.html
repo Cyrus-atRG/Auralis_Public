@@ -155,6 +155,11 @@
       z-index: 0;
     }
 
+    .settings-multimedia { grid-column: 1 / -1; display: grid; gap: 8px; }
+    .settings-multimedia .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .settings-multimedia a { color: var(--ink); font-size: 12px; text-underline-offset: 3px; }
+    .settings-multimedia p { margin: 0; }
+
     .app {
       position: relative;
       z-index: 1;
@@ -5271,6 +5276,13 @@
             <label>公司 API Key
               <input id="apiKeyInput" type="password" autocomplete="off" placeholder="每位同事填写自己的 key">
             </label>
+            <div class="settings-multimedia">
+            <label>多媒体 Token · RG Seedance 2 / 2.5
+              <input id="multimediaTokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴多媒体平台右上角复制的 Token">
+            </label>
+            <div class="actions"><a href="http://43.110.148.231:8025/playground/" target="_blank" rel="noopener">打开多媒体平台</a><button id="checkMultimediaTokenBtn" type="button">检查已保存 Token</button></div>
+            <p class="settings-section-description" id="multimediaTokenStatus" role="status">登录平台后复制 Token，在这里粘贴并保存。失效时会提醒更新。</p>
+            </div>
             <label>本地 Codex URL
               <input id="localCodexUrlInput" placeholder="http://127.0.0.1:17876/v1">
             </label>
@@ -5440,6 +5452,204 @@
 
   <input class="hidden" id="importFileInput" type="file" accept=".json,.zip,.aura,application/json,application/zip">
 
+  <script>
+/* Inlined from src/company-aigc.js. */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.CompanyAigc = factory();
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  const BASE = 'https://rgxz-agent-center.rivergame.net';
+  const LOGIN = 'http://43.110.148.231:8025/playground/';
+  const CHECK_INTERVAL = 30 * 60 * 1000;
+  const MODELS = { 'rg-seedance-2': 'seedance-2.0', 'rg-seedance-2.5': 'seedance-2.5' };
+  function fail(message, extra = {}) { throw Object.assign(new Error(message), { definite: true, ...extra }); }
+  function task(value) { return value?.task || value?.data?.task || value?.data || value || {}; }
+  function taskId(value) { const t = task(value); return t.task_id || t.id || ''; }
+  function status(value) { return String(task(value).status || '').toLowerCase(); }
+  function media(value) {
+    const r = task(value).result;
+    function find(v) {
+      if (typeof v === 'string') return /^https:\/\//.test(v) ? v : '';
+      if (!v || typeof v !== 'object') return '';
+      for (const key of ['video_url', 'url', 'output_url', 'outputs', 'output', 'videos', 'content']) { const url = find(v[key]); if (url) return url; }
+      if (Array.isArray(v)) for (const item of v) { const url = find(item); if (url) return url; }
+      return '';
+    }
+    return find(r) || find(task(value));
+  }
+  // The two surfaces supply the same semantic inputs; only this adapter owns API field names.
+  function specification(model, input) {
+    if (!MODELS[model]) fail('请选择 RG / Seedance 2 或 2.5');
+    const v25 = model === 'rg-seedance-2.5', images = input.images || [], videos = input.videos || [], audios = input.audios || [];
+    const mode = input.mode || 'text', first = input.first, last = input.last, source = input.source;
+    if (last && !first) fail('使用尾帧时也需要首帧');
+    if (first && (images.length || videos.length || audios.length || source)) fail('首尾帧模式不能混用其他图片、视频或音频参考');
+    if (images.length > (v25 ? 30 : 9) || videos.length > (v25 ? 10 : 3) || audios.length > (v25 ? 10 : 3)) fail('参考素材数量超过模型上限');
+    const category = mode === 'edit' ? 'video-edit' : mode === 'extend' ? 'video-extend' : first ? 'image-to-video' : 'text-to-video';
+    const params = { prompt: input.prompt, resolution: input.resolution, duration: input.duration, generate_audio: true };
+    if (category === 'text-to-video') Object.assign(params, { aspect_ratio: input.aspectRatio, reference_images: images, reference_videos: videos, reference_audios: audios });
+    if (category === 'image-to-video') Object.assign(params, { image: first, ...(last ? { last_image: last } : {}), ...(!v25 ? { aspect_ratio: input.aspectRatio } : {}) });
+    if (category === 'video-edit' || category === 'video-extend') {
+      if (!source) fail('请连接需要编辑或延长的视频');
+      if (first || last || videos.length) fail('编辑或延长模式只接受一段源视频');
+      params.reference_video = !v25 && category === 'video-extend' ? [source] : source;
+      if (category === 'video-edit') {
+        if (v25) Object.assign(params, { ratio: 'adaptive', duration: -1, reference_image: images, reference_audio: audios });
+        else Object.assign(params, { aspect_ratio: input.aspectRatio, reference_images: images, reference_audios: audios });
+      } else if (images.length || audios.length) fail('视频延长接口不接受额外图片或音频参考');
+    }
+    return { model, category, params };
+  }
+  function validateParams(fields, params) {
+    const known = new Map(fields.map(f => [f.field_key, f]));
+    for (const field of fields) if (field.required && (params[field.field_key] == null || params[field.field_key] === '' || (Array.isArray(params[field.field_key]) && !params[field.field_key].length))) fail('缺少参数：' + field.field_key);
+    for (const [key, value] of Object.entries(params)) {
+      const f = known.get(key), c = f?.constraints || {};
+      if (!f) fail('当前接口不支持参数：' + key);
+      if (c.options && !c.options.some(o => o.value === value)) fail('当前接口不支持 ' + key + ' = ' + value);
+      if (f.value_type === 'number' && (!Number.isFinite(value) || (c.min != null && value < c.min) || (c.max != null && value > c.max))) fail('参数超出范围：' + key);
+      if (f.value_type === 'url') {
+        if (!!f.multiple !== Array.isArray(value)) fail('素材参数格式不正确：' + key);
+        const values = Array.isArray(value) ? value : [value];
+        if (values.some(v => typeof v !== 'string' || !/^https:\/\//.test(v))) fail('参考素材需要先上传：' + key);
+        if ((c.max_count != null && values.length > c.max_count) || (c.min_count != null && values.length < c.min_count)) fail('参考素材数量超出范围：' + key);
+      }
+    }
+  }
+  class Client {
+    constructor(options = {}) {
+      this.fetch = options.fetch || globalThis.fetch.bind(globalThis);
+      this.token = options.token || (() => '');
+      this.onAuth = options.onAuth || (() => {});
+      this.auth = { state: 'missing', checkedAt: 0, revision: '' };
+      this.credential = ''; this.pending = null; this.catalog = null; this.forms = new Map();
+    }
+    current() {
+      const token = String(this.token() || '').trim();
+      if (this.credential !== token) {
+        this.credential = token; this.pending = null; this.catalog = null; this.forms.clear();
+        this.auth = { state: token ? 'unchecked' : 'missing', checkedAt: 0, revision: '' };
+      }
+      return token;
+    }
+    setAuth(state, token, revision = this.auth.revision) {
+      if (this.current() !== token) return;
+      this.auth = { state, checkedAt: Date.now(), revision }; this.onAuth({ ...this.auth });
+    }
+    async request(route, body, timeoutMs = 60000, token = this.current()) {
+      if (!token) fail('请在设置中填写多媒体 Token', { code: 'aigc_auth_missing' });
+      const headers = { 'X-Casdoor-Token': token };
+      const form = typeof FormData !== 'undefined' && body instanceof FormData;
+      if (body !== undefined && !form) headers['Content-Type'] = 'application/json';
+      let response, json;
+      try {
+        response = await this.fetch(BASE + route, { method: body === undefined ? 'GET' : 'POST', headers,
+          ...(body !== undefined ? { body: form ? body : JSON.stringify(body) } : {}), signal: AbortSignal.timeout(timeoutMs) });
+        json = await response.json();
+      } catch (error) {
+        throw Object.assign(new Error('多媒体接口暂时无法连接或响应无效，请稍后重试'), { definite: false, cause: error });
+      }
+      if (!response.ok || (json.code != null && json.code !== 200000 && json.code !== 200 && json.code !== 0)) {
+        const detail = String(json.error?.message || json.error || json.message || ('HTTP ' + response.status)).split(token).join('[Token]').slice(0, 500);
+        if (response.status === 401 || json.code === 401000) this.setAuth('invalid', token);
+        throw Object.assign(new Error('多媒体接口：' + detail), { httpStatus: response.status, definite: response.status >= 400 && response.status < 500 || /^4\d{5}$/.test(String(json.code)) });
+      }
+      return json;
+    }
+    async check(force = false) {
+      const token = this.current();
+      if (!token) return { ...this.auth };
+      if (!force && this.auth.checkedAt && Date.now() - this.auth.checkedAt < (this.auth.state === 'unavailable' ? 60000 : CHECK_INTERVAL)) return { ...this.auth };
+      if (this.pending) return this.pending;
+      const run = (async () => {
+        let revision = this.auth.revision;
+        try {
+          // Validation must also work on HTTP-hosted canvases without SubtleCrypto.
+          revision = globalThis.crypto?.subtle
+            ? Array.from(new Uint8Array(await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(token)))).map(x => x.toString(16).padStart(2, '0')).join('').slice(0, 20)
+            : revision || 'session-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+          const response = await this.request('/api/v1/casdoor/token/validate', { token }, 15000, token);
+          const data = response.data, user = data?.user_info;
+          if (!data || !Object.hasOwn(data, 'user_info')) throw new Error('Invalid validation response');
+          this.setAuth(data.valid === true && user && (user.name || user.email || user.id) ? 'valid' : 'invalid', token, revision);
+        } catch (error) { this.setAuth(error.httpStatus === 401 || error.httpStatus === 403 ? 'invalid' : 'unavailable', token, revision); }
+        return { ...this.auth };
+      })();
+      this.pending = run;
+      try { return await run; } finally { if (this.pending === run) this.pending = null; }
+    }
+    async ready() {
+      const auth = await this.check();
+      if (auth.state !== 'valid') fail(auth.state === 'unavailable' ? '暂时无法验证多媒体 Token，请检查网络后重试' : '多媒体 Token 未填写或已失效，请在设置中更新', { code: 'aigc_auth_' + auth.state });
+    }
+    async prepare(spec) {
+      await this.ready();
+      if (!MODELS[spec.model]) fail('不支持的多媒体模型');
+      if (!this.catalog || Date.now() - this.catalog.at > CHECK_INTERVAL) this.catalog = { at: Date.now(), value: await this.request('/api/v1/aigc/catalog') };
+      const models = this.catalog.value.models || this.catalog.value.data?.models || [];
+      const candidates = models.flatMap(m => m.scenes || []).filter(s => s.category === spec.category && s.name === 'bytedance/' + MODELS[spec.model] + '/' + spec.category);
+      if (candidates.length !== 1) fail('当前多媒体目录没有唯一可用的 ' + MODELS[spec.model] + ' / ' + spec.category);
+      const scene = candidates[0];
+      let form = this.forms.get(scene.id);
+      if (!form || Date.now() - form.at > CHECK_INTERVAL) { form = { at: Date.now(), value: await this.request('/api/v1/aigc/scenes/' + encodeURIComponent(scene.id) + '/form') }; this.forms.set(scene.id, form); }
+      const fields = form.value.fields || form.value.data?.fields;
+      if (!Array.isArray(fields)) fail('多媒体接口返回的场景参数无效');
+      validateParams(fields, spec.params);
+      return { scene_id: scene.id, params: spec.params };
+    }
+    async upload(blob, name) {
+      await this.ready();
+      const form = new FormData(); form.append('file', blob, name); form.append('path', 'auralis');
+      const json = await this.request('/api/v1/xiaozhi/common/upload-object', form, 600000);
+      const url = json.data?.url;
+      if (!/^https:\/\//.test(url || '')) fail('多媒体上传未返回有效素材地址');
+      return url;
+    }
+    async submit(body) { return this.request('/api/v1/aigc/generate', body); }
+    async query(id) { return this.request('/api/v1/aigc/tasks/' + encodeURIComponent(id), {}); }
+  }
+  function watchToken(options) {
+    let busy = false, stopped = false, dialog = null;
+    const seen = new Set();
+    const labels = { valid: 'Token 有效', invalid: 'Token 已失效，请重新登录并更新', missing: '尚未填写多媒体 Token', unchecked: '尚未验证', unavailable: '暂时无法检查，请检查网络后重试' };
+    async function check(force = false) {
+      if (busy || stopped || options.enabled?.() === false) return;
+      busy = true;
+      try {
+        const state = await options.check(force);
+        options.onStatus?.(state, labels[state.state] || '正在检查…');
+        if (state.state !== 'invalid' || !state.revision || options.canNotify?.() === false) return state;
+        const key = 'auralis-multimedia-expired-' + state.revision;
+        let acknowledged = seen.has(key);
+        try { acknowledged ||= !!localStorage.getItem(key); } catch (_) {}
+        if (acknowledged || dialog) return state;
+        seen.add(key); try { localStorage.setItem(key, '1'); } catch (_) {}
+        const focus = document.activeElement;
+        dialog = document.createElement('dialog');
+        dialog.className = 'multimedia-token-dialog';
+        dialog.setAttribute('aria-labelledby', 'multimediaTokenNoticeTitle');
+        dialog.style.cssText = 'max-width:480px;width:calc(100% - 40px);box-sizing:border-box;background:var(--surface,#202323);color:var(--ink,#edf0f0);border:1px solid var(--line,#555);border-radius:12px;padding:24px;';
+        dialog.innerHTML = '<h2 id="multimediaTokenNoticeTitle" style="font-size:18px;margin:0 0 12px">多媒体 Token 已失效</h2><p style="line-height:1.7">请打开多媒体平台，登录后点击右上角复制 Token，再到设置中粘贴保存，以继续使用 RG Seedance。</p><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><a href="' + LOGIN + '" target="_blank" rel="noopener" style="color:inherit">打开多媒体平台</a><button type="button" data-token-settings>填写 Token</button><button type="button" data-token-later>稍后</button></div>';
+        const close = () => { const old = dialog; dialog = null; old?.close(); old?.remove(); if (focus?.isConnected) focus.focus(); };
+        dialog.querySelector('[data-token-settings]').onclick = () => { close(); options.openSettings(); };
+        dialog.querySelector('[data-token-later]').onclick = close;
+        dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
+        dialog.addEventListener('click', event => { if (event.target === dialog) { const r = dialog.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) close(); } });
+        document.body.append(dialog); dialog.showModal();
+        return state;
+      } catch (_) { options.onStatus?.({ state: 'unavailable' }, labels.unavailable); }
+      finally { busy = false; }
+    }
+    const focus = () => check(), visible = () => { if (document.visibilityState === 'visible') check(); };
+    const timer = setInterval(() => check(), CHECK_INTERVAL);
+    window.addEventListener('focus', focus); document.addEventListener('visibilitychange', visible);
+    return { check, stop() { stopped = true; clearInterval(timer); window.removeEventListener('focus', focus); document.removeEventListener('visibilitychange', visible); dialog?.close(); dialog?.remove(); } };
+  }
+  return { BASE, LOGIN, CHECK_INTERVAL, MODELS, Client, specification, validateParams, task, taskId, status, media, watchToken };
+});
+
+</script>
   <script>
 /* Inlined from src/auralis-controller-foundation.js. */
 (function attachAuralisFoundation(root, factory) {
@@ -7413,17 +7623,18 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.24';
+    const AURALIS_VERSION = 'Auralis v1.25';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '自由画布与短剧工作台的公司 API 模型升级为 GPT-6.1 Sol，已有 GPT-5.5 配置自动迁移。',
-      '短剧工作台更新至 1.2.0：支持运行中追加消息、查看本轮输入、编辑未采用候选，并改进草稿交接。',
-      '短剧素材预览提速，后台生成与 Agent 状态独立刷新，并新增工作台版本更新提醒。',
-      'Apple Silicon Mac 启动器新增短剧工作台入口，支持独立更新和共享 API 配置。'
+      'RG Seedance 2.0 / 2.5 切换至公司多媒体平台；设置中新增多媒体 Token、平台入口和有效性检查，失效时自动提醒更新。',
+      '参考图片和音频先上传再生成，改善多参考素材提交的稳定性；已提交任务保留状态，支持恢复查询，避免重复生成。',
+      '修复视频详情页编辑提示词后播放被重置的问题，并改进新增参考与画布的同步。',
+      '隐藏 RG Seedance 2.0 Fast 的新建入口，保留已有记录。',
+      'Windows 启动器更新至 1.18.1，修复旧内置包覆盖新版本，以及旧版自由画布无法跳转至短剧工作台的问题。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9264,9 +9475,9 @@
       'google/gemini-omni-1.1-flash/image-to-video': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, canonical: 'ws-gemini-omni-1.1-flash' },
       'google/gemini-omni-1.1-flash/reference-to-video': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, endpointModel: 'google/gemini-omni-1.1-flash/reference-to-video', canonical: 'ws-gemini-omni-1.1-flash' },
       'google/gemini-omni-1.1-flash/video-edit': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, endpointModel: 'google/gemini-omni-1.1-flash/video-edit', canonical: 'ws-gemini-omni-1.1-flash' },
-      'rg-seedance-2.5': { provider: 'company', requestModel: 'doubao-seedance-2-5-260628', bodyKind: 'doubao-seedance', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
-      'rg-seedance-2-fast': { provider: 'company', requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-fast-video-edit', family: 'seedance2-fast' },
-      'rg-seedance-2': { provider: 'company', requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
+      'rg-seedance-2.5': { provider: 'company', transport: 'aigc', requestModel: 'doubao-seedance-2-5-260628', bodyKind: 'doubao-seedance', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
+      'rg-seedance-2-fast': { provider: 'company', hidden: true, requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-fast-video-edit', family: 'seedance2-fast' },
+      'rg-seedance-2': { provider: 'company', transport: 'aigc', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
       'ws-seedance-2.5': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'ws-seedance-2-fast': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast' },
       'ws-seedance-2': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2' },
@@ -10031,6 +10242,7 @@
         visualScheme: 'aura',
         llmMode: 'company',
         baseUrl: BASE_URL,
+        multimediaToken: '',
         apiKey: '',
         localCodexUrl: LOCAL_CODEX_URL,
         localCodexToken: '',
@@ -11154,7 +11366,7 @@
       return next;
     }
 
-    const SHARED_API_FIELDS = ['baseUrl', 'apiKey', 'wavespeedApiKey', 'elevenLabsApiKey'];
+    const SHARED_API_FIELDS = ['baseUrl', 'apiKey', 'wavespeedApiKey', 'elevenLabsApiKey', 'multimediaToken'];
     async function syncSharedApiSettings(save = false, patch = null) {
       if (embeddedCompanyTransport || embeddedCanvasHost || !state.settings.localMediaToken) return;
       const fields = SHARED_API_FIELDS;
@@ -11793,7 +12005,7 @@
 
     function backupSafeSettings() {
       const settings = { ...state.settings };
-      ['apiKey', 'wavespeedApiKey', 'elevenLabsApiKey', 'telemetryWebhookUrl', 'telemetryUsageWebhookUrl', 'telemetryFeedbackWebhookUrl'].forEach(key => {
+      ['apiKey', 'wavespeedApiKey', 'elevenLabsApiKey', 'multimediaToken', 'telemetryWebhookUrl', 'telemetryUsageWebhookUrl', 'telemetryFeedbackWebhookUrl'].forEach(key => {
         settings[key] = '';
       });
       return settings;
@@ -11919,6 +12131,7 @@
 
     function backupSecretSettings(settings = {}) {
       return {
+        multimediaToken: settings.multimediaToken || '',
         apiKey: settings.apiKey || '',
         wavespeedApiKey: settings.wavespeedApiKey || '',
         elevenLabsApiKey: settings.elevenLabsApiKey || ''
@@ -12473,10 +12686,9 @@
 
     function activeVideoModels(settings = state.settings) {
       const embedded = currentProject()?.embeddedMediaModels;
-      if (embedded) return VIDEO_MODELS.filter(model => embedded.includes(model));
-      return hasWaveSpeedApiKey(settings)
-        ? VIDEO_MODELS
-        : VIDEO_MODELS.filter(model => mediaModelProvider(model, 'video') !== 'wavespeed');
+      const visible = VIDEO_MODELS.filter(model => !VIDEO_MODEL_REGISTRY[model]?.hidden);
+      if (embedded) return visible.filter(model => embedded.includes(model));
+      return hasWaveSpeedApiKey(settings) ? visible : visible.filter(model => mediaModelProvider(model, 'video') !== 'wavespeed');
     }
 
     function visibleMediaModel(model, kind, settings = state.settings) {
@@ -12544,6 +12756,7 @@
       $('llmModeSelect').value = state.settings.llmMode || 'company';
       $('baseUrlInput').value = state.settings.baseUrl;
       $('apiKeyInput').value = state.settings.apiKey;
+      $('multimediaTokenInput').value = state.settings.multimediaToken || '';
       $('localCodexUrlInput').value = state.settings.localCodexUrl || LOCAL_CODEX_URL;
       $('localCodexTokenInput').value = state.settings.localCodexToken || '';
       fillLocalCodexReasoningSelect();
@@ -17026,9 +17239,8 @@
         });
         promptEditor.addEventListener('blur', () => {
           if (state.mediaViewerRendering) return;
-          closePromptMentionMenu({ render: false });
-          refreshProjectSurface(projectContainingNode(promptNode.id) || currentProject(), { nodeIds: [promptNode.id] });
-          renderMediaViewer();
+          closePromptMentionMenu();
+          if (promptNode) refreshProjectSurface(projectContainingNode(promptNode.id) || currentProject(), { nodeIds: [promptNode.id] });
         });
       }
       root.querySelectorAll('[data-media-review-panel] [data-generation-control]').forEach(control => {
@@ -30412,7 +30624,7 @@
       if (!prompt) return addMessage('system', '请先生成或选择 Prompt/图片 Astra。', { project });
       const model = operationModelValue(promptPick.model || project.runtime.videoModel, 'video');
       const targetNode = promptPick.targetNodeId ? nodeById(promptPick.targetNodeId, project) : null;
-      const canFillTarget = canFillGenerationTarget(targetNode, 'genVideo', options);
+      const canFillTarget = canFillGenerationTarget(targetNode, 'genVideo', options) || !!(targetNode?.meta?.aigcTask && (['submitting', 'submission_unknown', 'polling'].includes(targetNode.meta.aigcTask.state) || (targetNode.meta.aigcTask.state === 'completed' && !assetDisplayUrl(targetNode))));
       const official = !canFillTarget && isOfficialGenerationForPrompt(targetNode, 'genVideo', promptPick, { includePending: true })
         ? targetNode
         : findOfficialForPrompt('genVideo', promptPick, { includePending: true }, project);
@@ -30554,9 +30766,10 @@
 
     async function generateVideoAsset(model, prompt, nodeId, resolvedExecution = null, project = currentProject()) {
       if (embeddedCanvasHost?.id === project.id && embeddedCanvasHost.generateVideo) return embeddedCanvasHost.generateVideo({model, prompt, execution: resolvedExecution, nodeId});
-      if (resolvedExecution?.mode === 'video_extend' && mediaModelFamily(model, 'video') !== 'seedance2.5') {
+      if (resolvedExecution?.mode === 'video_extend' && mediaModelFamily(model, 'video') !== 'seedance2.5' && mediaModelConfig(canonicalModelValue(model), 'video').transport !== 'aigc') {
         throw new Error(`${modelDisplayLabel(model)} 不支持视频延长；请切换到 WS / Seedance 2.5。`);
       }
+      if (mediaModelConfig(canonicalModelValue(model), 'video').transport === 'aigc') return aigcVideoGeneration(canonicalModelValue(model), prompt, nodeId, resolvedExecution, project);
       if (shouldUseWaveSpeedMedia(model, 'video')) return waveSpeedVideoGeneration(model, prompt, nodeId, resolvedExecution, project);
       // This asynchronous route must never resubmit a failed/pending task through chat.
       if (mediaModelConfig(canonicalModelValue(model), 'video').bodyKind === 'doubao-seedance') return videoGeneration(model, prompt, nodeId, resolvedExecution, project);
@@ -30603,6 +30816,7 @@
 
     async function buildVideoGenerationBody(model, prompt, resolvedExecution = null, project = currentProject()) {
       model = canonicalModelValue(model);
+      if (mediaModelConfig(model, 'video').transport === 'aigc') return buildAigcVideoSpec(model, prompt, resolvedExecution, project);
       if (mediaModelConfig(model, 'video').bodyKind === 'doubao-seedance') return buildCompanySeedanceVideoBody(model, prompt, resolvedExecution, project);
       const mediaSettings = mediaSettingsForExecution(resolvedExecution, project);
       const references = videoReferenceNodesForExecution(resolvedExecution, project);
@@ -30655,6 +30869,110 @@
         body.reference_videos = referenceVideoUrls;
       }
       return body;
+    }
+
+    const aigcClient = new CompanyAigc.Client({ token: () => state.settings.multimediaToken, onAuth: status => { if (status.state === 'invalid') queueMicrotask(() => multimediaMonitor.check()); } });
+    const aigcVideoRuns = new Map();
+    const aigcUploads = new Map();
+    async function aigcReferenceUrl(node, project) {
+      if (!node) return '';
+      if (embeddedCanvasHost?.referenceUrl) return embeddedCanvasHost.referenceUrl(node);
+      await aigcClient.ready();
+      const source = node.meta?.localAssetId || assetSourceUrl(node);
+      const key = JSON.stringify([aigcClient.auth.revision, node.id, source]);
+      const cached = aigcUploads.get(key);
+      if (cached && Date.now() - cached.at < 6 * 60 * 60 * 1000) return cached.promise;
+      const promise = (async () => {
+        const asset = await blobForAssetUpload(node);
+        if (!asset?.blob) throw new Error('无法读取参考素材：' + (node.title || node.id));
+        let blob = asset.blob;
+        // Preserve full resolution first; only downscale unusually large JPEGs.
+        if (blob.type.startsWith('image/') && blob.size > 1350000) {
+          const bitmap = await createImageBitmap(blob), canvas = document.createElement('canvas');
+          try {
+            canvas.width = bitmap.width; canvas.height = bitmap.height;
+            const context = canvas.getContext('2d'); context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(bitmap, 0, 0);
+            const jpeg = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95));
+            if (jpeg && jpeg.size < blob.size) blob = jpeg;
+            if (blob.size > 1350000 && Math.max(bitmap.width, bitmap.height) > 2048) {
+              const scale = 2048 / Math.max(bitmap.width, bitmap.height);
+              canvas.width = Math.round(bitmap.width * scale); canvas.height = Math.round(bitmap.height * scale);
+              context.fillStyle = '#fff'; context.fillRect(0, 0, canvas.width, canvas.height); context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+              blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg', 0.95)) || blob;
+            }
+          } finally { bitmap.close(); }
+        }
+        return aigcClient.upload(blob, mediaDownloadFileName(node, extensionFromMime(blob.type, node.title || '')));
+      })();
+      aigcUploads.set(key, { at: Date.now(), promise });
+      try { return await promise; } catch (error) { aigcUploads.delete(key); throw error; }
+    }
+    async function buildAigcVideoSpec(model, prompt, execution = null, project = currentProject()) {
+      const settings = mediaSettingsForExecution(execution, project), refs = videoReferenceNodesForExecution(execution, project);
+      const audioNodes = (execution?.referenceAudioNodeIds || []).map(id => nodeById(id, project)).filter(Boolean);
+      const mode = refs.editVideo ? 'edit' : refs.extendVideo ? 'extend' : 'text';
+      const input = { prompt, mode, resolution: settings.videoResolution, aspectRatio: settings.videoAspectRatio,
+        duration: videoDurationForMediaSettings(settings, model), first: refs.first?.id, last: refs.last?.id, source: (refs.editVideo || refs.extendVideo)?.id,
+        images: refs.refs.map(n => n.id), videos: refs.referenceVideos.map(n => n.id), audios: audioNodes.map(n => n.id) };
+      CompanyAigc.specification(model, input); // Reject unsupported combinations before uploading anything.
+      const urls = new Map();
+      for (const node of [refs.first, refs.last, refs.editVideo, refs.extendVideo, ...refs.refs, ...refs.referenceVideos, ...audioNodes].filter(Boolean))
+        if (!urls.has(node.id)) urls.set(node.id, await aigcReferenceUrl(node, project));
+      for (const key of ['first', 'last', 'source']) input[key] = urls.get(input[key]);
+      for (const key of ['images', 'videos', 'audios']) input[key] = input[key].map(id => urls.get(id));
+      return CompanyAigc.specification(model, input);
+    }
+    async function aigcVideoGeneration(model, prompt, nodeId, execution, project) {
+      if (!nodeId) return runAigcVideoGeneration(model, prompt, nodeId, execution, project);
+      const key = project.id + ':' + nodeId;
+      if (aigcVideoRuns.has(key)) return aigcVideoRuns.get(key);
+      const run = runAigcVideoGeneration(model, prompt, nodeId, execution, project);
+      aigcVideoRuns.set(key, run);
+      try { return await run; } finally { aigcVideoRuns.delete(key); }
+    }
+    async function runAigcVideoGeneration(model, prompt, nodeId, execution, project) {
+      const node = nodeById(nodeId, project);
+      let record = node?.meta?.aigcTask;
+      const persist = async value => {
+        record = value;
+        if (node) { updateNode(node.id, { meta: { ...node.meta, aigcTask: value } }, project); await saveState({ quiet: true, layoutOnly: true }); }
+      };
+      if (record && ['submitting', 'submission_unknown'].includes(record.state) && !record.id)
+        throw new Error('这条任务提交结果不明，请先在多媒体平台核对任务，避免重复生成。');
+      if (record?.state === 'completed' && record.url) return { url: record.url, mime: 'video/mp4', raw: '' };
+      await syncSharedApiSettings();
+      await aigcClient.ready();
+      if (!record?.id || record.state === 'failed') {
+        const spec = await buildAigcVideoSpec(model, prompt, execution, project), body = await aigcClient.prepare(spec);
+        await persist({ state: 'submitting', model, submittedAt: new Date().toISOString() });
+        try {
+          const response = await aigcClient.submit(body), id = CompanyAigc.taskId(response);
+          if (!id) throw new Error('多媒体接口未返回任务 ID，提交结果不明');
+          await persist({ ...record, state: 'polling', id });
+        } catch (error) {
+          await persist({ ...record, state: record?.id ? 'polling' : error.definite ? 'failed' : 'submission_unknown' });
+          throw error;
+        }
+      }
+      for (let attempt = 0; attempt < 450; attempt++) {
+        let response;
+        try { response = await aigcClient.query(record.id); }
+        catch (error) { if (error.definite || aigcClient.auth.state === 'invalid') throw error; if (node) updateNode(node.id, { progressText: '查询暂时失败，正在重试；任务已提交' }, project); await wait(4000); continue; }
+        const status = CompanyAigc.status(response);
+        if (['failed', 'cancelled', 'timeout'].includes(status)) {
+          await persist({ ...record, state: 'failed' });
+          throw new Error(CompanyAigc.task(response).error_message || '多媒体任务失败：' + status);
+        }
+        if (status === 'completed') {
+          const url = CompanyAigc.media(response);
+          if (!url) throw new Error('任务完成但没有视频地址：' + record.id);
+          await persist({ ...record, state: 'completed', url });
+          return { url, mime: 'video/mp4', raw: JSON.stringify(response) };
+        }
+        if (node) updateNode(node.id, { progressText: '已提交，正在生成 · ' + (status || '等待状态') }, project);
+        await wait(4000);
+      }
+      throw new Error('任务仍在生成，已保存任务 ID，可稍后恢复查询：' + record.id);
     }
 
     async function buildCompanySeedanceVideoBody(model, prompt, resolvedExecution = null, project = currentProject()) {
@@ -31112,6 +31430,7 @@
         ...state.settings,
         llmMode: $('llmModeSelect').value,
         baseUrl: $('baseUrlInput').value.trim() || BASE_URL,
+        multimediaToken: $('multimediaTokenInput').value.trim(),
         apiKey: $('apiKeyInput').value.trim(),
         localCodexUrl: $('localCodexUrlInput').value.trim() || LOCAL_CODEX_URL,
         localCodexToken: $('localCodexTokenInput').value.trim(),
@@ -31212,11 +31531,16 @@
         ].filter(Boolean);
         return `${modelDisplayLabel(model)} -> ${endpoints.join(' / ')}, duration=${waveSpeedVideoDuration()}s, resolution=${settings.videoResolution}, aspect=${settings.videoAspectRatio}`;
       }
+      if (mediaModelConfig(model, 'video').transport === 'aigc') {
+        if (!state.settings.multimediaToken) throw new Error('请填写多媒体 Token');
+        return modelDisplayLabel(model) + ' → 多媒体接口';
+      }
       if (!state.settings.apiKey) throw new Error('missing company API key for video generation');
       return `${modelDisplayLabel(model)} -> ${mediaModelRequestModel(model, 'video', true)} / ${mediaModelRequestModel(model, 'video', false)}`;
     }
 
     function diagnoseVideoPollingConfig() {
+      if (mediaModelConfig(state.settings.videoModel, 'video').transport === 'aigc') return CompanyAigc.BASE + '/api/v1/aigc/tasks/{task_id}';
       if (shouldUseWaveSpeedMedia(state.settings.videoModel, 'video')) return `${WAVESPEED_URL}/predictions/{request_id}/result`;
       return `${trimSlash(state.settings.baseUrl)}/video/generations/{task_id}`;
     }
@@ -33153,6 +33477,10 @@
         ...mentionRefs,
         ...linkedRefs.filter(id => !mentionRefs.includes(id))
       ].filter(id => id !== first?.id && id !== last?.id))];
+      const referenceAudioNodeIds = [...new Set([
+        ...(promptPick.mentionNodeIds || []).filter(id => nodeById(id, project)?.mime?.startsWith('audio/')),
+        ...inputOwners.flatMap(id => upstreamInputsFor(id, project).filter(item => item.node?.mime?.startsWith('audio/')).map(item => item.node.id))
+      ])];
       const isGeminiOmniReference = mediaModelFamily(model, 'video') === 'gemini-omni-1.1-flash'
         && (referenceNodeIds.length > 0 || referenceVideoNodeIds.length > 0);
       const mode = editVideo
@@ -33175,8 +33503,9 @@
         editVideoNodeId: editVideo?.id || '',
         extendVideoNodeId: extendVideo?.id || '',
         referenceVideoNodeIds,
+        referenceAudioNodeIds,
         referenceNodeIds,
-        inputNodeIds: [...new Set([editVideo?.id, extendVideo?.id, first?.id, last?.id, ...mentionRefs, ...linkedRefs, ...referenceVideoNodeIds].filter(Boolean))],
+        inputNodeIds: [...new Set([editVideo?.id, extendVideo?.id, first?.id, last?.id, ...mentionRefs, ...linkedRefs, ...referenceVideoNodeIds, ...referenceAudioNodeIds].filter(Boolean))],
         mentionBindings: promptPick.mentionBindings || [],
         mediaMentionNodeIds: promptPick.mentionNodeIds || [],
         mediaSettings,
@@ -35908,6 +36237,7 @@
         }
         else closeLocalCodexBridge({ deliberate: true });
       };
+      $('checkMultimediaTokenBtn').onclick = () => multimediaMonitor.check(true);
       $('testApiBtn').onclick = testCurrentConnection;
       $('workflowDiagnosticBtn').onclick = runWorkflowDiagnostics;
       $('checkStorageBtn').onclick = checkStorageStatus;
@@ -35920,6 +36250,7 @@
         state.settings.llmMode = $('llmModeSelect').value;
         state.settings.baseUrl = $('baseUrlInput').value.trim() || BASE_URL;
         state.settings.apiKey = $('apiKeyInput').value.trim();
+        state.settings.multimediaToken = $('multimediaTokenInput').value.trim();
         state.settings.localCodexUrl = $('localCodexUrlInput').value.trim() || LOCAL_CODEX_URL;
         state.settings.localCodexToken = $('localCodexTokenInput').value.trim();
         state.settings.localMediaToken = state.settings.localMediaToken || state.settings.localCodexToken;
@@ -35946,6 +36277,7 @@
         try { sharedSaved = !!await syncSharedApiSettings(true, sharedPatch); }
         catch (error) { sharedSaveError = error.message; }
         await saveState({ quiet: true, layoutOnly: true });
+        await multimediaMonitor.check(true);
         settingsModalDraft = null;
         settingsSharedBaseline = Object.fromEntries(SHARED_API_FIELDS.map(key => [key, state.settings[key] || '']));
         for (const key of SHARED_API_FIELDS) $(key + 'Input').value = state.settings[key] || '';
@@ -36429,6 +36761,7 @@
           return { endpoint: request.endpointModel, body: request.body };
         }
         const body = await buildVideoGenerationBody(model, prompt, execution, project);
+        if (mediaModelConfig(canonicalModelValue(model), 'video').transport === 'aigc') return { endpoint: 'generate', body };
         return { endpoint: mediaModelConfig(canonicalModelValue(model), 'video').bodyKind === 'doubao-seedance' || isRgSeedanceSoraRequestModel(body.model) ? 'videos' : 'video/generations', body };
       },
       mount(data, host = null) {
@@ -36450,8 +36783,8 @@
         state.settings.llmMode = 'api'; state.settings.apiKey = ''; state.settings.wavespeedApiKey = '';
         render(); return project.id;
       },
-      updateCanvasNodes(nodes, removedIds = []) {
-        if (!nodes.length && !removedIds.length) return;
+      updateCanvasNodes(nodes, removedIds = [], links = []) {
+        if (!nodes.length && !removedIds.length && !links.length) return;
         const project = currentProject();
         project.nodes = project.nodes.filter(n => !removedIds.includes(n.id));
         project.links = project.links.filter(l => !removedIds.includes(l.fromNodeId) && !removedIds.includes(l.toNodeId));
@@ -36466,8 +36799,11 @@
             project.nodes.push(normalized); added.push(patch.id);
           }
         }
+        for (const link of links) {
+          if (!project.links.some(l => l.fromNodeId === link.fromNodeId && l.toNodeId === link.toNodeId)) project.links.push(link);
+        }
         if (removedIds.length && !removeRenderedNodes(removedIds, project)) { render(); return; }
-        if (changed.length || added.length) refreshProjectSurface(project, {nodeIds: changed, addedNodeIds: added});
+        if (changed.length || added.length || links.length) refreshProjectSurface(project, {nodeIds: changed, addedNodeIds: added});
       },
       snapshot() { const p = currentProject(); return { id: p?.id, nodes: p?.nodes || [], links: p?.links || [], jobs: p?.embeddedJobs || [] }; },
       openMedia(id, batchIds = [id]) {
@@ -36482,7 +36818,7 @@
         return { node, prompt, batchIds: [...state.mediaViewerBatchNodeIds], settings: prompt ? promptGenerationSettings(prompt) : null,
           inputs: prompt ? upstreamInputsFor(prompt.id).map(item => item.node) : [] };
       },
-      syncMedia(data) {
+      syncMedia(data, { syncInputs = false } = {}) {
         const project = currentProject();
         if (!project || project.id !== data.id) return;
         const incomingIds = new Set(data.nodes.map(n => n.id));
@@ -36490,6 +36826,8 @@
         project.links = project.links.filter(l => incomingIds.has(l.fromNodeId) && incomingIds.has(l.toNodeId));
         project.embeddedJobs = data.jobs || [];
         const added = new Set();
+        const synced = new Set();
+        let refreshControls = false;
         for (const incoming of data.nodes) {
           const existing = nodeById(incoming.id);
           if (!existing) { project.nodes.push(normalizeNode(incoming)); added.add(incoming.id); }
@@ -36497,10 +36835,23 @@
             existing.meta = { ...existing.meta, ...incoming.meta };
             existing.assetState = incoming.assetState;
           }
+          else if (syncInputs && incoming.meta?.dramaDraftBase) {
+            if (existing === this.mediaReview()?.prompt && JSON.stringify(existing.generation) !== JSON.stringify(incoming.generation)) refreshControls = true;
+            Object.assign(existing, structuredClone({ content: incoming.content, generation: incoming.generation, meta: incoming.meta }));
+            synced.add(incoming.id);
+          }
         }
         // Preserve unsaved prompt edits and their reference links while new results arrive.
-        project.links.push(...data.links.filter(link => added.has(link.toNodeId)));
+        project.links = project.links.filter(link => !synced.has(link.toNodeId));
+        project.links.push(...data.links.filter(link => added.has(link.toNodeId) || synced.has(link.toNodeId)));
         state.mediaViewerBatchNodeIds = data.batchIds;
+        if (refreshControls) renderMediaViewer();
+        if (syncInputs) {
+          const review = this.mediaReview(), editor = document.querySelector('[data-media-prompt-editor]');
+          if (editor && review?.prompt && editor.value !== review.prompt.content) editor.value = review.prompt.content;
+          const marker = document.querySelector('[data-media-prompt-change]');
+          if (marker && review) marker.textContent = mediaReviewPromptChanged(review.node, review.prompt) ? '*存在变更*' : '';
+        }
       },
       setMediaReferences(ids) {
         const review = this.mediaReview(), project = currentProject();
@@ -36516,7 +36867,18 @@
       }
     };
 
+    const multimediaMonitor = CompanyAigc.watchToken({
+      enabled: () => !embeddedCanvasHost && !embeddedCompanyTransport,
+      canNotify: () => !$('settingsModal')?.classList.contains('open'),
+      check: async force => { await syncSharedApiSettings(); return aigcClient.check(force); },
+      openSettings: () => { openSettingsModal(); $('multimediaTokenInput').focus(); },
+      onStatus: (_status, text) => { $('multimediaTokenStatus').textContent = text; }
+    });
+    window.__auralisTest.aigcClient = aigcClient;
+    window.__auralisTest.multimediaMonitor = multimediaMonitor;
+    window.__auralisTest.buildAigcVideoSpec = buildAigcVideoSpec;
     window.__auralisReady = boot();
+    window.__auralisReady.then(() => multimediaMonitor.check());
     window.__auralisReady.catch(error => {
       document.body.innerHTML = `<pre style="padding:24px">${escapeHtml(error.stack || error.message)}</pre>`;
     });
