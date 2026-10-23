@@ -1,39 +1,39 @@
 {
-  "schemaVersion": 2,
-  "platform": "macos-arm64",
-  "releaseVersion": "1.2.6",
-  "publishedAt": "2026-10-23T04:29:13.8096545Z",
-  "changelog": [
-    "新增 WaveSpeed Kling 4.0，支持视频生成与多模态参考，并在制作画布中支持首尾帧、视频编辑和延长。",
-    "公司主控更新为 Claude Sonnet 5.5、Claude Opus 5.5、Gemini 4 Argon、DeepSeek V4.1 Flash、GPT 6.1 Sol 和 Kimi K3，旧模型设置自动迁移。",
-    "修复 GPT 6.1 Sol 请求参数报错、Gemini 工具参数和 Claude 工具调用衔接问题。",
-    "制作画布从视频卡连线新建 Prompt 时，可先选择参考、编辑或延长；视频主控补充相应用途说明，调整原片内容时使用编辑模式。",
-    "修复 macOS 短剧工作台缺少运行文件导致无法启动的问题。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "1.2.6",
-      "url": "AuralisDrama.html",
-      "size": 6059,
-      "sha256": "a43e5aa449f0677dc5b5b481f370e4a0b1e3fecaafdd8706ee1c4900352cc428",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "1.2.6",
-      "url": "auralis-drama-runtime-macos-arm64.zip",
-      "size": 784527,
-      "sha256": "9ca33138b95f3fecfb368c28db59474e787f3fd19786cca8579943cf5635cca7",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "1.2.6",
-      "url": "auralis-controller-packs-macos-arm64.zip",
-      "size": 28190,
-      "sha256": "585e4a07d8a5c519ceab552a91bfe93cc268465d71505967582e69f9be1f8d03",
-      "format": "zip"
-    }
-  ]
+    "schemaVersion":  2,
+    "platform":  "macos-arm64",
+    "releaseVersion":  "1.2.7",
+    "publishedAt":  "2026-10-23T09:41:35.1304176Z",
+    "changelog":  [
+                      "新增 RG wavesdance 2 和 2.5，视频生成与制作画布同步支持，使用已配置的多媒体 Token。",
+                      "优化视频提示词展示：Agent 更新当前计划后，再次打开视频卡默认显示最新计划，并提示待生成新版本，避免误改历史版本提示词。",
+                      "新增正文修改标记：新增和改写内容使用绿色虚线下划线，长提示词滚动时同步显示。",
+                      "优化版本切换体验：可随时查看历史视频及其提示词，并保留未保存的本地编辑。",
+                      "修复 macOS 启动器更新时因下载内容经过压缩而误报文件大小不匹配的问题。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "1.2.7",
+                           "url":  "AuralisDrama.html",
+                           "size":  6037,
+                           "sha256":  "2951bca51af38595b13e4a9c224b072371d31506a445e5007b7db9ea3892fdab",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "1.2.7",
+                           "url":  "auralis-drama-runtime-macos-arm64.zip",
+                           "size":  787779,
+                           "sha256":  "bcbcc9bf325b62658087a7293581bbe9e4eda68e0c3598af6d9a031bf987ddc1",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "1.2.7",
+                           "url":  "auralis-controller-packs-macos-arm64.zip",
+                           "size":  28190,
+                           "sha256":  "e645edf221d6ce4becfb7c5c71d7c22058e85122625bfeb8eb20e7c7a920cf86",
+                           "format":  "zip"
+                       }
+                   ]
 }

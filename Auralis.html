@@ -5277,7 +5277,7 @@
               <input id="apiKeyInput" type="password" autocomplete="off" placeholder="每位同事填写自己的 key">
             </label>
             <div class="settings-multimedia">
-            <label>多媒体 Token · RG Seedance 2 / 2.5
+            <label>多媒体 Token · RG Seedance / wavesdance
               <input id="multimediaTokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="粘贴多媒体平台右上角复制的 Token">
             </label>
             <div class="actions"><a href="http://43.110.148.231:8025/playground/" target="_blank" rel="noopener">打开多媒体平台</a><button id="checkMultimediaTokenBtn" type="button">检查已保存 Token</button></div>
@@ -5462,7 +5462,10 @@
   const BASE = 'https://rgxz-agent-center.rivergame.net';
   const LOGIN = 'http://43.110.148.231:8025/playground/';
   const CHECK_INTERVAL = 30 * 60 * 1000;
-  const MODELS = { 'rg-seedance-2': 'seedance-2.0', 'rg-seedance-2.5': 'seedance-2.5' };
+  const MODELS = {
+    'rg-seedance-2': 'seedance-2.0', 'rg-seedance-2.5': 'seedance-2.5',
+    'rg-wavesdance-2': 'ws/seedance-2.0', 'rg-wavesdance-2.5': 'ws/seedance-2.5'
+  };
   function fail(message, extra = {}) { throw Object.assign(new Error(message), { definite: true, ...extra }); }
   function task(value) { return value?.task || value?.data?.task || value?.data || value || {}; }
   function taskId(value) { const t = task(value); return t.task_id || t.id || ''; }
@@ -5480,10 +5483,12 @@
   }
   // The two surfaces supply the same semantic inputs; only this adapter owns API field names.
   function specification(model, input) {
-    if (!MODELS[model]) fail('请选择 RG / Seedance 2 或 2.5');
-    const v25 = model === 'rg-seedance-2.5', images = input.images || [], videos = input.videos || [], audios = input.audios || [];
+    if (!MODELS[model]) fail('请选择已接通的 RG 多媒体视频模型');
+    const v25 = MODELS[model].endsWith('2.5'), wavesdance = MODELS[model].startsWith('ws/');
+    const images = input.images || [], videos = input.videos || [], audios = input.audios || [];
     const mode = input.mode || 'text', first = input.first, last = input.last, source = input.source;
-    if (last && !first) fail('使用尾帧时也需要首帧');
+    const extendLast = wavesdance && !v25 && mode === 'extend';
+    if (last && !first && !extendLast) fail('使用尾帧时也需要首帧');
     if (first && (images.length || videos.length || audios.length || source)) fail('首尾帧模式不能混用其他图片、视频或音频参考');
     if (images.length > (v25 ? 30 : 9) || videos.length > (v25 ? 10 : 3) || audios.length > (v25 ? 10 : 3)) fail('参考素材数量超过模型上限');
     const category = mode === 'edit' ? 'video-edit' : mode === 'extend' ? 'video-extend' : first ? 'image-to-video' : 'text-to-video';
@@ -5492,12 +5497,22 @@
     if (category === 'image-to-video') Object.assign(params, { image: first, ...(last ? { last_image: last } : {}), ...(!v25 ? { aspect_ratio: input.aspectRatio } : {}) });
     if (category === 'video-edit' || category === 'video-extend') {
       if (!source) fail('请连接需要编辑或延长的视频');
-      if (first || last || videos.length) fail('编辑或延长模式只接受一段源视频');
-      params.reference_video = !v25 && category === 'video-extend' ? [source] : source;
-      if (category === 'video-edit') {
-        if (v25) Object.assign(params, { ratio: 'adaptive', duration: -1, reference_image: images, reference_audio: audios });
-        else Object.assign(params, { aspect_ratio: input.aspectRatio, reference_images: images, reference_audios: audios });
-      } else if (images.length || audios.length) fail('视频延长接口不接受额外图片或音频参考');
+      if (first || (last && !extendLast) || videos.length) fail('编辑或延长模式只接受一段源视频');
+      if (wavesdance) {
+        params.video = source;
+        if (category === 'video-edit') {
+          Object.assign(params, { reference_images: images, reference_audios: audios });
+          if (v25) delete params.duration;
+          else params.aspect_ratio = input.aspectRatio;
+        } else if (last) params.last_image = last;
+      } else {
+        params.reference_video = !v25 && category === 'video-extend' ? [source] : source;
+        if (category === 'video-edit') {
+          if (v25) Object.assign(params, { ratio: 'adaptive', duration: -1, reference_image: images, reference_audio: audios });
+          else Object.assign(params, { aspect_ratio: input.aspectRatio, reference_images: images, reference_audios: audios });
+        }
+      }
+      if (category === 'video-extend' && (images.length || audios.length)) fail('视频延长接口不接受额外图片或音频参考');
     }
     return { model, category, params };
   }
@@ -5588,7 +5603,8 @@
       if (!MODELS[spec.model]) fail('不支持的多媒体模型');
       if (!this.catalog || Date.now() - this.catalog.at > CHECK_INTERVAL) this.catalog = { at: Date.now(), value: await this.request('/api/v1/aigc/catalog') };
       const models = this.catalog.value.models || this.catalog.value.data?.models || [];
-      const candidates = models.flatMap(m => m.scenes || []).filter(s => s.category === spec.category && s.name === 'bytedance/' + MODELS[spec.model] + '/' + spec.category);
+      const modelPath = MODELS[spec.model].startsWith('ws/') ? MODELS[spec.model] : 'bytedance/' + MODELS[spec.model];
+      const candidates = models.flatMap(m => m.scenes || []).filter(s => s.category === spec.category && s.name === modelPath + '/' + spec.category);
       if (candidates.length !== 1) fail('当前多媒体目录没有唯一可用的 ' + MODELS[spec.model] + ' / ' + spec.category);
       const scene = candidates[0];
       let form = this.forms.get(scene.id);
@@ -5630,7 +5646,7 @@
         dialog.className = 'multimedia-token-dialog';
         dialog.setAttribute('aria-labelledby', 'multimediaTokenNoticeTitle');
         dialog.style.cssText = 'max-width:480px;width:calc(100% - 40px);box-sizing:border-box;background:var(--surface,#202323);color:var(--ink,#edf0f0);border:1px solid var(--line,#555);border-radius:12px;padding:24px;';
-        dialog.innerHTML = '<h2 id="multimediaTokenNoticeTitle" style="font-size:18px;margin:0 0 12px">多媒体 Token 已失效</h2><p style="line-height:1.7">请打开多媒体平台，登录后点击右上角复制 Token，再到设置中粘贴保存，以继续使用 RG Seedance。</p><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><a href="' + LOGIN + '" target="_blank" rel="noopener" style="color:inherit">打开多媒体平台</a><button type="button" data-token-settings>填写 Token</button><button type="button" data-token-later>稍后</button></div>';
+        dialog.innerHTML = '<h2 id="multimediaTokenNoticeTitle" style="font-size:18px;margin:0 0 12px">多媒体 Token 已失效</h2><p style="line-height:1.7">请打开多媒体平台，登录后点击右上角复制 Token，再到设置中粘贴保存，以继续使用 RG 视频模型。</p><div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center"><a href="' + LOGIN + '" target="_blank" rel="noopener" style="color:inherit">打开多媒体平台</a><button type="button" data-token-settings>填写 Token</button><button type="button" data-token-later>稍后</button></div>';
         const close = () => { const old = dialog; dialog = null; old?.close(); old?.remove(); if (focus?.isConnected) focus.focus(); };
         dialog.querySelector('[data-token-settings]').onclick = () => { close(); options.openSettings(); };
         dialog.querySelector('[data-token-later]').onclick = close;
@@ -7699,17 +7715,15 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.26';
+    const AURALIS_VERSION = 'Auralis v1.27';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 WaveSpeed Kling 4.0，支持文生视频、首尾帧、多模态参考、视频编辑和延长。',
-      '公司主控更新为 Claude Sonnet 5.5、Claude Opus 5.5、Gemini 4 Argon、DeepSeek V4.1 Flash、GPT 6.1 Sol 和 Kimi K3，旧模型设置自动迁移。',
-      '修复 GPT 6.1 Sol 请求参数报错，并改善新主控模型的调用兼容性。',
-      '从视频卡连线新建 Prompt 时，可先选择视频参考、视频编辑或视频延长；补充主控的用途判断说明，调整原片内容时使用编辑模式。'
+      '新增 RG wavesdance 2 和 2.5，支持视频生成、参考、编辑和延长，使用已配置的多媒体 Token。',
+      '修复 macOS 启动器更新时因下载内容经过压缩而误报文件大小不匹配的问题。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9436,6 +9450,8 @@
       'rg-seedance-2-fast',
       'rg-seedance-2',
       'rg-seedance-2.5',
+      'rg-wavesdance-2',
+      'rg-wavesdance-2.5',
       'ws-seedance-2.5',
       'ws-kling-4.0',
       'ws-seedance-2-fast',
@@ -9484,6 +9500,8 @@
       'rg-seedance-2.5': 'RG/S2.5',
       'rg-seedance-2-fast': 'RG/S2F',
       'rg-seedance-2': 'RG/S2',
+      'rg-wavesdance-2': 'RG/WSD2',
+      'rg-wavesdance-2.5': 'RG/WSD2.5',
       'ws-seedance-2.5': 'WS/S2.5',
       'ws-kling-4.0': 'WS/K4',
       'ws-seedance-2-fast': 'WS/S2F',
@@ -9577,6 +9595,8 @@
       'rg-seedance-2.5': { provider: 'company', transport: 'aigc', requestModel: 'doubao-seedance-2-5-260628', bodyKind: 'doubao-seedance', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'rg-seedance-2-fast': { provider: 'company', hidden: true, requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-fast-video-edit', family: 'seedance2-fast' },
       'rg-seedance-2': { provider: 'company', transport: 'aigc', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
+      'rg-wavesdance-2': { provider: 'company', transport: 'aigc', family: 'seedance2', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: ['480p', '720p', '1080p', '4k'], videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE2_DURATION_MAX },
+      'rg-wavesdance-2.5': { provider: 'company', transport: 'aigc', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: ['480p', '720p', '1080p', '4k'], videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'ws-seedance-2.5': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'ws-seedance-2-fast': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0-fast/image-to-video', textEndpointModel: 'bytedance/seedance-2.0-fast/text-to-video', editEndpointModel: 'bytedance/seedance-2.0-fast/video-edit', family: 'seedance2-fast' },
       'ws-seedance-2': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.0/image-to-video', textEndpointModel: 'bytedance/seedance-2.0/text-to-video', editEndpointModel: 'bytedance/seedance-2.0/video-edit', family: 'seedance2' },
@@ -9616,6 +9636,8 @@
       'rg-seedance-2.5': 'RG / Seedance 2.5',
       'rg-seedance-2-fast': 'RG / Seedance 2 Fast',
       'rg-seedance-2': 'RG / Seedance 2',
+      'rg-wavesdance-2': 'RG/ wavesdance 2',
+      'rg-wavesdance-2.5': 'RG/ wavesdance 2.5',
       'ws-seedance-2-fast': 'WS / Seedance 2 Fast',
       'ws-seedance-2': 'WS / Seedance 2',
       'ws-seedance-2.5': 'WS / Seedance 2.5',
@@ -9668,6 +9690,10 @@
       sd2: 'rg-seedance-2',
       seedance2: 'rg-seedance-2',
       seedance: 'rg-seedance-2',
+      rgwsd2: 'rg-wavesdance-2',
+      rgwsd25: 'rg-wavesdance-2.5',
+      wavesdance2: 'rg-wavesdance-2',
+      wavesdance25: 'rg-wavesdance-2.5',
       rgs25: 'rg-seedance-2.5',
       rgseedance25: 'rg-seedance-2.5',
       doubaoseedance25260628: 'rg-seedance-2.5',
