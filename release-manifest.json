@@ -1,46 +1,45 @@
 {
-    "schemaVersion":  2,
-    "releaseVersion":  "Auralis v1.25",
-    "publishedAt":  "2026-10-22T09:20:00.2715125Z",
-    "changelog":  [
-                      "RG Seedance 2.0 / 2.5 切换至公司多媒体平台；设置中新增多媒体 Token、平台入口和有效性检查，失效时自动提醒更新。",
-                      "参考图片和音频先上传再生成，改善多参考素材提交的稳定性；已提交任务保留状态，支持恢复查询，避免重复生成。",
-                      "修复视频详情页编辑提示词后播放被重置的问题，并改进新增参考与画布的同步。",
-                      "隐藏 RG Seedance 2.0 Fast 的新建入口，保留已有记录。",
-                      "Windows 启动器更新至 1.18.1，修复旧内置包覆盖新版本，以及旧版自由画布无法跳转至短剧工作台的问题。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "Auralis v1.25",
-                           "url":  "Auralis.html",
-                           "size":  1893754,
-                           "sha256":  "92698520c6e7922f0d4c93a91b863b21d3f7b4e98c100ab3971b56437ed99c7d",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "Auralis v1.25",
-                           "url":  "auralis-runtime-windows-x64.zip",
-                           "size":  33652754,
-                           "sha256":  "eaff564d7c9674efed864bfc217d7a794ad6438f0d9cee7b7c7722d529b1122d",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "Auralis v1.25",
-                           "url":  "auralis-controller-packs.zip",
-                           "size":  25094,
-                           "sha256":  "737c3ac264b940d3ef20d5e4cc9bee0208c17dc7c19ffb57315b2303c13806a1",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "launcher",
-                           "version":  "1.18.1",
-                           "url":  "Auralis Launcher.exe",
-                           "size":  125440,
-                           "sha256":  "c335dfc1003b96f8cbf882d75a3f20e9e59b99cfd24b5e117db23188f8a32fff",
-                           "format":  "file"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "releaseVersion": "Auralis v1.26",
+  "publishedAt": "2026-10-23T04:28:56.9433338Z",
+  "changelog": [
+    "新增 WaveSpeed Kling 4.0，支持文生视频、首尾帧、多模态参考、视频编辑和延长。",
+    "公司主控更新为 Claude Sonnet 5.5、Claude Opus 5.5、Gemini 4 Argon、DeepSeek V4.1 Flash、GPT 6.1 Sol 和 Kimi K3，旧模型设置自动迁移。",
+    "修复 GPT 6.1 Sol 请求参数报错，并改善新主控模型的调用兼容性。",
+    "从视频卡连线新建 Prompt 时，可先选择视频参考、视频编辑或视频延长；补充主控的用途判断说明，调整原片内容时使用编辑模式。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "Auralis v1.26",
+      "url": "Auralis.html",
+      "size": 1903112,
+      "sha256": "264aa27dde7438594d1172f7f6295e70bf68d4699ba449fdf3cee4721df7d442",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "Auralis v1.26",
+      "url": "auralis-runtime-windows-x64.zip",
+      "size": 34696548,
+      "sha256": "d25805ff3c0a453da91bffa004d38a41ba4201047f035ebcc9d1c24f40326497",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "Auralis v1.26",
+      "url": "auralis-controller-packs.zip",
+      "size": 25836,
+      "sha256": "7522bf79a5810b42e17e729eebbe89cda97cf80403793eb076d4f4489414fd84",
+      "format": "zip"
+    },
+    {
+      "id": "launcher",
+      "version": "1.18.1",
+      "url": "Auralis Launcher.exe",
+      "size": 125440,
+      "sha256": "aeb08bd719556b3f35e3f528d822e8442bbce5d6fff34f136375e2d3e7a8c57d",
+      "format": "file"
+    }
+  ]
 }

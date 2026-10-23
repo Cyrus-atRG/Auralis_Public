@@ -1,38 +1,38 @@
 {
-    "schemaVersion":  2,
-    "releaseVersion":  "1.2.5",
-    "publishedAt":  "2026-10-22T09:20:04.6287444Z",
-    "changelog":  [
-                      "RG Seedance 2.0 / 2.5 切换至公司多媒体平台；共享设置新增多媒体 Token 和平台入口，失效时自动提醒更新。",
-                      "图片和语音参考先上传再生成，改善多图、大图和语音参考的提交稳定性，保留原始素材。",
-                      "更新 Token 后可继续查询已提交任务；网络异常或提交结果不明时保留任务状态，避免重复生成，旧任务继续使用原接口查询。",
-                      "Agent 回复按对话顺序直接展示，不再被折叠隐藏。",
-                      "隐藏 RG Seedance 2.0 Fast 的新建入口，保留旧任务记录和查询。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "1.2.5",
-                           "url":  "AuralisDrama.html",
-                           "size":  5998,
-                           "sha256":  "673dc8cf47af5dc9a8a028bdf53206fffeb22ec77a885b842480f847d40a498f",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "1.2.5",
-                           "url":  "auralis-drama-runtime-windows-x64.zip",
-                           "size":  34382588,
-                           "sha256":  "c9ecbe85675c22f0475d593afca4142b33f8c9caa4134e567549da5cf439c9a3",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "1.2.5",
-                           "url":  "auralis-drama-controller-packs.zip",
-                           "size":  25094,
-                           "sha256":  "737c3ac264b940d3ef20d5e4cc9bee0208c17dc7c19ffb57315b2303c13806a1",
-                           "format":  "zip"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "releaseVersion": "1.2.6",
+  "publishedAt": "2026-10-23T04:28:59.8801899Z",
+  "changelog": [
+    "新增 WaveSpeed Kling 4.0，支持视频生成与多模态参考，并在制作画布中支持首尾帧、视频编辑和延长。",
+    "公司主控更新为 Claude Sonnet 5.5、Claude Opus 5.5、Gemini 4 Argon、DeepSeek V4.1 Flash、GPT 6.1 Sol 和 Kimi K3，旧模型设置自动迁移。",
+    "修复 GPT 6.1 Sol 请求参数报错、Gemini 工具参数和 Claude 工具调用衔接问题。",
+    "制作画布从视频卡连线新建 Prompt 时，可先选择参考、编辑或延长；视频主控补充相应用途说明，调整原片内容时使用编辑模式。",
+    "修复 macOS 短剧工作台缺少运行文件导致无法启动的问题。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "1.2.6",
+      "url": "AuralisDrama.html",
+      "size": 6059,
+      "sha256": "a43e5aa449f0677dc5b5b481f370e4a0b1e3fecaafdd8706ee1c4900352cc428",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "1.2.6",
+      "url": "auralis-drama-runtime-windows-x64.zip",
+      "size": 35435189,
+      "sha256": "416826a1fc4a7519161a41c20667101a15f795d1ed5479a0090832f90f776e56",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "1.2.6",
+      "url": "auralis-drama-controller-packs.zip",
+      "size": 25836,
+      "sha256": "7522bf79a5810b42e17e729eebbe89cda97cf80403793eb076d4f4489414fd84",
+      "format": "zip"
+    }
+  ]
 }
