@@ -1,47 +1,48 @@
 {
-    "schemaVersion":  2,
-    "platform":  "macos-arm64",
-    "releaseVersion":  "Auralis v1.27",
-    "publishedAt":  "2026-10-23T09:41:34.0917557Z",
-    "changelog":  [
-                      "新增 RG wavesdance 2 和 2.5，支持视频生成、参考、编辑和延长，使用已配置的多媒体 Token。",
-                      "修复 macOS 启动器更新时因下载内容经过压缩而误报文件大小不匹配的问题。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "Auralis v1.27",
-                           "url":  "Auralis.html",
-                           "size":  1904584,
-                           "sha256":  "45cbc75a474f8e402355490b59acfb8b1aec598df9d2035226c55debac9d07fe",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "Auralis v1.27",
-                           "url":  "auralis-runtime-macos-arm64.zip",
-                           "size":  38870121,
-                           "sha256":  "e9cdcb73153268e1011ce840b39a164cbc070c538df671ff74082163e96d69fd",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "Auralis v1.27",
-                           "url":  "auralis-controller-packs-macos-arm64.zip",
-                           "size":  28190,
-                           "sha256":  "e645edf221d6ce4becfb7c5c71d7c22058e85122625bfeb8eb20e7c7a920cf86",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "launcher",
-                           "version":  "1.19.1",
-                           "url":  "auralis-launcher-macos-arm64.zip",
-                           "size":  38898871,
-                           "sha256":  "a6e24e0bd4827ec9e9eeee7a90ed1b4b567a4ab1724f622c739096c144cd9e48",
-                           "format":  "zip",
-                           "executableSize":  176,
-                           "executableSha256":  "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
-                           "bundleSha256":  "3687b3206da2e5043199748fda0fc133f69ac9d0dbd37e7a9f147ba5cd995158"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "platform": "macos-arm64",
+  "releaseVersion": "Auralis v1.28",
+  "publishedAt": "2026-10-28T02:50:36.0950839Z",
+  "changelog": [
+    "优化本地配置读取：优先使用已保存的配置，缺失时再补齐共享配置，避免共享服务暂时不可用阻断生成。",
+    "修复多媒体 Token 新旧覆盖问题，避免旧 Token、延迟同步或未更新的设置表单覆盖新值。",
+    "修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "Auralis v1.28",
+      "url": "Auralis.html",
+      "size": 1908753,
+      "sha256": "d28f4966e95a0f7c5a83b2f4e143420c7eec0f76fc8f2420adfee47be7eb0ce0",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "Auralis v1.28",
+      "url": "auralis-runtime-macos-arm64.zip",
+      "size": 38870963,
+      "sha256": "e3eefc33a605d6f190b3f5a2d292d38b92e86d5153e03a7adfab7ae698747a41",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "Auralis v1.28",
+      "url": "auralis-controller-packs-macos-arm64.zip",
+      "size": 28190,
+      "sha256": "f99fff1162d631b0eea659fffe4343ff133239be669dfcee451e50af4fe98462",
+      "format": "zip"
+    },
+    {
+      "id": "launcher",
+      "version": "1.19.1",
+      "url": "auralis-launcher-macos-arm64.zip",
+      "size": 38898869,
+      "sha256": "9fc651cb5832195a7db7eec38abd80479f003072d7bc1b3bea94a4b2f5efa728",
+      "format": "zip",
+      "executableSize": 176,
+      "executableSha256": "359d8c2c004d7ceaa794a7df74c8fe1db60cd8b712f533e8df9ce7d979aa4da4",
+      "bundleSha256": "efc8fee6d1f7b4089d18a8219761430ca65eaa56bd83e52cc5af606ff98bebce"
+    }
+  ]
 }

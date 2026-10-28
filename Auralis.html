@@ -5467,6 +5467,21 @@
     'rg-wavesdance-2': 'ws/seedance-2.0', 'rg-wavesdance-2.5': 'ws/seedance-2.5'
   };
   function fail(message, extra = {}) { throw Object.assign(new Error(message), { definite: true, ...extra }); }
+  function tokenIssuedAt(token) {
+    try {
+      const parts = String(token || '').split('.');
+      if (parts.length !== 3) return 0;
+      const issuedAt = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))).iat;
+      return Number.isFinite(issuedAt) && issuedAt > 0 ? issuedAt : 0;
+    } catch (_) { return 0; }
+  }
+  function compareTokenVersions(next, current) {
+    const nextIssued = tokenIssuedAt(next.token), currentIssued = tokenIssuedAt(current.token);
+    // Issuance time orders tokens; it does not authenticate them.
+    if (nextIssued && currentIssued && nextIssued !== currentIssued) return Math.sign(nextIssued - currentIssued);
+    if (next.updatedAt > 0 && current.updatedAt > 0) return Math.sign(next.updatedAt - current.updatedAt);
+    return null;
+  }
   function task(value) { return value?.task || value?.data?.task || value?.data || value || {}; }
   function taskId(value) { const t = task(value); return t.task_id || t.id || ''; }
   function status(value) { return String(task(value).status || '').toLowerCase(); }
@@ -5662,7 +5677,7 @@
     window.addEventListener('focus', focus); document.addEventListener('visibilitychange', visible);
     return { check, stop() { stopped = true; clearInterval(timer); window.removeEventListener('focus', focus); document.removeEventListener('visibilitychange', visible); dialog?.close(); dialog?.remove(); } };
   }
-  return { BASE, LOGIN, CHECK_INTERVAL, MODELS, Client, specification, validateParams, task, taskId, status, media, watchToken };
+  return { BASE, LOGIN, CHECK_INTERVAL, MODELS, Client, specification, validateParams, task, taskId, status, media, watchToken, compareTokenVersions };
 });
 
 </script>
@@ -7715,15 +7730,16 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.27';
+    const AURALIS_VERSION = 'Auralis v1.28';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '新增 RG wavesdance 2 和 2.5，支持视频生成、参考、编辑和延长，使用已配置的多媒体 Token。',
-      '修复 macOS 启动器更新时因下载内容经过压缩而误报文件大小不匹配的问题。'
+      '优化本地配置读取：优先使用已保存的配置，缺失时再补齐共享配置，避免共享服务暂时不可用阻断生成。',
+      '修复多媒体 Token 新旧覆盖问题，避免旧 Token、延迟同步或未更新的设置表单覆盖新值。',
+      '修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。'
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -10373,6 +10389,7 @@
         llmMode: 'company',
         baseUrl: BASE_URL,
         multimediaToken: '',
+        multimediaTokenUpdatedAt: 0,
         apiKey: '',
         localCodexUrl: LOCAL_CODEX_URL,
         localCodexToken: '',
@@ -11497,23 +11514,39 @@
     }
 
     const SHARED_API_FIELDS = ['baseUrl', 'apiKey', 'wavespeedApiKey', 'elevenLabsApiKey', 'multimediaToken'];
-    async function syncSharedApiSettings(save = false, patch = null) {
+    async function syncSharedApiSettings({ save = false, patch = null, fields = SHARED_API_FIELDS, refreshToken = false } = {}) {
       if (embeddedCompanyTransport || embeddedCanvasHost || !state.settings.localMediaToken) return;
-      const fields = SHARED_API_FIELDS;
-      const settings = Object.fromEntries(fields.map(key => [key, state.settings[key] || '']));
+      if (!save && !refreshToken && fields.every(key => String(state.settings[key] || '').trim())) return;
+      const settings = Object.fromEntries(SHARED_API_FIELDS.map(key => [key, state.settings[key] || '']));
+      const tokenUpdatedAt = state.settings.multimediaTokenUpdatedAt || 0;
       const root = String(state.settings.localMediaUrl || LOCAL_MEDIA_URL).replace(/\/$/, '');
-      const updates = [{ settings, missingOnly: true }];
-      if (save) updates.push({ settings: patch || settings, missingOnly: false });
+      const updates = save ? [{ settings, missingOnly: true }, { settings: patch || settings, missingOnly: false }] : [null];
       let shared;
       for (const update of updates) {
         const response = await fetch(root + '/shared-api', {
-          method: 'POST', headers: { ...localMediaAuthHeaders(), 'Content-Type': 'application/json' },
-          body: JSON.stringify(update), signal: AbortSignal.timeout(20000)
+          method: update ? 'POST' : 'GET', headers: { ...localMediaAuthHeaders(), ...(update ? { 'Content-Type': 'application/json' } : {}) },
+          ...(update ? { body: JSON.stringify({ ...update, multimediaTokenUpdatedAt: tokenUpdatedAt }) } : {}), signal: AbortSignal.timeout(20000)
         });
-        if (!response.ok) throw new Error('共享 API 配置保存失败，请连接启动器本地工具后重试。');
+        if (!response.ok) throw new Error('共享 API 配置' + (save ? '保存' : '读取') + '失败，请连接启动器本地工具后重试。');
         shared = await response.json();
       }
-      for (const key of fields) if (Object.hasOwn(shared, key)) state.settings[key] = shared[key];
+      let changed = false;
+      for (const key of fields) {
+        if (key === 'multimediaToken' || !Object.hasOwn(shared, key) || String(state.settings[key] || '').trim() || !shared[key]) continue;
+        state.settings[key] = shared[key]; changed = true;
+      }
+      if (Object.hasOwn(shared, 'multimediaToken') && (fields.includes('multimediaToken') || refreshToken)) {
+        const next = { token: shared.multimediaToken, updatedAt: shared.multimediaTokenUpdatedAt || 0 };
+        const current = { token: state.settings.multimediaToken, updatedAt: state.settings.multimediaTokenUpdatedAt || 0 };
+        const newer = CompanyAigc.compareTokenVersions(next, current) === 1;
+        if ((!current.token && !current.updatedAt) || newer || next.token === current.token) {
+          const updatedAt = next.token === current.token ? Math.max(next.updatedAt, current.updatedAt) : next.updatedAt;
+          changed ||= next.token !== current.token || updatedAt !== current.updatedAt;
+          state.settings.multimediaToken = next.token;
+          state.settings.multimediaTokenUpdatedAt = updatedAt;
+        }
+      }
+      if (changed) await saveState({ quiet: true, layoutOnly: true });
       return shared;
     }
 
@@ -11521,10 +11554,17 @@
     async function refreshCompanyApiSettings() {
       // A diagnostic explicitly uses the currently edited form instead of the saved credentials.
       if (workflowDiagnosticsRunning) return;
-      try { await syncSharedApiSettings(); }
+      try { await syncSharedApiSettings({ fields: ['baseUrl', 'apiKey'] }); }
       catch (error) {
         if (!state.settings.baseUrl || !state.settings.apiKey)
           throw new Error('无法读取共享 API 配置，请在设置中填写并保存公司 API 地址和 Key。' + error.message);
+      }
+    }
+
+    async function refreshMultimediaToken() {
+      try { await syncSharedApiSettings({ fields: ['multimediaToken'] }); }
+      catch (error) {
+        if (!state.settings.multimediaToken?.trim()) throw new Error('无法读取共享多媒体 Token，请在设置中填写并保存多媒体 Token。');
       }
     }
 
@@ -12135,6 +12175,7 @@
 
     function backupSafeSettings() {
       const settings = { ...state.settings };
+      settings.multimediaTokenUpdatedAt = 0;
       ['apiKey', 'wavespeedApiKey', 'elevenLabsApiKey', 'multimediaToken', 'telemetryWebhookUrl', 'telemetryUsageWebhookUrl', 'telemetryFeedbackWebhookUrl'].forEach(key => {
         settings[key] = '';
       });
@@ -31076,7 +31117,7 @@
       if (record && ['submitting', 'submission_unknown'].includes(record.state) && !record.id)
         throw new Error('这条任务提交结果不明，请先在多媒体平台核对任务，避免重复生成。');
       if (record?.state === 'completed' && record.url) return { url: record.url, mime: 'video/mp4', raw: '' };
-      await syncSharedApiSettings();
+      await refreshMultimediaToken();
       await aigcClient.ready();
       if (!record?.id || record.state === 'failed') {
         const spec = await buildAigcVideoSpec(model, prompt, execution, project), body = await aigcClient.prepare(spec);
@@ -36402,6 +36443,7 @@
       $('backupNowBtn').onclick = () => writeProjectBackup({ reason: 'manual' });
       $('restoreLatestBackupBtn').onclick = restoreLatestBackup;
       $('saveSettingsBtn').onclick = async () => {
+        const previousShared = Object.fromEntries(SHARED_API_FIELDS.map(key => [key, state.settings[key] || '']));
         state.settings.visualScheme = selectedVisualScheme();
         applyVisualScheme();
         state.settings.llmMode = $('llmModeSelect').value;
@@ -36430,8 +36472,16 @@
         state.settings.launcherConfigVersion = state.settings.launcherConfigVersion || '';
         const sharedPatch = Object.fromEntries(SHARED_API_FIELDS.filter(key =>
           state.settings[key] !== (settingsSharedBaseline?.[key] || '')).map(key => [key, state.settings[key] || '']));
+        for (const key of SHARED_API_FIELDS) if (!Object.hasOwn(sharedPatch, key)) state.settings[key] = previousShared[key];
+        const tokenDraft = sharedPatch.multimediaToken;
+        if (Object.hasOwn(sharedPatch, 'multimediaToken')) {
+          const updatedAt = Math.max(Date.now(), (state.settings.multimediaTokenUpdatedAt || 0) + 1);
+          const order = CompanyAigc.compareTokenVersions({ token: tokenDraft, updatedAt }, { token: previousShared.multimediaToken, updatedAt: state.settings.multimediaTokenUpdatedAt || 0 });
+          if (order === -1) { state.settings.multimediaToken = previousShared.multimediaToken; delete sharedPatch.multimediaToken; }
+          else state.settings.multimediaTokenUpdatedAt = updatedAt;
+        }
         let sharedSaved = false, sharedSaveError = '';
-        try { sharedSaved = !!await syncSharedApiSettings(true, sharedPatch); }
+        try { sharedSaved = !!await syncSharedApiSettings({ save: true, patch: sharedPatch }); }
         catch (error) { sharedSaveError = error.message; }
         await saveState({ quiet: true, layoutOnly: true });
         await multimediaMonitor.check(true);
@@ -36458,6 +36508,8 @@
         if (!keepSettingsOpenForNotification) closeSettingsModal({ discardDraft: true });
         scheduleSave();
         render();
+        if (tokenDraft !== undefined && state.settings.multimediaToken !== tokenDraft)
+          showInAppNotification({ title: '已保留较新的多媒体 Token', body: '这次填写的 Token 较旧，未替换现有 Token。' });
         if (!sharedSaved && !embeddedCompanyTransport && (state.settings.baseUrl || state.settings.apiKey))
           showInAppNotification({ title: '设置已保存到自由画布', body: (sharedSaveError ? sharedSaveError + ' ' : '') + '尚未同步到短剧工作台；请在工作台「设置 → 共享 API」填写同一份地址和 Key。', timeoutMs: 15000 });
         if (state.settings.llmMode === 'local-codex') connectLocalCodexBridge({ force: true });
@@ -36628,13 +36680,19 @@
         if (config.launchTarget === 'http://127.0.0.1:17887') launcherTarget = config.launchTarget;
       } catch (_) {}
       await loadState();
-      try { await syncSharedApiSettings(); } catch (_) {}
-      if (launcherTarget) { location.replace(launcherTarget); return; }
+      if (launcherTarget) {
+        try { await syncSharedApiSettings({ save: true, patch: {} }); } catch (_) {}
+        location.replace(launcherTarget); return;
+      }
       applyUserLayoutPreferences();
       requestPersistentStorage();
       bindEvents();
-      window.addEventListener('focus', () => { if (!$('settingsModal')?.classList.contains('open')) syncSharedApiSettings().then(() => syncSettingsUI()).catch(() => {}); });
+      const refreshSharedSettings = () => syncSharedApiSettings({ refreshToken: true }).then(() => {
+        if (!$('settingsModal')?.classList.contains('open')) syncSettingsUI();
+      }).catch(() => {});
+      window.addEventListener('focus', () => { if (!$('settingsModal')?.classList.contains('open')) refreshSharedSettings(); });
       render();
+      refreshSharedSettings();
       if (state.settings.llmMode === 'local-codex') connectLocalCodexBridge();
       scheduleAuralisUpdateChecks();
     }
@@ -37028,7 +37086,7 @@
     const multimediaMonitor = CompanyAigc.watchToken({
       enabled: () => !embeddedCanvasHost && !embeddedCompanyTransport,
       canNotify: () => !$('settingsModal')?.classList.contains('open'),
-      check: async force => { await syncSharedApiSettings(); return aigcClient.check(force); },
+      check: async force => { await refreshMultimediaToken(); return aigcClient.check(force); },
       openSettings: () => { openSettingsModal(); $('multimediaTokenInput').focus(); },
       onStatus: (_status, text) => { $('multimediaTokenStatus').textContent = text; }
     });

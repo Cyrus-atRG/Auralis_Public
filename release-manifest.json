@@ -1,43 +1,44 @@
 {
-    "schemaVersion":  2,
-    "releaseVersion":  "Auralis v1.27",
-    "publishedAt":  "2026-10-23T09:41:27.0532837Z",
-    "changelog":  [
-                      "新增 RG wavesdance 2 和 2.5，支持视频生成、参考、编辑和延长，使用已配置的多媒体 Token。",
-                      "修复 macOS 启动器更新时因下载内容经过压缩而误报文件大小不匹配的问题。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "Auralis v1.27",
-                           "url":  "Auralis.html",
-                           "size":  1904584,
-                           "sha256":  "45cbc75a474f8e402355490b59acfb8b1aec598df9d2035226c55debac9d07fe",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "Auralis v1.27",
-                           "url":  "auralis-runtime-windows-x64.zip",
-                           "size":  33654703,
-                           "sha256":  "f3298b23bdad2bd64d39fef67c331af94bdcc4646eb7b19ae8dd688b38bded07",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "Auralis v1.27",
-                           "url":  "auralis-controller-packs.zip",
-                           "size":  25094,
-                           "sha256":  "642fe10216ca8e6dac8851af8e4d0b3d1d5dd352c56930f343e74bad34bb241e",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "launcher",
-                           "version":  "1.18.1",
-                           "url":  "Auralis Launcher.exe",
-                           "size":  125440,
-                           "sha256":  "191ee3d8113b8239cbf7f6aabeaddbb52860a8fa2461602fd9fda90d3080c03d",
-                           "format":  "file"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "releaseVersion": "Auralis v1.28",
+  "publishedAt": "2026-10-28T02:50:27.5130224Z",
+  "changelog": [
+    "优化本地配置读取：优先使用已保存的配置，缺失时再补齐共享配置，避免共享服务暂时不可用阻断生成。",
+    "修复多媒体 Token 新旧覆盖问题，避免旧 Token、延迟同步或未更新的设置表单覆盖新值。",
+    "修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "Auralis v1.28",
+      "url": "Auralis.html",
+      "size": 1908753,
+      "sha256": "d28f4966e95a0f7c5a83b2f4e143420c7eec0f76fc8f2420adfee47be7eb0ce0",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "Auralis v1.28",
+      "url": "auralis-runtime-windows-x64.zip",
+      "size": 34697565,
+      "sha256": "06ca7552e9ab45b9cc87a26b581c449396b256ba8ed2dac38c0e859a1752970c",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "Auralis v1.28",
+      "url": "auralis-controller-packs.zip",
+      "size": 25836,
+      "sha256": "69a4eb9dbf8f475d4190a5013889271568c1cb4516e9bbb224dc9c15005ee210",
+      "format": "zip"
+    },
+    {
+      "id": "launcher",
+      "version": "1.18.1",
+      "url": "Auralis Launcher.exe",
+      "size": 125440,
+      "sha256": "10f00a69bfea540e7fb0a95a701879b82b6096c9a90d1069e78af9951209be89",
+      "format": "file"
+    }
+  ]
 }

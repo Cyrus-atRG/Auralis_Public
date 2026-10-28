@@ -1,38 +1,37 @@
 {
-    "schemaVersion":  2,
-    "releaseVersion":  "1.2.7",
-    "publishedAt":  "2026-10-23T09:41:31.4691670Z",
-    "changelog":  [
-                      "新增 RG wavesdance 2 和 2.5，视频生成与制作画布同步支持，使用已配置的多媒体 Token。",
-                      "优化视频提示词展示：Agent 更新当前计划后，再次打开视频卡默认显示最新计划，并提示待生成新版本，避免误改历史版本提示词。",
-                      "新增正文修改标记：新增和改写内容使用绿色虚线下划线，长提示词滚动时同步显示。",
-                      "优化版本切换体验：可随时查看历史视频及其提示词，并保留未保存的本地编辑。",
-                      "修复 macOS 启动器更新时因下载内容经过压缩而误报文件大小不匹配的问题。"
-                  ],
-    "components":  [
-                       {
-                           "id":  "html",
-                           "version":  "1.2.7",
-                           "url":  "AuralisDrama.html",
-                           "size":  6037,
-                           "sha256":  "2951bca51af38595b13e4a9c224b072371d31506a445e5007b7db9ea3892fdab",
-                           "format":  "file"
-                       },
-                       {
-                           "id":  "runtime",
-                           "version":  "1.2.7",
-                           "url":  "auralis-drama-runtime-windows-x64.zip",
-                           "size":  34390875,
-                           "sha256":  "fc2ceb548e91c723f5a2ca5f733160f06a09fad0f753bfc2a30bfaffbeaa5039",
-                           "format":  "zip"
-                       },
-                       {
-                           "id":  "controller-packs",
-                           "version":  "1.2.7",
-                           "url":  "auralis-drama-controller-packs.zip",
-                           "size":  25094,
-                           "sha256":  "642fe10216ca8e6dac8851af8e4d0b3d1d5dd352c56930f343e74bad34bb241e",
-                           "format":  "zip"
-                       }
-                   ]
+  "schemaVersion": 2,
+  "releaseVersion": "1.2.8",
+  "publishedAt": "2026-10-28T02:50:30.6172729Z",
+  "changelog": [
+    "新增页面浏览位置记忆，切换设定、梗概和分镜后，返回时恢复上次位置。",
+    "新增选中文字批注：确认后附到聊天框，可积攒多条并编辑、删除，点击发送后统一提交。",
+    "人物主参考改用 9:16 四格模板，包含正脸、侧脸、正面身体和背面全身。",
+    "修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。"
+  ],
+  "components": [
+    {
+      "id": "html",
+      "version": "1.2.8",
+      "url": "AuralisDrama.html",
+      "size": 6014,
+      "sha256": "aa0b5cfe9e70587b9ed206f480432deeb1f934f7b3c6a356ec3ee3230a9fd573",
+      "format": "file"
+    },
+    {
+      "id": "runtime",
+      "version": "1.2.8",
+      "url": "auralis-drama-runtime-windows-x64.zip",
+      "size": 35447687,
+      "sha256": "02e01dfc76f6755384abf11777935d406afa716218a167bfb8cbaebc5ae28f21",
+      "format": "zip"
+    },
+    {
+      "id": "controller-packs",
+      "version": "1.2.8",
+      "url": "auralis-drama-controller-packs.zip",
+      "size": 25836,
+      "sha256": "69a4eb9dbf8f475d4190a5013889271568c1cb4516e9bbb224dc9c15005ee210",
+      "format": "zip"
+    }
+  ]
 }
