@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
-  "releaseVersion": "1.2.9",
-  "publishedAt": "2026-10-30T07:22:21.057Z",
+  "releaseVersion": "1.2.10",
+  "publishedAt": "2026-10-30T08:55:01.4598858Z",
   "changelog": [
     "新增「接力拷打」：可另选模型，以全新视角审查当前环节，先整理项目中的用户偏好，再结合额外要求给出修改建议。",
     "新增逐条对照编辑器：查看原文与修改版，编辑后采纳或忽略，采纳直接写回正文；视频参考支持新增、替换和删除。",
@@ -11,23 +11,23 @@
   "components": [
     {
       "id": "html",
-      "version": "1.2.9",
+      "version": "1.2.10",
       "url": "AuralisDrama.html",
-      "size": 6343,
-      "sha256": "a35e3d4eccf51c7afd132071cc25bf310bb642047f4950168d609933182df8e8",
+      "size": 6344,
+      "sha256": "2c342f7297b7ed15575828991daf14e0fb61fdc9567cd68208a42fbd193d06ea",
       "format": "file"
     },
     {
       "id": "runtime",
-      "version": "1.2.9",
+      "version": "1.2.10",
       "url": "auralis-drama-runtime-windows-x64.zip",
-      "size": 34418183,
-      "sha256": "f0dcb0849742a94c5698f304b61160c7babf1ecaaf8b77bb2c0b06a88f999e3a",
+      "size": 34423111,
+      "sha256": "b0dc22ad1e146ffac3d750dc213059d669204b012f6d3ddfa721533260a71350",
       "format": "zip"
     },
     {
       "id": "controller-packs",
-      "version": "1.2.9",
+      "version": "1.2.10",
       "url": "auralis-drama-controller-packs.zip",
       "size": 25836,
       "sha256": "69a4eb9dbf8f475d4190a5013889271568c1cb4516e9bbb224dc9c15005ee210",

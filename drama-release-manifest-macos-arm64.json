@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "platform": "macos-arm64",
-  "releaseVersion": "1.2.9",
-  "publishedAt": "2026-10-30T07:22:21.804Z",
+  "releaseVersion": "1.2.10",
+  "publishedAt": "2026-10-30T08:55:05.2801333Z",
   "changelog": [
     "新增「接力拷打」：可另选模型，以全新视角审查当前环节，先整理项目中的用户偏好，再结合额外要求给出修改建议。",
     "新增逐条对照编辑器：查看原文与修改版，编辑后采纳或忽略，采纳直接写回正文；视频参考支持新增、替换和删除。",
@@ -12,23 +12,23 @@
   "components": [
     {
       "id": "html",
-      "version": "1.2.9",
+      "version": "1.2.10",
       "url": "AuralisDrama.html",
-      "size": 6343,
-      "sha256": "a35e3d4eccf51c7afd132071cc25bf310bb642047f4950168d609933182df8e8",
+      "size": 6344,
+      "sha256": "2c342f7297b7ed15575828991daf14e0fb61fdc9567cd68208a42fbd193d06ea",
       "format": "file"
     },
     {
       "id": "runtime",
-      "version": "1.2.9",
+      "version": "1.2.10",
       "url": "auralis-drama-runtime-macos-arm64.zip",
-      "size": 815446,
-      "sha256": "11218dfd847163db31848ba0a9792bf94489cb94addf5787a4d21de5f2bcd058",
+      "size": 820401,
+      "sha256": "043b09436e4a66c308070cdd9a98dc049d91fd6cc57a487bb6fa32c136cc0157",
       "format": "zip"
     },
     {
       "id": "controller-packs",
-      "version": "1.2.9",
+      "version": "1.2.10",
       "url": "auralis-controller-packs-macos-arm64.zip",
       "size": 28190,
       "sha256": "f99fff1162d631b0eea659fffe4343ff133239be669dfcee451e50af4fe98462",
