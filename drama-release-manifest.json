@@ -1,33 +1,33 @@
 {
   "schemaVersion": 2,
-  "releaseVersion": "1.2.8",
-  "publishedAt": "2026-10-28T02:50:30.6172729Z",
+  "releaseVersion": "1.2.9",
+  "publishedAt": "2026-10-30T07:22:21.057Z",
   "changelog": [
-    "新增页面浏览位置记忆，切换设定、梗概和分镜后，返回时恢复上次位置。",
-    "新增选中文字批注：确认后附到聊天框，可积攒多条并编辑、删除，点击发送后统一提交。",
-    "人物主参考改用 9:16 四格模板，包含正脸、侧脸、正面身体和背面全身。",
-    "修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。"
+    "新增「接力拷打」：可另选模型，以全新视角审查当前环节，先整理项目中的用户偏好，再结合额外要求给出修改建议。",
+    "新增逐条对照编辑器：查看原文与修改版，编辑后采纳或忽略，采纳直接写回正文；视频参考支持新增、替换和删除。",
+    "无法直接修改的建议单独汇总，可一键复制给对应 Agent 继续处理。",
+    "设置中的提示词新增接力拷打的「用户偏好整理」和「正文审查」，均可切换 official 或保存 custom 自定义版本。"
   ],
   "components": [
     {
       "id": "html",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "url": "AuralisDrama.html",
-      "size": 6014,
-      "sha256": "aa0b5cfe9e70587b9ed206f480432deeb1f934f7b3c6a356ec3ee3230a9fd573",
+      "size": 6343,
+      "sha256": "a35e3d4eccf51c7afd132071cc25bf310bb642047f4950168d609933182df8e8",
       "format": "file"
     },
     {
       "id": "runtime",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "url": "auralis-drama-runtime-windows-x64.zip",
-      "size": 35447687,
-      "sha256": "02e01dfc76f6755384abf11777935d406afa716218a167bfb8cbaebc5ae28f21",
+      "size": 34418183,
+      "sha256": "f0dcb0849742a94c5698f304b61160c7babf1ecaaf8b77bb2c0b06a88f999e3a",
       "format": "zip"
     },
     {
       "id": "controller-packs",
-      "version": "1.2.8",
+      "version": "1.2.9",
       "url": "auralis-drama-controller-packs.zip",
       "size": 25836,
       "sha256": "69a4eb9dbf8f475d4190a5013889271568c1cb4516e9bbb224dc9c15005ee210",

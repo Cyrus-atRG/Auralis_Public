@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Auralis · 短剧工作台</title>
     <link rel="stylesheet" href="/style.css" />
-  <script>const AURALIS_VERSION = '1.2.8'; const AURALIS_CHANGELOG = Object.freeze(["新增页面浏览位置记忆，切换设定、梗概和分镜后，返回时恢复上次位置。","新增选中文字批注：确认后附到聊天框，可积攒多条并编辑、删除，点击发送后统一提交。","人物主参考改用 9:16 四格模板，包含正脸、侧脸、正面身体和背面全身。","修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。"]);</script></head>
+  <script>const AURALIS_VERSION = '1.2.9'; const AURALIS_CHANGELOG = Object.freeze(["新增「接力拷打」：可另选模型，以全新视角审查当前环节，先整理项目中的用户偏好，再结合额外要求给出修改建议。","新增逐条对照编辑器：查看原文与修改版，编辑后采纳或忽略，采纳直接写回正文；视频参考支持新增、替换和删除。","无法直接修改的建议单独汇总，可一键复制给对应 Agent 继续处理。","设置中的提示词新增接力拷打的「用户偏好整理」和「正文审查」，均可切换 official 或保存 custom 自定义版本。"]);</script></head>
   <body>
     <aside id="rail">
       <a class="brand" href="/" aria-label="工作台首页"
@@ -54,7 +54,10 @@
       </div>
       <h3 id="agentRole">设定 Agent</h3>
       <p id="agentScope" class="muted"></p>
-      <button id="agentController" class="quiet agent-controller" data-preference="controller" type="button">主控：本地 Codex</button>
+      <div class="agent-model-actions">
+        <button id="agentController" class="quiet agent-controller" data-preference="controller" type="button">主控：本地 Codex</button>
+        <button id="agentRelayReview" class="quiet" type="button">接力拷打</button>
+      </div>
       <div
         id="agentStatus"
         class="agent-status"
@@ -112,6 +115,7 @@
     <script src="/src/company-aigc.js"></script>
     <script src="/app.js"></script>
     <script src="/text-annotations.js"></script>
+    <script src="/relay-review.js"></script>
     <script src="/service-health.js"></script>
     <script src="/preferences.js"></script>
     <script src="/canvas-bridge.js"></script>
