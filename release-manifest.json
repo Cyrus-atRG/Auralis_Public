@@ -1,44 +1,43 @@
 {
-  "schemaVersion": 2,
-  "releaseVersion": "Auralis v1.28",
-  "publishedAt": "2026-10-28T02:50:27.5130224Z",
-  "changelog": [
-    "优化本地配置读取：优先使用已保存的配置，缺失时再补齐共享配置，避免共享服务暂时不可用阻断生成。",
-    "修复多媒体 Token 新旧覆盖问题，避免旧 Token、延迟同步或未更新的设置表单覆盖新值。",
-    "修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "Auralis v1.28",
-      "url": "Auralis.html",
-      "size": 1908753,
-      "sha256": "d28f4966e95a0f7c5a83b2f4e143420c7eec0f76fc8f2420adfee47be7eb0ce0",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "Auralis v1.28",
-      "url": "auralis-runtime-windows-x64.zip",
-      "size": 34697565,
-      "sha256": "06ca7552e9ab45b9cc87a26b581c449396b256ba8ed2dac38c0e859a1752970c",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "Auralis v1.28",
-      "url": "auralis-controller-packs.zip",
-      "size": 25836,
-      "sha256": "69a4eb9dbf8f475d4190a5013889271568c1cb4516e9bbb224dc9c15005ee210",
-      "format": "zip"
-    },
-    {
-      "id": "launcher",
-      "version": "1.18.1",
-      "url": "Auralis Launcher.exe",
-      "size": 125440,
-      "sha256": "10f00a69bfea540e7fb0a95a701879b82b6096c9a90d1069e78af9951209be89",
-      "format": "file"
-    }
-  ]
+    "schemaVersion":  2,
+    "releaseVersion":  "Auralis v1.29",
+    "publishedAt":  "2026-11-06T03:04:07.6098588Z",
+    "changelog":  [
+                      "RG Seedance 2.0、2.5 切换至 YK 通道，保留已有模型选择，支持图片、视频和音频参考；提供 720p、1080p，2.5 支持视频编辑和延长。",
+                      "Kimi 升级为 kimi-k3-1-pro，旧设置自动迁移；适配采样、输出额度及工具参数，已验证主控与节点编辑。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "Auralis v1.29",
+                           "url":  "Auralis.html",
+                           "size":  1909347,
+                           "sha256":  "99317031d64e94dc960893bd809a5ace303cd3d7b2617672644c1db95c0432a6",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "Auralis v1.29",
+                           "url":  "auralis-runtime-windows-x64.zip",
+                           "size":  33655719,
+                           "sha256":  "883f896662aca0ad2f4bac5d925f8dcfa60460d6286168f50847fa30da991e09",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "Auralis v1.29",
+                           "url":  "auralis-controller-packs.zip",
+                           "size":  25094,
+                           "sha256":  "454e3e942df67e065c300c7dbc4d5068614fd21e5f4543bd2710391ac5df6389",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "launcher",
+                           "version":  "1.18.1",
+                           "url":  "Auralis Launcher.exe",
+                           "size":  125440,
+                           "sha256":  "fe00816d58be3dca704bdd61ba735cdea0afe9d9c3afea9b0ad6e3daffba5745",
+                           "format":  "file"
+                       }
+                   ]
 }

@@ -1,38 +1,41 @@
 {
-  "schemaVersion": 2,
-  "platform": "macos-arm64",
-  "releaseVersion": "1.2.10",
-  "publishedAt": "2026-10-30T08:55:05.2801333Z",
-  "changelog": [
-    "新增「接力拷打」：可另选模型，以全新视角审查当前环节，先整理项目中的用户偏好，再结合额外要求给出修改建议。",
-    "新增逐条对照编辑器：查看原文与修改版，编辑后采纳或忽略，采纳直接写回正文；视频参考支持新增、替换和删除。",
-    "无法直接修改的建议单独汇总，可一键复制给对应 Agent 继续处理。",
-    "设置中的提示词新增接力拷打的「用户偏好整理」和「正文审查」，均可切换 official 或保存 custom 自定义版本。"
-  ],
-  "components": [
-    {
-      "id": "html",
-      "version": "1.2.10",
-      "url": "AuralisDrama.html",
-      "size": 6344,
-      "sha256": "2c342f7297b7ed15575828991daf14e0fb61fdc9567cd68208a42fbd193d06ea",
-      "format": "file"
-    },
-    {
-      "id": "runtime",
-      "version": "1.2.10",
-      "url": "auralis-drama-runtime-macos-arm64.zip",
-      "size": 820401,
-      "sha256": "043b09436e4a66c308070cdd9a98dc049d91fd6cc57a487bb6fa32c136cc0157",
-      "format": "zip"
-    },
-    {
-      "id": "controller-packs",
-      "version": "1.2.10",
-      "url": "auralis-controller-packs-macos-arm64.zip",
-      "size": 28190,
-      "sha256": "f99fff1162d631b0eea659fffe4343ff133239be669dfcee451e50af4fe98462",
-      "format": "zip"
-    }
-  ]
+    "schemaVersion":  2,
+    "platform":  "macos-arm64",
+    "releaseVersion":  "1.2.11",
+    "publishedAt":  "2026-11-06T03:04:15.5852350Z",
+    "changelog":  [
+                      "RG Seedance 2.0、2.5 切换至 YK 通道；图片、视频、音频参考已实测，2.5 支持视频编辑和延长，提供 720p、1080p。",
+                      "Kimi 升级为 kimi-k3-1-pro，主控和接力拷打同步更新，旧设置与审查草稿自动迁移；多轮工具调用及带图审查已实测。",
+                      "接力拷打支持本地 Codex，可结合文字与参考图审查；改善 Gemini、Kimi 工具参数和 Claude 长内容审查兼容性。",
+                      "接力偏好按创作环节整理，复用已有摘要并增量处理新增消息；长历史分批处理，中断后保留进度。",
+                      "对照编辑器显示具体增删：新增文字用绿色虚线标记，删除文字显示删除线，手动修改时同步更新。",
+                      "精简 Agent 每轮重复上下文，补充指南按需读取。",
+                      "修复切换素材生成任务时制作页刷新、任务进度及音色选择状态异常。"
+                  ],
+    "components":  [
+                       {
+                           "id":  "html",
+                           "version":  "1.2.11",
+                           "url":  "AuralisDrama.html",
+                           "size":  6657,
+                           "sha256":  "ac963a3e8fcbbc0bd28451d95b32fcf64e2a96b8a67c3d0c838486934768637d",
+                           "format":  "file"
+                       },
+                       {
+                           "id":  "runtime",
+                           "version":  "1.2.11",
+                           "url":  "auralis-drama-runtime-macos-arm64.zip",
+                           "size":  834378,
+                           "sha256":  "f25b8bfaeae1239feb1025f96cf92c22a5f061f6652ac1546ce765fe0631c50d",
+                           "format":  "zip"
+                       },
+                       {
+                           "id":  "controller-packs",
+                           "version":  "1.2.11",
+                           "url":  "auralis-controller-packs-macos-arm64.zip",
+                           "size":  28190,
+                           "sha256":  "5b441b05fe76f799c4f626b89cfb7380841b9d57990b781aab0d9c85a691741e",
+                           "format":  "zip"
+                       }
+                   ]
 }

@@ -5463,7 +5463,7 @@
   const LOGIN = 'http://43.110.148.231:8025/playground/';
   const CHECK_INTERVAL = 30 * 60 * 1000;
   const MODELS = {
-    'rg-seedance-2': 'seedance-2.0', 'rg-seedance-2.5': 'seedance-2.5',
+    'rg-seedance-2': 'yk/seedance-2.0', 'rg-seedance-2.5': 'yk/seedance-2.5',
     'rg-wavesdance-2': 'ws/seedance-2.0', 'rg-wavesdance-2.5': 'ws/seedance-2.5'
   };
   function fail(message, extra = {}) { throw Object.assign(new Error(message), { definite: true, ...extra }); }
@@ -5502,14 +5502,15 @@
     const v25 = MODELS[model].endsWith('2.5'), wavesdance = MODELS[model].startsWith('ws/');
     const images = input.images || [], videos = input.videos || [], audios = input.audios || [];
     const mode = input.mode || 'text', first = input.first, last = input.last, source = input.source;
+    if (!wavesdance && !v25 && ['edit', 'extend'].includes(mode)) fail('RG / Seedance 2 的 YK 接口暂不支持视频编辑或延长，请选择 RG / Seedance 2.5');
     const extendLast = wavesdance && !v25 && mode === 'extend';
     if (last && !first && !extendLast) fail('使用尾帧时也需要首帧');
     if (first && (images.length || videos.length || audios.length || source)) fail('首尾帧模式不能混用其他图片、视频或音频参考');
-    if (images.length > (v25 ? 30 : 9) || videos.length > (v25 ? 10 : 3) || audios.length > (v25 ? 10 : 3)) fail('参考素材数量超过模型上限');
+    if (images.length > (v25 ? 30 : wavesdance ? 9 : 15) || videos.length > (v25 ? 10 : wavesdance ? 3 : 15) || audios.length > (v25 ? 10 : wavesdance ? 3 : 15)) fail('参考素材数量超过模型上限');
     const category = mode === 'edit' ? 'video-edit' : mode === 'extend' ? 'video-extend' : first ? 'image-to-video' : 'text-to-video';
-    const params = { prompt: input.prompt, resolution: input.resolution, duration: input.duration, generate_audio: true };
+    const params = { prompt: input.prompt, resolution: wavesdance ? input.resolution : input.resolution?.toUpperCase(), duration: input.duration, generate_audio: true };
     if (category === 'text-to-video') Object.assign(params, { aspect_ratio: input.aspectRatio, reference_images: images, reference_videos: videos, reference_audios: audios });
-    if (category === 'image-to-video') Object.assign(params, { image: first, ...(last ? { last_image: last } : {}), ...(!v25 ? { aspect_ratio: input.aspectRatio } : {}) });
+    if (category === 'image-to-video') Object.assign(params, { image: first, ...(last ? { last_image: last } : {}), ...(!v25 || !wavesdance ? { aspect_ratio: input.aspectRatio } : {}) });
     if (category === 'video-edit' || category === 'video-extend') {
       if (!source) fail('请连接需要编辑或延长的视频');
       if (first || (last && !extendLast) || videos.length) fail('编辑或延长模式只接受一段源视频');
@@ -5521,13 +5522,10 @@
           else params.aspect_ratio = input.aspectRatio;
         } else if (last) params.last_image = last;
       } else {
-        params.reference_video = !v25 && category === 'video-extend' ? [source] : source;
-        if (category === 'video-edit') {
-          if (v25) Object.assign(params, { ratio: 'adaptive', duration: -1, reference_image: images, reference_audio: audios });
-          else Object.assign(params, { aspect_ratio: input.aspectRatio, reference_images: images, reference_audios: audios });
-        }
+        Object.assign(params, { reference_video: source, reference_image: images, reference_audio: audios });
+        if (category === 'video-edit') delete params.duration;
       }
-      if (category === 'video-extend' && (images.length || audios.length)) fail('视频延长接口不接受额外图片或音频参考');
+      if (wavesdance && category === 'video-extend' && (images.length || audios.length)) fail('视频延长接口不接受额外图片或音频参考');
     }
     return { model, category, params };
   }
@@ -5618,7 +5616,8 @@
       if (!MODELS[spec.model]) fail('不支持的多媒体模型');
       if (!this.catalog || Date.now() - this.catalog.at > CHECK_INTERVAL) this.catalog = { at: Date.now(), value: await this.request('/api/v1/aigc/catalog') };
       const models = this.catalog.value.models || this.catalog.value.data?.models || [];
-      const modelPath = MODELS[spec.model].startsWith('ws/') ? MODELS[spec.model] : 'bytedance/' + MODELS[spec.model];
+      const modelPath = MODELS[spec.model];
+      if (modelPath === 'yk/seedance-2.0' && ['video-edit', 'video-extend'].includes(spec.category)) fail('RG / Seedance 2 的 YK 接口暂不支持视频编辑或延长，请选择 RG / Seedance 2.5');
       const candidates = models.flatMap(m => m.scenes || []).filter(s => s.category === spec.category && s.name === modelPath + '/' + spec.category);
       if (candidates.length !== 1) fail('当前多媒体目录没有唯一可用的 ' + MODELS[spec.model] + ' / ' + spec.category);
       const scene = candidates[0];
@@ -5626,8 +5625,14 @@
       if (!form || Date.now() - form.at > CHECK_INTERVAL) { form = { at: Date.now(), value: await this.request('/api/v1/aigc/scenes/' + encodeURIComponent(scene.id) + '/form') }; this.forms.set(scene.id, form); }
       const fields = form.value.fields || form.value.data?.fields;
       if (!Array.isArray(fields)) fail('多媒体接口返回的场景参数无效');
-      validateParams(fields, spec.params);
-      return { scene_id: scene.id, params: spec.params };
+      const params = { ...spec.params };
+      // Saved, unsubmitted canvas plans may still contain the previous bytedance schema.
+      if (modelPath.startsWith('yk/')) {
+        if (params.resolution) params.resolution = params.resolution.toUpperCase();
+        if (spec.category === 'video-edit') { delete params.ratio; delete params.duration; }
+      }
+      validateParams(fields, params);
+      return { scene_id: scene.id, params };
     }
     async upload(blob, name) {
       await this.ready();
@@ -7730,16 +7735,15 @@
     const LOCAL_CODEX_CONTEXT_EVENT_LIMIT = 12;
     const AURA_TYPE_STANDARD = 'standard';
     const AURA_TYPE_THE_MOBS = 'the-mobs';
-    const AURALIS_VERSION = 'Auralis v1.28';
+    const AURALIS_VERSION = 'Auralis v1.29';
     const AURALIS_DISPLAY_VERSION = AURALIS_VERSION.replace(/^Auralis\s*/i, '');
     const AURALIS_UPDATE_CHECK_URL = 'https://raw.githubusercontent.com/Cyrus-atRG/Auralis_Public/main/Auralis.html';
     const AURALIS_UPDATE_CHECK_INTERVAL_MS = 2 * 60 * 60 * 1000;
     const AURALIS_UPDATE_INITIAL_DELAY_MS = 8 * 1000;
     const AURALIS_IGNORED_UPDATE_STORAGE_KEY = 'auralis.ignoredUpdateVersion';
     const AURALIS_CHANGELOG = Object.freeze([
-      '优化本地配置读取：优先使用已保存的配置，缺失时再补齐共享配置，避免共享服务暂时不可用阻断生成。',
-      '修复多媒体 Token 新旧覆盖问题，避免旧 Token、延迟同步或未更新的设置表单覆盖新值。',
-      '修复 Windows 中文用户名或配置路径下本地 Codex 控制器启动失败的问题。'
+      "RG Seedance 2.0、2.5 切换至 YK 通道，保留已有模型选择，支持图片、视频和音频参考；提供 720p、1080p，2.5 支持视频编辑和延长。",
+      "Kimi 升级为 kimi-k3-1-pro，旧设置自动迁移；适配采样、输出额度及工具参数，已验证主控与节点编辑。"
     ]);
     // AURALIS_TUTORIAL_EMBED_START
     const AURALIS_TUTORIAL_DOCUMENT_BASE64 = [
@@ -9447,12 +9451,12 @@
       aura: '\u5207\u6362\u5230 Aura \u5916\u89c2',
       caelum: '\u5207\u6362\u5230 Caelum \u5916\u89c2'
     };
-    const LLM_MODELS = ['claude-sonnet-5-5', 'claude-opus-5-5', 'gemini-4-argon', 'deepseek-v4-1-flash-1017', 'gpt-6.1-sol', 'kimi-k3-260716'];
+    const LLM_MODELS = ['claude-sonnet-5-5', 'claude-opus-5-5', 'gemini-4-argon', 'deepseek-v4-1-flash-1017', 'gpt-6.1-sol', 'kimi-k3-1-pro'];
     const DEFAULT_COMPANY_LLM_MODEL = 'gpt-6.1-sol';
-    const COMPANY_LLM_MODEL_ALIASES = { 'claude-opus-4-8': 'claude-opus-5-5', 'deepseek-v4-pro': 'deepseek-v4-1-flash-1017', 'gemini-3.8-flash': 'gemini-4-argon', 'gemini-3.1-pro-preview': 'gemini-4-argon', 'gpt-5.5': 'gpt-6.1-sol' };
+    const COMPANY_LLM_MODEL_ALIASES = { 'claude-opus-4-8': 'claude-opus-5-5', 'deepseek-v4-pro': 'deepseek-v4-1-flash-1017', 'gemini-3.8-flash': 'gemini-4-argon', 'gemini-3.1-pro-preview': 'gemini-4-argon', 'gpt-5.5': 'gpt-6.1-sol', 'kimi-k3-260716': 'kimi-k3-1-pro' };
     const LOCAL_CODEX_MODELS = ['local-codex/app-server'];
     const LEGACY_LOCAL_CODEX_MODELS = new Set(['local-codex/gpt-5.5']);
-    const CHAT_TEMPERATURE_UNSUPPORTED_MODELS = new Set(['claude-opus-4-8', 'gpt-6.1-sol']);
+    const CHAT_TEMPERATURE_UNSUPPORTED_MODELS = new Set(['claude-opus-4-8', 'gpt-6.1-sol', 'kimi-k3-1-pro']);
     const LOCAL_CODEX_REASONING_EFFORTS = [
       { value: 'low', label: '低，推荐' },
       { value: 'medium', label: '中' },
@@ -9608,9 +9612,9 @@
       'google/gemini-omni-1.1-flash/image-to-video': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, canonical: 'ws-gemini-omni-1.1-flash' },
       'google/gemini-omni-1.1-flash/reference-to-video': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, endpointModel: 'google/gemini-omni-1.1-flash/reference-to-video', canonical: 'ws-gemini-omni-1.1-flash' },
       'google/gemini-omni-1.1-flash/video-edit': { ...GEMINI_OMNI_1_1_FLASH_VIDEO_CONFIG, endpointModel: 'google/gemini-omni-1.1-flash/video-edit', canonical: 'ws-gemini-omni-1.1-flash' },
-      'rg-seedance-2.5': { provider: 'company', transport: 'aigc', requestModel: 'doubao-seedance-2-5-260628', bodyKind: 'doubao-seedance', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
+      'rg-seedance-2.5': { provider: 'company', transport: 'aigc', requestModel: 'doubao-seedance-2-5-260628', bodyKind: 'doubao-seedance', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: ['720p', '1080p'], videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'rg-seedance-2-fast': { provider: 'company', hidden: true, requestModel: 'ws-seedance-2.0-fast-image-to-video', textRequestModel: 'ws-seedance-2.0-fast-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-fast-video-edit', family: 'seedance2-fast' },
-      'rg-seedance-2': { provider: 'company', transport: 'aigc', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2' },
+      'rg-seedance-2': { provider: 'company', transport: 'aigc', videoModes: ['text', 'image', 'reference'], videoResolutions: ['720p', '1080p'], videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, requestModel: 'ws-seedance-2.0-image-to-video', textRequestModel: 'ws-seedance-2.0-text-to-video', videoEditRequestModel: 'ws-seedance-2.0-video-edit', family: 'seedance2', maxReferenceImages: 15, maxReferenceVideos: 15, maxReferenceAudios: 15 },
       'rg-wavesdance-2': { provider: 'company', transport: 'aigc', family: 'seedance2', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: ['480p', '720p', '1080p', '4k'], videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE2_DURATION_MAX },
       'rg-wavesdance-2.5': { provider: 'company', transport: 'aigc', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: ['480p', '720p', '1080p', '4k'], videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
       'ws-seedance-2.5': { provider: 'wavespeed', endpointModel: 'bytedance/seedance-2.5/image-to-video', textEndpointModel: 'bytedance/seedance-2.5/text-to-video', editEndpointModel: 'bytedance/seedance-2.5/video-edit', extendEndpointModel: 'bytedance/seedance-2.5/video-extend', family: 'seedance2.5', videoModes: ['text', 'image', 'reference', 'edit', 'extend'], videoResolutions: SEEDANCE25_VIDEO_RESOLUTIONS, videoAspectRatios: SEEDANCE25_VIDEO_ASPECT_RATIOS, durationMin: SEEDANCE2_DURATION_MIN, durationMax: SEEDANCE25_DURATION_MAX },
@@ -30162,7 +30166,7 @@
       };
       if (supportsChatTemperature(model)) body.temperature = options.temperature ?? 0.7;
       const maxTokens = Number(options.maxTokens);
-      if (Number.isFinite(maxTokens) && maxTokens > 0) body[model === 'gpt-6.1-sol' ? 'max_completion_tokens' : 'max_tokens'] = Math.floor(maxTokens);
+      if (Number.isFinite(maxTokens) && maxTokens > 0) body[['gpt-6.1-sol', 'kimi-k3-1-pro'].includes(model) ? 'max_completion_tokens' : 'max_tokens'] = Math.floor(maxTokens);
       if (options.responseFormat) body.response_format = options.responseFormat;
       if (options.reasoningEffort) body.reasoning_effort = model === 'gpt-6.1-sol' && ['none', 'minimal'].includes(options.reasoningEffort) ? 'low' : options.reasoningEffort;
       if (options.extraBody) body.extra_body = options.extraBody;
